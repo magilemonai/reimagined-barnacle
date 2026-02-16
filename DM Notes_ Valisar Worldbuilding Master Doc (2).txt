@@ -1,0 +1,668 @@
+﻿D&D - Zelda, Studio Ghibli, and FromSoftware
+
+
+World name:
+Valisar / The Eldspyre
+1. World Overview
+Valisar: Valisar is an epic high fantasy realm inspired by the aesthetics and adventures of Zelda games and Miyazaki films like Spirited Away, Howl’s Moving Castle, and Princess Mononoke. A powerful cosmic artifact called The Eldspyre is the source of all magic in Valisar, lost to time and only referenced in archaeological carvings from an ancient civilization. Modern society refers to the source of magic as "The Spark," or “The Forge” or “The Seed”, which also serves as the connecting point to the Spirit Realm—a portal between the Material Realm and the Spirit World. A key theme of this campaign is the misinterpretation or misunderstanding of The Eldspyre by various cultures and classes. The PCs will uncover its nature, mysteries, and true name as the campaign progresses.
+
+
+Areas:
+
+
+Established canon:
+Ebon Vale
+Mystarion
+The Shrouded Mountains - Mount Kaja
+
+
+The Citidaea
+The City of Liquid Stone
+Located in the burning west of the Fuhran Desert, The Citidaea is not merely a city; it is a monument to the arrogance of intellect. Formerly the Kingdom of Aeldrya, it was once a land of enchanted forests and ornate beauty before it fell to the Empire.
+Now, it is a labyrinthine metropolis inspired by organic, melting architecture. Towers spiral skyward in fluid, curvilinear forms that defy physics, appearing as if the stone itself is liquid, flowing and melding into a complex tapestry .
+The Citidaea functions less like a university and more like a massive defense contractor. The "Seals" are not just schools of thought; they are Directorates in a unified Military-Industrial complex feeding the Sakazarac War Machine.
+Here is the organizational breakdown of The Imperial Arcane Directorate, outlining their current classified projects and how the Department Heads will receive your "provincial" party.
+The Hierarchy of Seals
+The Citidaea was originally governed by Eight Seals, representing the eight schools of magic, led by an Imperator. However, when King Tyserion (The Golden Blade) conquered the region, he forced the creation of a Ninth Seal.
+* The Ninth Seal: This Archmage reports directly to the King of Aurengate (Izuriel), bypassing the Imperator entirely. It is the Empire’s leash on the city.
+* Imperator Amegmon Shazz: The current leader of the Citidaea. He chafes under Izuriel’s thumb and plots treason, but he is blinded by his own hubris.
+* Archmage Severyn Caldreth: The leader of the Ninth Seal and Imperial Liaison. A former soldier with a magical scar and a mechanical eye, he plays Shazz for a fool, lulling him into a false sense of security.
+________________
+
+
+The Dark Influence: The Spirit of Pride
+The Entity: The Spirit of Pride manifests within the deep sublevels of the Citidaea as a colossal spider covered in unblinking eyes.
+* This spirit intoxicates Imperator Shazz with ego, preventing him from being cunning enough to overthrow the Empire.
+* Historically, this spirit was responsible for distributing "dragon madness" to the Wizards of the War of the Fallen.
+
+
+How It Works (The Silo Effect): The Spirit does not use "mind control" in a crude sense. Instead, it weaponizes The Dunning-Kruger Effect on a god-like scale.
+1. Siloed Genius: It amplifies the wizards' belief that their specific field (e.g., Evocation) is the only one that matters, and that other schools are inferior. This prevents the Seals from ever uniting against the Emperor.
+2. The Illusion of Control: Every Archmage believes they are the ones manipulating the Emperor. They think, "Izuriel is just a politician; I am a god of physics. I will humor him until my work is complete." They never realize they are hamsters in a wheel built by the Ninth Seal.
+3. Intoxication: The Spirit emits a psychic hum that makes being correct feel like a drug. Admitting fault or asking for help causes physical pain. This is why Imperator Amegmon Shazz cannot effectively plot treason—he is too busy gloating about plans he hasn't even executed yet.
+
+
+________________
+
+
+The Eighth Seal: Ordo Mutatis (Directorate of Logistics & Materials)(Transmutation)
+Role: Supply Chain, Fuel Synthesis, Material Hardening. Immutazier Valerius Void.
+
+
+Active Projects:
+* Project Liquid Mana: Compressing spirit-matter into volatile, glowing blue canisters to power airships and war golems. (Status: Unstable. Tendency to mutate engine crews).
+* The Midas Ration: Transmuting granite and gravel into nutrient-dense, tasteless blocks to feed armies in the desert without supply lines.
+* Operation Iron-Skin: A ritual to permanently transmute the dermis of elite shock troopers into flexible steel. (Status: High rejection rate; subjects often suffocate).
+The Interaction: Void sits on a throne that is slowly transmuting from gold to diamond and back. He barely looks at the PCs.
+"So, these are Severyn’s... field assets? They smell of loam and unrefined potential. Don’t touch the glassware. If you spill that beaker, you’ll turn into a pile of salt, and the paperwork to replace you is tedious. Severyn says you found something in the dirt? Hand it over to a junior scribe and leave."
+________________
+
+
+The Seventh Seal: Collegium Sepulchri (Directorate of Personnel Recovery)(Necromancy)
+Role: Recycling, interrogation of deceased assets, "The Hollow Legion." Head: Thanatologist Vespera Gaunt.
+Active Projects:
+* The Black Box Protocol: Every officer in the Imperial Army has a gem embedded in their skull. Upon death, the Seventh Seal can download their last 5 minutes of visual memory for tactical analysis.
+* The Sleepless Sentry: Animated skeletons coated in aurium armor, used for standing guard in environments too toxic or boring for the living.
+* Project Lazarus: Rapid-response resurrection scrolls that bring a soldier back for exactly one hour of berserker rage before they dissolve.
+The Interaction: Gaunt is dissecting a brain floating in a jar. She speaks without looking up.
+"You breathe so loudly. It’s inefficient. Severyn claims you have 'survival instincts,' which is just a polite way of saying you're too stubborn to die properly. A pity. I could learn a great deal from your autopsies. Try not to get killed on the carpet; stains are a nightmare to remove."
+________________
+
+
+The Sixth Seal: Visus Umbra (Directorate of PsyOps & Counter-Intel)(Illusion)
+Role: Camouflage, Propaganda, False Flag Operations. Head: Lord Oritur (The Mirrored Man).
+Active Projects:
+* The False Dawn: A massive illusion projected over enemy cities to simulate the sun never setting, inducing sleep deprivation and exhaustion.
+* Project Doppelgänger: Training illusionists to perfectly mimic enemy commanders to broadcast surrender orders during battle.
+* The Nystul Cloak: A city-wide masking field that makes the Citidaea’s weapons factories look like simple grain silos to magical detection.
+The Interaction: Oritur does not appear in the room. His face appears in the wine glass Daxon is holding, then shifts to a mirror on the wall.
+"I see you. Or do I? You perceive yourselves as heroes, but you are merely variables I haven't obscured yet. Severyn trusts you, which means you are either very useful or very expendable. In my department, there is no difference. Check your pockets—I believe you’ve already lost something."
+________________
+
+
+The Fifth Seal: Fulmen Aeterna (Directorate of Heavy Ordinance)(Evocation)
+Role: Artillery, Siege Weaponry, Tamori Production ("Smart Munitions"). Head: Grand Marshal Ignis Korth.
+Active Projects:
+* Project Tamori ("The Living Warhead"):
+   * Concept: Binding a single, high-yield spell (e.g., Fireball, Chain Lightning) into a semi-sentient, humanoid lattice.
+   * Strategic Value: A standard Fireball can be Counterspelled or blocked by a Wall of Force. A Tamori can walk through the shield, shake the enemy general's hand, and then detonate.
+   * The Prototype: Vel (The Emberlight) is considered a "Gen-1 High-Yield Asset." She is currently deployed with Lord-Provost Masque for field testing.
+   * The Flaw: The manufacturing process requires "perfect" energy stabilization. If a Tamori has an existential crisis, they tend to detonate prematurely.
+* The Solar Flare Cannon: A siege weapon designed to replicate the destructive yield of the Eldspyre . It fires concentrated beams of radiant heat capable of glassing a square mile.
+* Thunder-Step Mines: Runes buried in the earth that trigger Chain Lightning when stepped on.
+The Interaction: Korth is shouting at a subordinate who is holding a glowing, vibrating humanoid figure by the scruff of its neck.
+"Stable? You call this stable? It’s trying to recite poetry! I don't want a Fireball that feels remorse, I want one that knows pathfinding! (He turns to the PCs) And who are you? Severyn’s field scouts? You’ve met Vel, haven't you? Magnificent design. Clean. Efficient. One spell, one life, zero wasted mana. If you’re looking for a job, I need volunteers to test the blast radius of a Gen-2 Disintegrate Tamori. It pays in gold, mostly to your next of kin."
+________________
+
+
+How the Spirit of Pride Influences This:
+The Spirit of Pride ensures Korth focuses solely on the yield and perfection of the spell-form, completely ignoring the morality of creating sentient suicide bombers.
+* The Silo: Korth refuses to ask the Fourth Seal (Enchantment/Loyalty) for help with the Tamori's personalities because "Enchanters are soft-hearted manipulators who would ruin the purity of the explosion."
+* The Result: The Tamori are powerful but socially maladapted and prone to volatile emotional outbursts (which usually result in explosions), keeping the project in perpetual "beta" and dependent on Imperial funding to fix.
+
+
+________________
+
+
+The Fourth Seal: Vox Imperiosa (Directorate of Compliance & HR)(Enchantment)
+Role: Loyalty assurance, Interrogation, Pacification. Head: Lady Sallow.
+Active Projects:
+* The Compliance Array: Subliminal enchantment waves broadcast through the city's lamp-posts that make citizens feel physically nauseous when they think treasonous thoughts.
+* Project Harmony: A hive-mind spell for infantry squads that removes fear and enforces perfect synchronization of movement.
+* The Truth-Hum: An interrogation room where lying causes the air to vibrate at a frequency that shatters teeth.
+The Interaction: Lady Sallow offers them tea. The tea is definitely enchanted. She smiles too much.
+"Welcome, darlings. You look so tense. Is it the guilt? Or just the weight of your little secrets? Severyn has such... rustic taste in friends. But I see potential. If you ever tire of free will—it is such a burden, isn't it?—come see me. We can make you perfectly content."
+________________
+
+
+The Second Seal: Porta Mundi (Directorate of Strategic Deployment)(Conjuration)
+Role: Logistics, Troop Transport, "The Infinity Lattice." Head: High Summoner Vala.
+Active Projects:
+* The Hall of Doors: A room of stable wormholes allowing the Emperor to march a legion from Aurengate to the Zalian Coast in 30 seconds.
+* The Void-Drop: Teleporting massive stone kinetic rods into the sky above enemy fortifications and letting gravity do the rest.
+* Project Intercept: A web of abjuration/conjuration magic that detects incoming teleportation and redirects the travelers into the heart of a volcano.
+The Interaction: Vala hovers three feet off the ground. She looks at their boots with disgust.
+"You walked here? How... linear. I suppose Severyn enjoys the charm of primitive transit. I am busy folding space-time to move a battalion across the continent, so unless you need to be dropped into a shark tank, move along."
+________________
+
+
+The First Seal: Aegis Primus (Directorate of Defense & Containment)(Abjuration)
+Role: City Shields, Spirit Cages, Counter-Magic. Head: Warden-Architect Kaelthos.
+Active Projects:
+* The Spirit-Proof Cage: A geometric lattice of Perfect Sapphires designed to hold entities like Taranis or Grimore indefinitely.
+* The Null-Zone Generators: Pylons that create an anti-magic field, rendering enemy wizards powerless (and turning off the PCs' magic items).
+* Project Aegis: A city-wide shield that can withstand a direct hit from a falling moon (theoretically).
+The Interaction: Kaelthos is inspecting a blueprint for a cell. He checks the PCs for magical signatures with a monocle.
+"Unregistered magical signatures. Unsanctioned artifacts. You are a security breach walking on two legs. Severyn vouches for you, but my cages don't care about vouchers. Step out of line, and you will find that my walls are much harder than your heads."
+________________
+
+
+The Third Seal: Oculus Profundi (Directorate of Advanced Research)(Divination)
+Jurisdiction: Divination, Quantum Metaphysics, The Jagged Frontier.
+This is not a place of crystal balls and tea leaves. This is a high-security research facility buried deep beneath the melted towers. It resembles a particle accelerator more than a wizard’s tower. The air hums with the sound of reality groaning.
+The Mission: Piercing the "Jagged Frontier" The "Jagged Frontier" is the theoretical membrane where the Material Plane and the Spirit Realm rub against each other. It is not a smooth border; it fluctuates like a waveform.
+* The Goal: To predict the fluctuations of the Frontier with mathematical precision so that a "needle" (Conjuration/Evocation) can be inserted to extract energy.
+* The Vibe: Ultra-high-grade particle physics. Blackboards covered in impossible calculus. Floating debris suspended in anti-gravity fields to measure micro-tremors in reality.
+
+
+Role: Divination, Metaphysics, R&D, "The Jagged Frontier."  Head: Imperator Amegmon Shazz.
+Active Projects:
+* The Mirrored Dome: A star-map of the "True Cosmos" used to calculate the coordinates of the Spirit World's backdoor.
+* Project Needle: A probe designed to physically puncture reality to extract raw magic from the "Near Spirit."
+* The Pre-Crime Algorithm: Divining potential insurrections before they happen so the Fourth Seal can arrest the perpetrators.
+The Interaction (Valerius Void): Void has black, unblinking eyes. He is looking at a timeline the PCs cannot see.
+"You are statistically improbable. My models predicted you would die in Ebon Vale. The fact that you are here introduces a variable I must... account for. Severyn believes you are useful. I believe you are a rounding error. Do not disrupt the waveform."
+The Interaction (Prognosticator Pym - The Outlier): Pym pulls them into a broom closet filled with red string and clocks.
+"Don't listen to Void! He’s trying to drill a hole in the bottom of the boat to let the water in! You’ve seen it, haven't you? The Bone Moon? The stars moving wrong? Tell me you’ve seen it! I’m the only one who knows we’re already dead!"
+
+
+
+
+Ancient History
+Original Comprehensive Timeline Integrating Conflict and Cataclysm
+Era of Beginnings (~10,000 - 8,000 years ago)
+* 10,000 YA: Awakening of the Eldspyre - The discovery or creation of the Eldspyre ushers in an era of unprecedented unity and power among the ancient sorcerer-kings, who wield it to bring about prosperity and magical advancements.
+Era of Expansion (8,000 - 6,000 years ago)
+* 7,500 YA: Continental Unity and Harmony - Under the guidance of the Eldspyre, a golden age prevails with sorcerer-kings at the zenith of their power, overseeing a continent unified in peace and magical prowess.
+Era of the Great Sundering (6,000 - 5,000 years ago)
+* 6,000 YA: Cataclysm and Fragmentation - The misuse of the Eldspyre, possibly due to internal conflicts among the sorcerer-kings or external temptations, leads to a catastrophic event that shatters the continent:
+   * Birth of Akuzo and the Ascendant Shadow: In the chaos, negative energies and the darker aspects of the Eldspyre coalesce into malevolent entities like Akuzo and the nascent forms of the Ascendant Shadow. These beings symbolize and perpetuate the cycle of violence and decay.
+   * Physical and Magical Schism: The continent fragments into several landmasses, each carrying a part of the Eldspyre's legacy, now distorted or forgotten. This schism ensures ongoing conflict as isolated cultures develop divergent interpretations of their magical heritage.
+Era of Dark Ages (5,000 - 3,000 years ago)
+* 4,500 YA: Rise of New Empires - As the memory of the Eldspyre fades, new empires rise on the scattered continents, each built on the remnants of ancient power and often coming into conflict over misunderstood or coveted magical legacies.
+* 3,500 YA: First Manifestations of the Ascendant Shadow - As corrupt powers grow, the Ascendant Shadow begins to exert its influence more directly, initiating cycles of warfare and corruption.
+Era of Rebirth and Enlightenment (3,000 - 1,000 years ago)
+* 2,500 YA: Rediscovery and Misinterpretation - Fragments of the original Eldspyre teachings are rediscovered, leading to a flawed renaissance that misinterprets these powers as separate entities like "The Forge" or "The Spark."
+* 1,500 YA: The Bone Moon Prophecy - An ominous celestial event linked to the cycles of conflict and the Ascendant Shadow, prophesied to recur and bring great calamity.
+Era of the Sakazarac Empire (1,000 years ago - Present)
+* 1,000 YA: Founding of the Sakazarac Dynasty - Claiming descent from the ancient sorcerer-kings, the dynasty seeks to unify the fragmented knowledge and restore the glory of the past, unknowingly paving the way for the resurgence of ancient threats.
+* Present: The players enter during a tense period of apparent peace shadowed by rising tensions and the looming prophecy of the Bone Moon, with the true history of the Eldspyre lost to time, awaiting rediscovery.
+* The Sakazarac empire is run by Izuriel Sakazarac, a young high elf (secretly blood elf) who bargains for great power by becoming a warlock to the Ascendant Shadow. He also does not realize that the Ascendant Shadow is using him by condensing all power into a centralized point of failure in Aurengate. He is a Putin-like figure, has had his heirs killed.
+* Once in power, Izuriel begins to invade neighboring kingdoms and consolidate them until the entire continent is essentially under his banner. He does this over 1,000 years by perpetuating a false lineage of heirs, each of whom is really him in another aspect, given his power to shapeshift from the power given to him by the Ascendant Shadow
+This timeline not only frames your world’s history within cycles of rise, fall, and rebirth, influenced by powerful magical artifacts and dark entities but also sets a backdrop for the players’ adventures against a rich historical canvas. They will uncover lost truths, face consequences of ancient conflicts, and perhaps alter the cycle of violence that has plagued their world for millennia.
+
+
+Proposed alternate Ancient History of Valisar
+The Era of Beginnings (~10,000–8,000 years ago)
+The discovery or creation of the Eldspyre, a cosmic artifact of unimaginable power, marked the dawn of civilization in Valisar. The Eldspyre served as a source of magic and balance, channeling the forces of light (the Spark) and darkness (the Shadow). Under its influence, the sorcerer-kings rose to power, guiding the continent into an era of harmony and prosperity.
+The Eldspyre Custodians were formed to safeguard the artifact and maintain its delicate balance. With their guidance, the Aetherforged Machina—ancient devices designed to stabilize leylines and amplify magic—were constructed, linking the lands in unity. Spirits, as natural guardians of the world, worked alongside mortals to sustain this equilibrium.
+The Era of Expansion (~8,000–6,000 years ago)
+This golden age saw the flourishing of the Eldspyre’s influence. The Custodians established leyline nodes across Valisar, embedding the Aetherforged Machina in temples and cities. The sorcerer-kings, wielding unparalleled magical power, ruled wisely but grew increasingly ambitious.
+Philosophical divisions began to form among the Custodians and their allies. Some viewed the Eldspyre as a tool to create and sustain life, while others believed its power was too dangerous to remain unchecked. These tensions set the stage for later conflict.
+The Era of the Great Sundering (~6,000–5,000 years ago)
+A cataclysm shattered the Eldspyre, unleashing chaos across Valisar. Some records attribute this disaster to internal conflicts among the Custodians, while others suggest an external force exploited their divisions. This event fractured the continent and gave birth to the Ascendant Shadow, a malevolent force formed from the Eldspyre’s darker aspects.
+The Great Sundering marked the decline of the sorcerer-kings. Leylines faltered, and spirits weakened as corruption spread. The surviving Custodians tried to restore order, but their influence waned as Valisar descended into chaos.
+The Era of Dark Ages (~5,000–3,000 years ago)
+Following the Sundering, Valisar entered an age of decline. Kingdoms rose and fell, each vying for control over fragments of the Eldspyre’s legacy. The Aetherforged Machina became relics of a forgotten age, misunderstood and misused by those who uncovered them.
+Spirits retreated as corruption spread, severing the bonds between mortals and the natural world. The Ascendant Shadow grew stronger in the absence of balance, its influence felt through whispered omens and strange, dark forces.
+The Era of Rebirth and Enlightenment (~3,000–1,000 years ago)
+A flawed renaissance emerged as fragments of the Eldspyre’s teachings were rediscovered. Scholars and rulers sought to harness its remnants, but their limited understanding often caused more harm than good. This period also saw the rise of new ideologies, including a growing mistrust of spirits. Some began to see them as unpredictable and dangerous, a sentiment manipulated by those seeking power.
+It was during this era that Izuriel Sakazarac first emerged—or so the records claim. In truth, Izuriel was not born into the Sakazarac line. Instead, he was a cunning sorcerer from a much less noble house who struck a pact with the Ascendant Shadow, also becoming a warlock in the process, granting him longevity and immense magical power at the cost of his soul.
+Izuriel orchestrated his rise by infiltrating the Sakazarac lineage during a period of instability. He killed the ruling family and assumed the identity of the “rightful heir,” declaring himself Izuriel I. Through propaganda, sorcery, and assassination, he solidified his power, presenting himself as a divine ruler chosen to guide Valisar into a new age.
+The Era of the Sakazarac Empire (~1,000 years ago–Present)
+Izuriel has ruled Aurengate for over 1,000 years, but not as a single figure. To maintain his grip on power, he has carefully crafted a false lineage of rulers, masquerading as the “heir” of each successive generation of the Sakazarac dynasty. When the people believe their king has died, Izuriel simply adopts a new identity as his “son” or “descendant,” perpetuating the illusion of a continuous line of benevolent rulers.
+Under his rule, Aurengate has become a sprawling metropolis of wealth and power. Its people worship the Sun-King as a divine protector, unaware that their prosperity is built on lies and exploitation. Izuriel’s propaganda machine blames the spirits for every disaster, positioning himself as the only force capable of protecting humanity.
+Behind the scenes, Izuriel’s true goals are far darker. Through his pact with the Ascendant Shadow, he has corrupted leylines and desecrated temples, systematically weakening the spirits to pave the way for the Shadow’s full manifestation. The upcoming Bone Moon—a celestial event prophesied to herald great change—marks the culmination of his plans. With the Shadow’s power fully unleashed, Izuriel intends to reshape Valisar into an eternal empire under his rule.
+Izuriel’s Legacy and Propaganda
+        1.        The False Lineage:
+Izuriel has fabricated a dynasty, claiming to be the son or grandson of his past identities. This strategy isolates him from the people, making him an enigmatic, almost godlike figure while masking his true age and identity.
+        2.        Blame the Spirits:
+Izuriel’s propaganda paints spirits as dangerous and chaotic, responsible for Valisar’s calamities. This narrative justifies his war against them and further alienates mortals from their natural guardians.
+        3.        The Sun-King’s Image:
+Through symbols, rituals, and public displays of power, Izuriel presents himself as a savior. His mastery of solar magic allows him to stage divine interventions that awe and subdue the population.
+
+
+The Sakazarac Dynasty: Names and Personas
+Each “king” is part of the fabricated Sakazarac lineage, complete with their own invented history, achievements, and downfall. Izuriel carefully orchestrates each transition to maintain his aura of divine right and continuity.
+1. Izuriel I, The Radiant Flame (1,000–850 Years Ago)
+        •        Persona: The first of the Sakazarac “dynasty,” Izuriel I was presented as a noble savior who unified the fragmented regions surrounding Aurengate under his divine light.
+        •        Signature Style: Grandiose displays of solar magic, consolidating power through fear and awe.
+        •        Key Propaganda: Izuriel claimed to be “chosen by the gods” to reignite civilization after the dark ages.
+        •        Fate: Officially “died in his sleep” after decades of rule, leaving his “kingdom” in the hands of his son.
+2. Calyric I, The Builder King (850–700 Years Ago)
+        •        Persona: The supposed son of Izuriel I, Calyric I was characterized as a visionary builder who expanded Aurengate’s infrastructure, including its canals and celestial observatories.
+        •        Signature Style: Focused on architectural achievements and reinforcing the dynasty’s “divine right” through public works.
+        •        Key Propaganda: Positioned himself as a scholar-king who honored the spirits but proclaimed their diminishing relevance.
+        •        Fate: “Died in battle” defending Aurengate against a fabricated threat, becoming a martyr.
+3. Tyserion I, The Golden Blade (700–550 Years Ago)
+        •        Persona: Calyric’s “son” and a warrior-king who forged the Aurengate military into an unstoppable force.
+        •        Signature Style: Martial prowess combined with overwhelming solar magic, positioning himself as the protector of humanity. Forced the Wizards of the Citidaea into submission under the Spirit of Pride. Expanded the bounds of the Sakazarac empire considerably to include The Sweeping Plains and the Fuhran Dessert.
+        •        Key Propaganda: Launched campaigns against “spirit loyalists,” accusing them of treachery and chaos.
+        •        Fate: Claimed to have been “struck down by shadow magic” while leading his forces, though his military victories were celebrated posthumously.
+4. Alorys I, The Dawn Shepherd (550–400 Years Ago)
+        •        Persona: The “peaceful” heir of Tyserion I, Alorys was framed as a ruler of compassion who brought a golden age of diplomacy and prosperity.
+        •        Signature Style: Patronized the arts, sponsoring bardic guilds to spread songs glorifying the Sakazarac lineage.
+        •        Key Propaganda: Used diplomacy to “prove” the Sakazaracs’ divine connection to light and peace.
+        •        Fate: “Retired to meditation,” ascending to the heavens as a saint. His “son” took his place soon after.
+5. Delyric I, The Iron Sun (400–250 Years Ago)
+        •        Persona: Delyric was the “pragmatic” ruler, focusing on securing Aurengate’s borders and cementing alliances with nearby kingdoms.
+        •        Signature Style: Harsh policies that centralized power in the monarchy and removed dissenters with calculated precision.
+        •        Key Propaganda: Used fear of external threats and the spirits’ “growing chaos” to justify his authoritarian measures.
+        •        Fate: Assassinated by a “traitorous noble,” inspiring his heir to “reclaim the throne.”
+6. Ilzaren I, The Resplendent King (250–100 Years Ago)
+        •        Persona: The charismatic and theatrical ruler, Ilzaren embraced the identity of a divine figurehead, holding elaborate festivals and ceremonies to celebrate the Sakazarac lineage.
+        •        Signature Style: Relied heavily on religious imagery, reinforcing the monarchy’s supposed connection to celestial forces.
+        •        Key Propaganda: Introduced the Solar Creed, a state religion glorifying the Sun-King and condemning spirits as heretical.
+        •        Fate: Claimed to have ascended into a celestial form, leaving his mortal body behind.
+7. Izuriel II, The Eternal Light (100 Years Ago–Present)
+        •        Persona: Returning to his original name, Izuriel II presents himself as the culmination of the Sakazarac dynasty, a ruler destined to bring about the “final dawn.”
+        •        Signature Style: Combines elements of all his previous personas, amplifying his divine image as both a warlord and a spiritual savior.
+        •        Key Propaganda: Uses the Bone Moon Prophecy to paint himself as humanity’s last hope against spiritual chaos.
+        •        Current Strategy: Izuriel II rarely appears in public, maintaining an air of mystery and divine distance while his lieutenants govern Aurengate.
+Traits Across All Personas
+        1.        Symbolism and Continuity:
+        •        Each ruler adopts variations of the Sun-Symbol as their sigil, with subtle changes to match their reign’s focus (e.g., a golden sword for Tyserion, a radiant crown for Ilzaren).
+        •        Public art and statues depicting each ruler deliberately maintain a resemblance to Izuriel’s original form, suggesting divine lineage.
+        2.        Manipulated History:
+        •        Izuriel frequently rewrites history, erasing inconsistencies and ensuring his personas are viewed as heroic paragons. Disloyal scholars or records are systematically eliminated.
+        3.        Isolation from the Public:
+        •        Izuriel’s “divine distance” has grown over the generations, making him seem more godlike and less mortal with each iteration. His “heirs” are always announced with elaborate rituals to reinforce this mystique.
+
+
+The Grand Deception of Izuriel (Added 8/19/25)
+Phase I – The Radiant Flame (1,000–850 years ago)
+ Izuriel begins by creating the illusion of a noble savior (Izuriel I). He unifies the splintered states under Aurengate, not simply to secure power, but to set the foundation for a state religion centered on the Eldspyre as Light. This was the first sleight of hand: a subtle rebranding of the Eldspyre from a chaotic, primal source into an imperial-sanctioned font of order.
+* Chess piece placed: The idea that only the Sakazarac dynasty can safeguard magic.
+
+* Hidden goal: Ensure future generations reject spirits as rivals and grow dependent on imperial ideology.
+
+Phase II – The Builder & The Blade (850–550 years ago)
+ Through his alter egos (Calyric the Builder, Tyserion the Golden Blade), Izuriel locks down infrastructure and the military. Roads, fortresses, and skyship docks aren’t merely civic projects—they are leyline anchors, built over sites of spiritual resonance, binding the land’s lifeblood into imperial stone.
+   * Chess piece placed: Control of the continent’s leylines disguised as progress.
+
+   * Hidden goal: Slowly siphon spiritual vitality into Aurengate, starving rival powers.
+
+Phase III – The Shepherd & The Iron Sun (550–250 years ago)
+ Through Alorys the Dawn Shepherd, he paints the dynasty as a benevolent line of peace-bringers. Then, as Delyric the Iron Sun, he pivots to fear—external threats, heretics, spirits—always positioning the empire as sole protector. These dual faces (kindness and tyranny) trained the people to accept contradictory truths, priming them for future propaganda.
+      * Chess piece placed: Normalization of cognitive dissonance—light as both salvation and terror.
+
+      * Hidden goal: Condition the people to accept any imperial decree without question.
+
+Phase IV – The Resplendent King & The Creed (250–100 years ago)
+ As Ilzaren the Resplendent, Izuriel introduces the Solar Creed. This religion cements his dynasty not merely as rulers, but as avatars of divine light. It demonizes spirits, rewriting myths so that the Ascendant Shadow is framed not as an existential corruption, but as something only the Sun-King can banish.
+         * Chess piece placed: Spirit-worship becomes heresy. The empire controls the narrative of cosmology itself.
+
+         * Hidden goal: Sever humanity’s cultural memory of the true Eldspyre and the Greater Binding.
+
+Phase V – The Eternal Light (100 years ago–Present)
+ Now, returned to his original name, Izuriel II declares himself the culmination of his own false dynasty: the Eternal Light, the Final Dawn. The centuries of lies were never about continuity—they were about creating the illusion of inevitability. He has always been preparing Valisar for a single, apocalyptic “endgame.”
+            * Chess piece revealed: The empire’s network of lampposts, fortresses, and skyships are not for order—they are a ritual lattice, a continental-scale working to merge the Eldspyre with the Ascendant Shadow.
+
+            * True goal: To rewrite reality itself, extinguishing the duality of Spark/Shadow and enthroning himself as the sole mediator of all magic. In effect, Izuriel is trying to become a living Eldspyre—an immortal god-king whose will is the only source of magic.
+
+________________
+
+
+Why Now?
+The Bonemoon Prophecy and the rise of The Dusk are not accidents—they are triggers Izuriel helped engineer by corrupting spirits and destabilizing the balance. Each calamity the party faces (Kojin’s corruption, Grimore’s rampage, Vraxxis’ hunger) are staged events in his thousand-year ritual. The Ascendant Shadow feeds on chaos, and Izuriel is fattening it like a calf for slaughter—intending, at the moment of greatest imbalance, to consume it himself and transcend mortality.
+________________
+
+
+The Final Gambit
+               * The lamp network (scrying posts) is both surveillance and ritual nodes.
+
+               * The false dynasty created centuries of legitimacy so his current claim feels like destiny.
+
+               * The Solar Creed has trained the people to see him as divine and spirits as villains.
+
+               * The machina sites the PCs are activating may unknowingly complete his ritual grid.
+
+If successful, Izuriel will not simply rule Valisar—he will collapse the distinction between Eldspyre, Shadow, and Binding, rewriting magic so that all power in the world flows through him alone.
+
+
+
+
+Nations and Regions of Valisar
+4. Mystarion, The Forest of Whispers
+                  * Races: Wood Elves, Forest Gnomes, Feyfolk, Druids
+                  * Major City: Dagan’s Grove.
+                  * Culture: Nature-oriented and mysterious, with an emphasis on druidic practices, ancient trees, and animal companions.
+                  * Ascendant Shadow: Bill Boggs was pressing for pure sapphire crocuses to fuel the Empire’s research in The Citidaea
+7. Echowraith Peaks, The Mountains of Echoes
+                  * Races: Dwarves, Goblins, Echo Spirits.
+                  * Major City: Thunderforge in/under Mount Kaja, the tallest mountain in the range, Capital City of the Serapheld Kingdom
+                  * Old Toppled Kingdom: Serapheld
+                  * Culture: Steeped in legends, mysticism, and echoes of the past, known for runic arts, ancestral worship, and mountaintop monasteries.
+8. The Citidaea, in the west of the Fuhran Desert
+                  * Races: Humans, Constructs
+                  * Major City: The Citidaea, Inspired by the organic, intricate designs of the Sangrada Familia, The Citidaea's architecture is a complex tapestry of 'melted' and 'intertwined' citadels. These structures seem to defy the laws of physics, with towers spiraling skyward in fluid, curvilinear forms, and facades that appear to flow like liquid stone. The buildings meld into one another, creating a labyrinthine metropolis that both awes and confounds the senses.
+                  * Culture: Center of magical study and innovation, with magical universities, libraries, and enchanted landscapes, totally under the Empire’s thumb and researching all means of manufacturing war tools and researching spirit weaknesses
+
+
+Former Kingdoms (all now Sakazara):
+                  * Aeldrya (Now the Citidaea): Known for its mastery over magic, the scholars of Aeldrya are keen to unlock the secrets of the Eldspyre. The kingdom boasts magical academies, enchanted forests, and ornate cities. 
+                  * Zalia: A coastal kingdom that worships the Ocean Spirit, with powerful naval forces, bustling port cities, and fishermen who tell tales of mythical sea creatures.
+                  * Serapheld: A mountainous kingdom, famous for its warrior culture and forging techniques. Ancient castles and fortresses dot the landscape, and honor is held above all else.
+                  * Ghilwyn (Now The Sweeping Plains): A fertile land filled with farms and vineyards, Ghilwyn is a beacon of culture, art, and culinary excellence. Its rulers are known for diplomacy and wisdom.
+                  * Runelara (Now the area north of Mystarion and south of The Sweeping Plains, home to Orienn, Port Chantier, and Tilbry): A kingdom built on trade, technology, and innovation. Runelara's cities are filled with markets, guilds, and inventors. Its location at crossroads makes it a melting pot of cultures.
+Eldoria (the original name of the kingdom of Aurengate): An imperial kingdom with a royal family centered in Aurengate, a bustling city at the very north of the continent.
+Disputed Territories:
+                  * Mystarion: A dense and uncharted wilderness of many many different forest types: jungle, rainforest, tropical, arid, etc. 
+                  * Spirans Isle: An island that has changed hands several times between Sakazara and its native people to the northwest. It is said to hold ancient shrines and the blessings of forgotten spirits.
+                  * Valis Pass: A strategic mountain pass connecting Aurengate through to Zalia, often contended for its control over trade routes and military advantage.
+                  * The Ghostly Marshes: Along the Eastern Zalian Coast, these eerie marshlands are said to be haunted by lost souls. The empire technically claims the marshes, but few dare to dwell there.
+Enemy Kingdoms/Continents:
+The Sakazarac Empire feeds off of the perpetual fear it can place its citizens in. This is because there is a perpetual threat from the other Great Empires/Continents out there:
+
+
+Ruuv:
+Decentralized Shamanistic tribes with powerful shapeshifting and nightmare magic, possession, becoming a “chalice” to be hollowed out and filled with great power from another source, spirits that are ensorcelled or bound and made to serve at the hands of the many great houses of Ruuv. The lands of Ruuv are plentiful with quicksilver.
+
+
+Tal’Jhat: Sorcerer houses
+The Pterranocht
+
+
+New idea: The Aniconate of Naiza
+Motto: By Hands Alone.
+        Axiomata — the state doctrine; axioms taught as catechism.
+Veyron — the great manufactory-districts (“Veyron Works”).
+Sable — shorthand for the secret police & internal auditors (“the Sable Office”).
+What they are
+A nation that decided the world must run on proofs, not prayers. Spirits are “errants”: nameable, bindable, exhaustible. Their cities run on paleglass—milk-white, rune-hungry glass that channels, cools, and cages spiritual output—and quicksilver as the conductive blood in every lattice. Nights glow starless where the Palegrid hums.
+The spark that made them possible
+After the Sundering, a Serattan coin washed up across the Obsidian Sea: a mirror-minted round whose faces are inverse clauses of the same pact. Turned within a ring of paleglass veins and quicksilver channels, it proved a cruel thesis: as above, so below can be made into a machine. From that relic they derived the Oath-Turner—a mirrored jurisprudence engine that flips a warlock’s contract and yokes the patron instead.
+How Oath-Turners work (fiction-first, rules-light)
+A rotating ring of paleglass sigils, fed with quicksilver, reads the letter of a pact and reflects it down the same channel. If a captured warlock agrees to a “clarification” (…or is tricked into one), the reflection snaps shut: the patron becomes the bound party, forced to perform the bargain’s duties back to the mortal side.
+
+
+Government & organs
+                  * Council of Axiomata (ruling council): Arch-Mechanist, Oathwright General, Logotheurge, Warden-Marshal, Auditor of Proofs, Master of Supply, Aether Custodian, Provost of Civic Clarity.
+                  * The Sable Office: internal security; equal parts inspectorate, mathematic priesthood, and quiet-knife.
+                  * Veyron Works: state-run manufactories; every citizen rotates a quarter serving cooling houses or line-calibration.
+
+Places to point a camera
+                     * Cipherfall (capital): basalt terraces veined with paleglass; lamps hum like caged bees; the stars never quite win here.
+                     * Pact-Yard XIV: where Ruuvian warlocks are “interviewed” and the coin is kept turning behind frost-fogged panes.
+                     * Basilica of Broken Icons: museum-cathedral of shattered idols; schoolchildren file past plaques reading history, not worship.
+
+
+Vibe contrast: Naiza vs. Citidaea
+Citidaea is 200–300 years behind on the same road: universities before shrines, civic pride over petitionary rites—but still willing to parley with mystery. Naiza has crossed the Rubicon: the shrine is a lab, the prayer a proof, and mercy is measured in wattage. Citidaea studies the storm; Karnost bottles it.
+
+
+
+
+Garnash: A brutal land of blood-soaked tribes where violence is sacred. Spirits are left unbound, feared as predators, and believed impossible to kill. To appease them, the people endlessly slaughter each other, whispering “Eat them, not me.” Authority belongs to the High Skullmaker, the one who commands the largest mound of skulls, said to be too frightening even for spirits to touch. Across Garnash lie fields of bone-piles, buzzing with carrion crows — shrines to a faith built on misunderstanding. In truth, their savagery is not demanded by the spirits at all, but born from generations of terror under the shadow of the most bloodthirsty.
+
+
+Guilds
+Established Canon:
+-Knights of the Bladed Wind, a corps of knights that use elemental wind blades finely crafted by the spirit Zyphri herself. 
+
+
+Lore
+
+
+                     * Magical Source: The Eldspyre might be the root of all magical power in the world. Wizards, sorcerers, and other magic users might draw from its energy, consciously or unconsciously.
+
+
+Lore of Magic Users in Valisar
+In the world of Valisar, magic is a revered and mysterious force, emanating from the cosmic heart of creation itself, known as the Eldspyre. Though not common among the general populace, magic is an integral part of the world, shaping its history, culture, and conflicts. Here's an overview of the magic users, the source of their powers, and their relationship with the Eldspyre:
+1. Origins of Magic: The Eldspyre
+                     * The Eldspyre: This is the primal forge from which all magic in Valisar flows. It is both a concept and a reality, a flame that burns at the core of existence, giving life to all magical energies.
+                     * Tapping into The Eldspyre: Magic users learn to tap into this ultimate source, channeling its energy through their particular practices and talents. However, the Eldspyre is not merely a tool; it's a living, chaotic force with its will and whims.
+2. Types of Magic Users and Their Sources
+                     * Wizards: Wizards study magic through rigorous academic means. They learn ancient texts, runes, and formulas to draw directly from the Eldspyre. Many are scholars and researchers, seeking to unravel the secrets of the Eldspyre itself.
+                     * Sorcerers: Born with innate magic, Sorcerers have a natural connection to the Eldspyre. Their powers are often wild and unpredictable, and some believe they are chosen or cursed by the Eldspyre for reasons unknown.
+                     * Druids: Druids draw magic from nature, believing that the Eldspyre's flame lives within the earth, trees, and waters. They view the Eldspyre as a part of the natural cycle of life and death.
+                     * Clerics and Paladins: These divine magic users believe their powers come from deities or celestial beings that have mastered or are connected to the Eldspyre. They may see the Eldspyre as a holy flame, a divine test, or a celestial challenge.
+                     * Warlocks: Warlocks gain their magic through pacts with powerful entities, some of which may be connected to or even born from the Eldspyre. These pacts often involve complex relationships and deep mysteries surrounding the Eldspyre.
+                     * Bards: Through music and art, Bards channel the creative spark of the Eldspyre, translating its chaotic energy into performance, charm, and enchantment.
+3. Tensions and Conflicts
+                     * Fear and Reverence: Magic, being uncommon and tied to the enigmatic Eldspyre, can be both revered and feared. While some see magic users as sages, healers, or protectors, others view them with suspicion, attributing disasters or curses to their meddling with the Eldspyre.
+                     * Manipulation vs. Respect: Some believe that the Eldspyre should not be tampered with, while others seek to master and manipulate it. This creates tension among magic users and even entire magical traditions, leading to conflicts, debates, and even wars.
+                     * The Mystery of the Eldspyre: The ultimate source of all magic is not fully understood, and many seek to uncover its secrets. This quest can lead to obsession, madness, or enlightenment, and it can also draw the attention of ancient beings, guardians, or enemies connected to the Eldspyre.
+Conclusion
+The magic users of Valisar draw their powers from the enigmatic Eldspyre, each in their unique way, reflecting different philosophies, practices, and cultural beliefs. This connection to the Eldspyre creates a complex tapestry of awe, conflict, and mystery surrounding magic in Valisar, providing a rich background for storytelling, character development, and world-building. Whether a wise village sage, a cunning urban wizard, or a mysterious sorcerer with a mystical lineage, magic users in Valisar navigate a world filled with wonder and danger, where the very source of their power may hold secrets that can change the fate of the entire world.
+
+
+Political Backdrop
+1.King Izuriel Sakazarac II, the  Eternal Light
+                     * He is the crown. He reigns supreme in Aurengate and controls the Sakazarac empire. He is largely mysterious and shrouded, although he does deploy his voice through the 32-member Septor’s Chorus that he has “gifted” to Lord-Provost Masque to ensure she is always under his watchful eye. The chorus speaks with his voice, or hers, alternately. But they have always been “his watchful eye” as well as his “golden voice”.
+                     * Lord-Provost Masque is the Septor, the PR person, the master propagandist for Izuriel II. She is mortal, believes he is a true heir and a messiah. Any doubts she has ever harbored are crushed by the knowledge that the Septor’s Chorus is upon her at all times
+                     * The Dusk  
+                     *                        * The “horcruxes” of Izuriel, who’s original name is Elenvar Elathriel. “The Dusk” takes the name Elenvar Elathriel when not also in one of the following aspects:
+                        * “Bill Boggs” - cartel runner, running leyline supply issues to get materials for the Citidaea’s research. Last project: sapphire crocuses from Mystarion’s Lake Mirrara. He had disrupted and corrupted Grimoire to lock the region down while he took the perfect sapphire crocuses and trafficked them through Port Chantier to The Citidaea
+                        * “Merrick Blackwater” - pirate
+                        * “Silas Moorland” - wizard
+2. Imperator Amegmon Shazz of The Citidaea
+                        * The citidaea: A campus of academics and researchers who utilize magic and scientific understanding to fuel the great machines of war that the Empire manifests. They fell to the Empire under King Tyserion and quickly acquiesced, striking a deal where they would supply the empire with their research, assuming they were always allowed to carry on their own research as well
+                        * The Citidaea up to that point had had eight schools of magic, referred to as a “Seal” and each headed by an archmage who would report to Amegmon.
+                        * King Tyserion insisted in the creation of a Ninth Seal, the leader of whom would report directly to the crown, and inform him of all of the happenings of the other Eight Seals. The archmage of the Ninth Seal is the only one to report directly to the King, and not to the Imperator of the Citiadaea.
+                        * Imperator Amegmon Shazz is under Izuriel’s thumb, but is also trying to plot against him. Unfortunately for him, the Spirit of Pride is inhibiting him from being his most cunning self as he is too drunk on his own ego and self-assurance to come up with anything too biting. In the meantime, his ego is appeased by the sycophancy from his lieutenants in the Eighth Seal and Sevaryn Caldreth of the Ninth Seal is playing him for a fool, lulling him into a false sense of security, all too aware that the Spirit of Pride is playing on his side.
+3. The Mad Pirate Queen Calvera Blackwake
+                        * She is the undisputed ruler of The Tradewind Isles, and has been very hot-and-cold to Lord-Provost Elaina Masque, constantly a thorn in her side. 
+                        * She holds the Empire hostage by threatening to crash some of the floating Tradewind Isles into the land below, saying she knows how to overload the anti-grav machina that keeps some of the islands afloat, and sending them hurtling downwards onto the Empire’s breadbasket, The Sweeping Plains. She could destroy villages AND also destroy lots of the nation’s food supply. There is proof of this many miles to the southeast, where one mile-long island had been made to crash some 7-8 years ago.
+                        * She is a war profiteer, both supplying the Empire with weapons and sabotaging them along the way. She makes constant reference to her Ruuvian or Garnashan agents, but does she really have them? Nevertheless, she often can provide materials from those other continents like: quicksilver from Ruuv or Lapis Lunae from Garnash
+4. The Rebels
+                        * Rebel Groups: Various factions resist the authority of the High Council or their regional governments, sometimes with violent means.
+                        * Secret Societies: Hidden organizations with their agendas, such as manipulating the Eldspyre, controlling governments, or overthrowing the established order.
+                        * The Rebellion in the Near-Spirit
+                        * While the Sakazarac Empire tightens its grip on the material realm, a rebellion is stirring in the near-Spirit of the Mystarion forest. This loose coalition of spirits, druids, and fey creatures seeks to restore the balance of magic and resist Izuriel's reign. Key figures may include a re-awakened Cernis, the Horned Forest Lord, the trickster spirit Taranis, and the Archdruid Ilyndor, leader of the Circle of the Stars. The rebellion operates from the shadows, using guerrilla tactics and powerful nature magic to cleanse corrupted leylines and disrupt the empire's operations.
+                        * Lirielle’s missing parents, Althea and Caelum, are here and they have been helping to coordinate and add magical energy to the Near Spirit factions, helping Cernis return to health once Grimoire was set back to her normal hibernation mode. Also the spirits of the bladed wind, Zyphri, and fae and fairies which are introduced for the first time.
+The Big Bad: The Ascendant Shadow
+Background
+                        * Who or What It Is: A once-defeated dark entity (or a coalition of such beings) tied to the Eldspyre's destructive aspect.
+                        * History: Long ago, the Ascendant Shadow sought to consume the Eldspyre and plunge Valisar into an age of darkness. It was banished but not destroyed.
+Rising Threat
+                        * Awakening: Signs of the Ascendant Shadow's return begin to manifest. Nightmares, omens, corrupted magic, and dark creatures appear.
+                        * Infiltration: Agents of the Ascendant Shadow infiltrate governments, magical orders, and even the High Council itself, sowing discord and confusion.
+                        * Goal: To weaken Valisar, control or consume the Eldspyre, and reshape the world in its dark image.
+Challenges and Conflicts
+                        * Uncovering the Threat: The players may become involved in uncovering the Ascendant Shadow's influence, tracking its agents, and understanding its plans.
+                        * Uniting the World: With the political landscape fractured and trust waning, uniting the nations against the rising threat becomes a monumental task.
+                        * The Eldspyre's Role: The relationship with the Eldspyre becomes central, as both a source of power and a potential weapon or vulnerability.
+Conclusion
+The political landscape of Valisar offers a rich and intricate web of alliances, rivalries, and hidden agendas, all set against the backdrop of the mysterious and powerful Eldspyre. As the Ascendant Shadow's threat grows, the world's leaders must navigate these complex relationships to forge a united front, or risk falling to darkness one by one. Whether engaged in diplomatic negotiations, espionage, battlefield conflicts, or mystical quests, the players will find themselves at the heart of Valisar's struggles, with the fate of the world hanging in the balance.
+
+
+
+
+
+
+Colloquial terms for machina
+
+
+                        * Starforged - A name that might be given by a society that believes the technology was crafted by celestial beings or influenced by the stars.
+                        * Ancestrine - A word that would resonate with a society that believes the ancient technology is the work of their ancestors.
+                        * Eldertech - Used by a society that acknowledges the age and ancient origin of the technology.
+                        * Duskmade - A term from a society that believes the tech comes from a 'dusk' or twilight era; a time of both enlightenment and shadow.
+                        * Skygift - A moniker given by those who believe that the technology was a gift or boon from the heavens.
+                        * Lostech - A somewhat somber term from civilizations that feel the knowledge to create such technology has been lost to time.
+                        * Godforge - A name from those who firmly believe only gods could have made such intricate and powerful machines.
+                        * Mystmach - Used by a society that sees the technology as both mystical and mechanical in nature.
+                        * Primetech - A term from those who think the tech comes from the 'prime' era or the golden age of their world.
+                        * Oldsparks - A playful or even slightly derogatory term for ancient tech, suggesting it's a bit rickety or unreliable.
+                        * Nightsilvered - Maybe the ancient tech has a silvery sheen or the knowledge to make them was believed to be harvested during moonlit nights.
+                        * Galeroot - If the tech seems integrated with nature or made of organic components, suggesting it's as old as trees or foundational elements of the world.
+                        * Echomach - Named for technology that seems to echo or replicate effects or power from an older era.
+                        * Lorestone - Used if the tech is primarily in the form of crystalline or stone-like constructs containing vast knowledge.
+                        * Ancienttech - A straightforward, descriptive term used by those who acknowledge the ancient origins of discovered machines.
+                        * Relicwork/Reliccraft - Evokes a sense of lost history and craftsmanship. Common among scholars.
+                        * Godsforge - Used by those who believe the machines to be crafted by gods rather than mortals.
+                        * Dawnforged - A reference to a mythical "dawn era" when such advanced technology supposedly originated.
+                        * Starcraft/Stargift - Indicates a belief that the technology came from celestial beings who bestowed it to certain ancient peoples.
+                        * Ancestorcraft - Suggests the technology belonged to honored ancestors rather than the gods.
+                        * Elderwork - Respectfully acknowledges the great age and mystery of the machines.
+                        * Relicsteel - Referring directly to the materials used, many of which are rare or long-forgotten alloys.
+                        * Ruinwork - Disparaging term used by those who believe tampering with such things leads to disaster or ruin.
+                        * Voidcraft - Sinister term used by those who believe the technology came from dark powers or void entities.
+                        * Chaoswork - Indicates a belief that the technology is too reckless, dangerous and chaotic to be used safely.
+
+
+
+
+Great Spirits
+
+
+                        * Danara, the Spirit of Wells and Springs
+                        * Guardian of sacred wells, springs, and healing waters.
+                        * Manifests as a maiden with a silver chalice or a radiant pool.
+                        * Inspired by Celtic healing wells and sacred springs.
+                        * Cernis, the Horned Forest Lord
+                        * Rules over dense growth, forest, jungle, prey animals
+                        * Often appears as a stag or a figure with antlers with the face of a rabbit
+                        * Reflects the imagery of the Celtic god Cernunnos.
+                        * Zyphri, the Gale Dancer
+                        * The ancient spirit of the razor winds, known for her grace and lethal precision. Revered by the Knights of the Bladed Wind, she is said to dance through the air, her movements creating the sharp gusts that empower their blades. 
+                        * Zyphri's favor is a closely guarded secret among the knights, her power known only to those who walk the shadowed path.
+                        * Appears as a translucent figure made of swirling wind and glinting blades, her form shifting and flowing like a graceful ballet. Her presence is marked by the soft whisper of the wind and the occasional flash of steel, her movements so swift and silent that they leave no trace.
+                        * Grimore, The Spirit of the Wild Hunt
+                        * Will absolutely destroy you if you run in fear from her
+                        * Reflects the imagery of predators with claws and talons
+                        *                         * Serratta, Spirit of the Deep Current, a Kraken, squid-like creature
+                        * Rules over the deep currents of dark sea
+                        * Often appears as a Kraken or a humanoid with a squid-like face
+                        * An important spirit deity to the Sunken Empire
+                        * Marin, Spirit of Ocean Waves
+                        * Governs the ebb and flow of the ocean's surface, embodying the rhythm and grace of the sea.
+                        * Appears as a graceful woman made of clear, shimmering water, her form swaying with the waves, simple but elegant robes, a powerful long spear
+                        * Often depicted in tales as dancing upon the waves, guiding sailors through treacherous waters and calming storms to protect those at sea. Her presence is both a blessing and a warning of the ocean's capricious moods.
+                        * Taranis, the Trickster
+                        * Taranis is mischievous but protective of the fae
+                        * Often manifests as a laughing crow with iridescent feathers
+                        * Known for stealing small, shiny objects and hiding them, cawing with laughter as it watches people search for their lost items.
+                        * Dagan, the Sovereign of the Scales
+                        * Rules over oaths, justice, and the balance of morality
+                        * May hallow a ground for neutrality, as in the city of Dagan’s Grove
+                        * Often manifests as a bright silver beam of light, a stag with perfect balance in the antlers, or the scales themselves
+                        * The Man in Black
+                        * Has many aliases, the Pilgrim Under Stars, the Wanderer of Night, The Last Drifter, Old Midnight, He-Who-Does-Not-Root, 
+                        * Inspired by Americana cowboys and rustlers, he wears a wide brimmed hat and dark boots, perhaps a poncho
+                        * He is somewhat of an oddity in the spirit world, as he represents the primary sphere of Death of Man. He is caught between spirits and humanity, rejected and often feared by both.
+                        * He is constantly walking the roads of Valisar, rarely if ever stopping, and only ever stopping at crossroads.
+                        * Despite him being closely associated with Night, he is not under Nitriti’s service or allegiance, he operates independently. Sometimes their goals align, sometimes not. Often the “night” he brings is mistaken for true night, not the “night of death”.
+                        * Kojin, the Fiery Whip
+                        * Inspired by the Japanese kami Kojin
+                        * Is the source of the forgefire under Mount Kaja
+                        * Has been touched by the Ascendant Shadow and is driving the dwarves out of Thunderforge
+                        * Dutiful in temperament before the corruption, now burns wild
+
+
+Lesser Spirits:
+Here are some ideas for spirits in the world of Valisar across a range of power levels:
+Minor Spirits:
+                        * Wisplight - Diminutive wisps that glow faintly, providing minimal illumination. More of an atmospheric entity.
+                        * Brookskippers - Playful freshwater spirits that inhabit streams and rivers. Capable of minor mischief like overturning small boats but otherwise harmless.
+                        * Hearthkeepers - Tiny fire spirits that tend to fires and forges. Can marginally increase or decrease the intensity of flames.
+                        * Floratwirls - Whimsical plant spirits that inhabit gardens and forests. Can commune with plants and manipulate vines and branches to a small degree.
+Mid-Level Spirits:
+                        * LunaMoths - Mystical moth-like spirits connected to dreams and the moon. Can send premonitions and disturbing dreams to those who invoke them.
+                        * Geoclasts - Earth spirits capable of minor earthquakes, opening fissures, and raising stone pillars. Bound to a specific location.
+                        * Windwisps - Air spirits that can control wind direction, generate gusts, and even coalesce into a physical form when angry.
+                        * Aquarians - Water spirits adept at manipulating currents, granting water breathing abilities, obscuring vision with mist, and healing with liquid.
+Greater Spirits (Levels 10-15):
+                        * Starseekers - Powerful celestial spirits who guide travelers and can glimpse distant places and futures. Their celestial maps assist navigation and translocation.
+                        * Volcanis - Ancient spirits of fire and magma dwelling deep within volcanoes and mountains. Able to hurl fireballs, melt solid rock, and trigger eruptions.
+                        * Tempestos - Storm spirits capable of controlling weather in vast areas. Able to call down lightning strikes, generate hurricane-force winds, and whip up massive waves.
+                        * Terranox - Wise nature spirits who oversee entire forests or vast landscapes. Able to animate trees and vegetation into an army, regenerate damage, and command all animals within their domain.
+Epic Spirits (Levels 18-20):
+                        * Cosmosoul - Extremely rare spirits tied to the very fabric of space and time. Capable of opening portals, granting limited time manipulation powers, bestowing knowledge of cosmic events, or even manipulating gravity.
+                        * Plaguebringer - Ancient blight spirits capable of rapidly spreading disease and corruption through populations and the land itself. Their mere presence causes sickness and decay.
+                        * Leviathan - Colossal water spirits of nearly demigod-like power. Able to control oceans and sea life as extensions of themselves and obliterate ships and cities with tidal waves or watery vortexes.
+Let me know if you would like me to expand on any of these spirits with more details! I focused on elements and broader concepts for domains, but I can also generate named, individualized spirits.
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+Eldertech Spheres
+During the course of the game, the PCs will collect Eldertech Spheres from dungeons, quests, bosses, etc. Here is a description of them: “This sphere, with its intricate layers of gears, glowing runes, and embedded crystalline components, serves as a key for activating ancient machina within dungeons, blending elements of fantasy, technology, and mysticism.” They will act as a sort of key or collectible that the PCs can use to do various things: 
+                        * They will be required to attune Lirielle’s Star Map to the next point of interest or location.
+                        * They can be used to access secret rooms in dungeons, which might open up sword-building components for Daxon or ancient ruins or translations for Luigi
+                        * They can manipulate/activate machina during fights/boss battles
+                        * Perhaps more things!
+
+
+  
+
+
+
+
+
+Final Fantasy X machina, technology exists but nothing happened recently
+
+
+
+
+
+
+
+
+
+
+
+
+PCs
+Lirielle
+Level 3 Elf Circle of the Stars Druid
+Relationships
+                        1. Elandra, the Elder Druid Mentor
+                        1. Elandra, with her silver hair and eyes like the deep night sky, was the first to discern the celestial aura around Lirielle. Acting as a guide, Elandra introduced young Lirielle to the ancient druidic rites of their tribe and often shared stories of the cosmos. However, she always held reservations about Lirielle's intimate bond with the stars, fearing the young druid might be consumed or led astray by the vastness of the universe. Their relationship is akin to a stormy sky — filled with bouts of tension but always underscored by deep respect and love.
+
+
+
+The Prophecy and The Warning
+Shortly after Lirielle was born under the auspicious celestial alignment, Elandra sensed an incredible surge of cosmic energy emanating from the newborn. After a careful reading of celestial signs and ancient texts, Elandra approached Lirielle's parents with a warning: "Your daughter has been touched by the heavens, her life-thread intricately woven with cosmic destinies. But this connection, as powerful as it may be, risks creating an imbalance in the fabric of our universe—an imbalance you yourselves might have to restore."
+The Talisman
+Understanding the weight of Elandra's words and what might lie ahead, Lirielle's parents began to prepare for the day they might need to restore the cosmic balance. As part of their preparations, they created a talisman imbued with their love, wisdom, and protective energies. As Lirielle grew older, they fastened it around her neck, a physical embodiment of their eternal love and guidance that she would always carry with her.
+The Celestial Gate
+When the day of reckoning arrived, a celestial gate materialized, radiant and full of swirling stardust, confirming Elandra's prophecy. Lirielle's parents knew what they had to do. They took their daughter's hands and spoke words of unconditional love and timeless wisdom. "We'll be walking through this gate with you, but only you will walk back out. Remember, we are always with you—in every star that lights your path, in every whisper of the wind through the trees."
+The Walk of Destiny
+Hand in hand, the family walked through the celestial gate. There was a moment of ethereal stillness, a meeting of mortal and immortal, finite and infinite. Then Lirielle felt her parents' hands slowly slip away from her own. When she returned through the celestial gate, she was alone, but for the appearance of Lumina, the celestial fox who would become her guide and guardian.
+A Soul-Deep Understanding
+Upon her return, Elandra helped Lirielle understand the magnitude of her parents' sacrifice. Though young, Lirielle grasped the essential truth: her parents had restored the cosmic balance, making her own life's journey possible. They had become a part of the very cosmos that she was now destined to explore and protect, forever interwoven with her own tapestry of fate.
+
+Luigi Bonemoon
+Level 3 Human “The Genie” Warlock
+Luigi Bonemoon, once a vibrant and adventurous relic hunter, is now a 44-year-old human who lives a life of seclusion, haunted by a dark prophecy that he uncovered 15 years ago. In his prime, Luigi was known for his gregarious and jovial nature. He had an insatiable curiosity about the past and dedicated his life to uncovering the secrets of the ancient civilizations of Valisar, the world in which he lived. His adventurous spirit led him on numerous expeditions, digging through ancient ruins and unearthing long-forgotten artifacts. However, everything changed during an expedition in a particularly remote and mysterious site. There, deep beneath the earth, Luigi stumbled upon a hidden chamber containing a relic vessel connected to the Eldspyre but he didn’t know it. As he examined the vessel, he accidentally unleashed a powerful Spirit, an inscrutible being made of gears and rings and angel wings and an enormous unblinking eye. For mechanical game purposes this is an Efreeti, but we are flavoring this as a Spirit in the world of Valisar.. The Spirit, grateful for its release and intrigued by Luigi's knowledge of the ancient civilizations, offered him a pact: power and knowledge in exchange for his service. In a moment of weakness, driven by his desire to learn more about the ancient civilizations and prevent the prophecy from coming true, Luigi accepted the pact. Unbeknownst to him, this decision would forever alter the course of his life. The prophecy that Luigi uncovered spoke of the Bonemoon, a celestial event that would bring about the annihilation of all life and lead to the ruin of Valisar, much like the ancient civilizations that once thrived there. The prophecy consumed Luigi, filling him with a sense of dread and hopelessness. Fearing that his actions as a relic hunter might inadvertently hasten the prophecy's fulfillment, Luigi swore off relic hunting and retreated from society. He now lives alone in a small cabin a few miles away from a nearby town, rarely venturing out except to buy supplies. Although he still harbors a deep love for the ancient civilizations of Valisar, he is haunted by the fear that his actions may advance the world toward ruin. The once adventurous and spirited man is now a shadow of his former self, weighed down by the burden of the prophecy and the pact he made with the Efreeti. As the time of the Bonemoon approaches, Luigi is torn between his desire to prevent the prophecy from coming true and the obligations of his pact with the Efreeti. Will he find a way to avert disaster, or will he succumb to the dark forces that threaten to consume the world?
+Luigi does not know he signed a pact with the spirit 15 years ago, and hasn't seen the genie in any recognizable form since
+
+
+But now, 15 years later, the genie has appeared to him in again as the clock angel form and come to collect the service that Luigi swore in his pact unwittingly. The spirit has also issued Luigi a familiar, a small fuzzy blob that functions like Tattle and Tale in Majora’s Mask, does not always tell the truth to Luigi, is inscrutable, and is mostly a spy for the spirit.
+
+
+Daxon Lamn
+Level 3 Human Eldrich Knight Fighter
+Father, Braxon Lamn, is the blacksmith in Ebonvale, mother and aunt wizards. Mom settled down to town life with Dad, aunt went adventuring. Learned using weapons from Dad plus maintenance, learned magic from Mom/Aunt. Few years ago aunt retired after gaining a reputation and went to open a  luxury wizard furniture store. Avant-garde couches galore in that store.
+
+
+Has friends around Ebonvale, but longs to find himself friends with great adventurers.
+
+
+Background is folk hero - stood up to a tyrant. I imagine there was some bandit group trying to exploit the town, and led a small group to defeat them. Used fighting skill to beat them, but then wanted to use magic in fights themselves to use every advantage after losing a member in the process.
+
+
+Since Daxon comes from the ranks of the common folk, he fits in among them with ease. He can find a place to hide, rest, or recuperate among other commoners, unless he have shown himself to be a danger to them. They will shield him from the law or anyone else searching for him, though they will not risk their lives for him
+
+
+Personality Traits
+He’s confident in his own abilities and does what he can to instill confidence in others. He gets bored easily. “When am I going to get on with my destiny?”
+Ideals
+Freedom. Tyrants must not be allowed to oppress the people. (Chaotic) Destiny. Nothing and no one can steer him away from my higher calling. (Any)
+Bonds
+His tools are symbols of my past life, and he carries them so that he will never forget my roots.
+Flaws
+The tyrant who rules my land will stop at nothing to see him killed.
+
+
+Daxon really wants to create a magical bond with their weapon so they can cause their weapon to teleport to their hand
+Stereotypical sword guy except he actually is a sword guy. 
+His quest is to go find a sentient weapon that he can then go on adventures with with a sentient weapon friend. Those things are complex, takes a long time to reach that goal. 
+Looking for ruins to find magical artifacts to make a sword, stumbling upon machina and ancient writings.

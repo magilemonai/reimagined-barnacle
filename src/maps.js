@@ -71,11 +71,11 @@
     window.TileProps[T.TEMPLE_WALL]  = { solid: true,  name: 'tile_temple_wall' };
     window.TileProps[T.TEMPLE_FLOOR] = { solid: false, name: 'tile_temple_floor' };
     window.TileProps[T.TEMPLE_DOOR]  = { solid: false, name: 'tile_temple_door' };
-    window.TileProps[T.ALTAR]        = { solid: true,  name: 'tile_altar' };
-    window.TileProps[T.PILLAR]       = { solid: true,  name: 'tile_pillar', hitbox: { x: 3, y: 2, w: 10, h: 14 } };
+    window.TileProps[T.ALTAR]        = { solid: true,  name: 'tile_altar',  hitbox: { x: 3, y: 4, w: 10, h: 8 } };
+    window.TileProps[T.PILLAR]       = { solid: true,  name: 'tile_pillar', hitbox: { x: 4, y: 4, w: 8, h: 9 } };
     window.TileProps[T.TORCH]        = { solid: true,  name: 'tile_torch' };
     window.TileProps[T.CHEST]        = { solid: true,  name: 'tile_chest',  hitbox: { x: 1, y: 3, w: 14, h: 12 } };
-    window.TileProps[T.STATUE]       = { solid: true,  name: 'tile_statue', hitbox: { x: 2, y: 2, w: 12, h: 14 } };
+    window.TileProps[T.STATUE]       = { solid: true,  name: 'tile_statue', hitbox: { x: 5, y: 4, w: 6, h: 11 } };
     window.TileProps[T.BRIDGE]       = { solid: false, name: 'tile_bridge' };
     window.TileProps[T.ROOF]         = { solid: true,  name: 'tile_roof' };
     window.TileProps[T.SIGN]         = { solid: true,  name: 'tile_sign',   hitbox: { x: 4, y: 5, w: 8, h: 11 } };

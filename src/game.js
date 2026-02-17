@@ -904,15 +904,17 @@
     // MINIMAP DATA
     // =====================================================================
 
+    // Rooms progress linearly north: market (south) to boss (north)
+    // Minimap column: row 0 = top (boss/north), row 7 = bottom (market/south)
     var MINIMAP_ROOMS = [
-        { id: 'ebon_vale_market',   col: 0, row: 0, color: '#4a7' },
-        { id: 'ebon_vale_square',   col: 1, row: 0, color: '#4a7' },
-        { id: 'ebon_vale_north',    col: 2, row: 0, color: '#4a7' },
-        { id: 'ebon_forest_entry',  col: 3, row: 0, color: '#276' },
-        { id: 'ebon_forest_deep',   col: 3, row: 1, color: '#276' },
-        { id: 'temple_entrance',    col: 3, row: 2, color: '#666' },
-        { id: 'temple_puzzle',      col: 3, row: 3, color: '#666' },
-        { id: 'temple_boss',        col: 3, row: 4, color: '#a33' }
+        { id: 'temple_boss',        col: 0, row: 0, color: '#a33' },
+        { id: 'temple_puzzle',      col: 0, row: 1, color: '#666' },
+        { id: 'temple_entrance',    col: 0, row: 2, color: '#666' },
+        { id: 'ebon_forest_deep',   col: 0, row: 3, color: '#276' },
+        { id: 'ebon_forest_entry',  col: 0, row: 4, color: '#276' },
+        { id: 'ebon_vale_north',    col: 0, row: 5, color: '#4a7' },
+        { id: 'ebon_vale_square',   col: 0, row: 6, color: '#4a7' },
+        { id: 'ebon_vale_market',   col: 0, row: 7, color: '#4a7' }
     ];
 
     // Track visited rooms for minimap
@@ -1009,12 +1011,12 @@
     // =====================================================================
 
     function renderMinimap(ctx) {
-        var cellW = 7;
+        var cellW = 9;
         var cellH = 5;
         var padding = 2;
-        // Calculate minimap bounds (4 cols wide x 5 rows tall)
-        var mapW = 4 * cellW + padding * 2;
-        var mapH = 5 * cellH + padding * 2;
+        // Calculate minimap bounds (1 column x 8 rows, vertical strip)
+        var mapW = 1 * cellW + padding * 2;
+        var mapH = 8 * cellH + padding * 2;
         var mapX = W - mapW - 3;
         var mapY = H - mapH - 3;
 

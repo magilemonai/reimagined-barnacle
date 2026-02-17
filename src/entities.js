@@ -65,13 +65,26 @@
                 return;
             }
 
-            // Handle knockback
+            // Handle knockback (collision-aware so we don't get pushed into walls)
             if (this.knockback) {
-                this.x += this.knockback.vx;
-                this.y += this.knockback.vy;
+                var kbx = this.x + this.knockback.vx;
+                var kby = this.y + this.knockback.vy;
+                // Try full knockback, then per-axis, then stop
+                if (!this.collidesWithMap(room, kbx, kby)) {
+                    this.x = kbx;
+                    this.y = kby;
+                } else if (!this.collidesWithMap(room, kbx, this.y)) {
+                    this.x = kbx;
+                } else if (!this.collidesWithMap(room, this.x, kby)) {
+                    this.y = kby;
+                }
+                // Decay knockback velocity so it doesn't just stop abruptly
+                this.knockback.vx *= 0.7;
+                this.knockback.vy *= 0.7;
                 this.knockback.timer--;
                 if (this.knockback.timer <= 0) this.knockback = null;
                 this.clampToRoom();
+                this.pushOutOfSolids(room);
                 return; // can't act during knockback
             }
 
@@ -148,6 +161,7 @@
             }
 
             this.clampToRoom();
+            this.pushOutOfSolids(room);
         }
 
         /* ----- attack helpers --------------------------------------- */
@@ -252,6 +266,19 @@
             this.y = Utils.clamp(this.y, 0, H - this.h);
         }
 
+        /** Push player out of solid tiles if stuck (e.g. after knockback) */
+        pushOutOfSolids(room) {
+            if (!this.collidesWithMap(room, this.x, this.y)) return;
+            // Try small offsets in each direction to escape
+            var step = 1;
+            for (var dist = step; dist <= 16; dist += step) {
+                if (!this.collidesWithMap(room, this.x, this.y - dist)) { this.y -= dist; return; }
+                if (!this.collidesWithMap(room, this.x, this.y + dist)) { this.y += dist; return; }
+                if (!this.collidesWithMap(room, this.x - dist, this.y)) { this.x -= dist; return; }
+                if (!this.collidesWithMap(room, this.x + dist, this.y)) { this.x += dist; return; }
+            }
+        }
+
         /** Returns exit direction if player is at room edge, else null */
         checkExit() {
             if (this.y <= 0)          return 'north';
@@ -266,7 +293,9 @@
             // Invincibility flashing -- skip every other 3-frame group
             if (this.invincible > 0 && Math.floor(this.invincible / 3) % 2 === 0) return;
 
-            var spriteKey = this.characterId + '_' + this.dir + '_';
+            // Use 'right' sprites for left direction (flipped horizontally)
+            var spriteDir = (this.dir === 'left') ? 'right' : this.dir;
+            var spriteKey = this.characterId + '_' + spriteDir + '_';
             if (this.attacking) {
                 spriteKey += 'atk';
             } else {
@@ -403,10 +432,18 @@
                 }
             }
 
-            // Knockback
+            // Knockback (collision-aware)
             if (this.knockback) {
-                this.x += this.knockback.vx;
-                this.y += this.knockback.vy;
+                var kbx = this.x + this.knockback.vx;
+                var kby = this.y + this.knockback.vy;
+                if (!this.collidesWithMap(room, kbx, kby)) {
+                    this.x = kbx;
+                    this.y = kby;
+                } else if (!this.collidesWithMap(room, kbx, this.y)) {
+                    this.x = kbx;
+                } else if (!this.collidesWithMap(room, this.x, kby)) {
+                    this.y = kby;
+                }
                 this.knockback.timer--;
                 if (this.knockback.timer <= 0) this.knockback = null;
                 this.clampToRoom();

@@ -98,26 +98,27 @@
 
       function makeCharacter(name, pal) {
         // -- FACING DOWN (toward camera) --
-        // Frame 0: standing
+        // 12 cols wide, 18 rows tall, drawn at offset (2,3) in a 16x24 canvas.
+        // Body is fully connected: hair->face->neck->shoulders->torso->legs->boots.
         var down0 = [
-          '....hhhh....',  // row 0  - top of hair
-          '...hhhhhh...',  // row 1  - hair sides
-          '..hhhhhhHH..',  // row 2  - hair with shadow
-          '..hhshksHH..',  // row 3  - face: skin, eyes (k)
-          '..hhssssHH..',  // row 4  - face: cheeks
-          '...ssmss....',  // row 5  - chin, mouth
-          '...aaaaaa...',  // row 6  - shoulders
-          '..aaAbbAaa..',  // row 7  - torso top, emblem(A)
-          '..aabbbbaa..',  // row 8  - torso
-          '..aabbbbaa..',  // row 9  - torso
-          '...aBBBBa...',  // row 10 - belt(B)
-          '...bbbbbb...',  // row 11 - waist
-          '...dd..dd...',  // row 12 - legs
-          '...dd..dd...',  // row 13 - legs
-          '...dd..dd...',  // row 14 - legs
-          '..ddd..ddd..',  // row 15 - shins
-          '..ooo..ooo..',  // row 16 - boots
-          '..ooo..ooo..'   // row 17 - boot soles
+          '....hhhh....',   // hair top
+          '...hhhhhh...',   // hair sides
+          '..hhhhhhHH..',   // hair with shadow (H)
+          '..hhshksHH..',   // face: skin(s), eyes(k)
+          '..hhssssHH..',   // cheeks
+          '...ssmsss...',   // chin, mouth(m)
+          '..aaaaaaa...',   // shoulders (armor/tunic a)
+          '..aaAbbAaa..',   // upper torso, emblem(A)
+          '..aabbbbaa..',   // torso
+          '..aabbbbaa..',   // torso
+          '...aBBBBa...',   // belt(B)
+          '...bbbbbb...',   // waist
+          '...dd..dd...',   // upper legs
+          '...dd..dd...',   // legs
+          '...dd..dd...',   // lower legs
+          '..ddd..ddd..',   // shins widen
+          '..ooo..ooo..',   // boots
+          '..ooo..ooo..'    // boot soles
         ];
 
         // Frame 1: left foot forward
@@ -127,14 +128,14 @@
           '..hhhhhhHH..',
           '..hhshksHH..',
           '..hhssssHH..',
-          '...ssmss....',
-          '...aaaaaa...',
+          '...ssmsss...',
+          '..aaaaaaa...',
           '..aaAbbAaa..',
           '..aabbbbaa..',
           '..aabbbbaa..',
           '...aBBBBa...',
           '...bbbbbb...',
-          '..dd....dd..',  // legs apart
+          '..dd....dd..',   // legs in stride
           '..dd....dd..',
           '..dd....dd..',
           '..dd....dd..',
@@ -142,15 +143,15 @@
           '.ooo....ooo.'
         ];
 
-        // Attack: sword thrust down
+        // Attack: arm extended with weapon(w)
         var downAtk = [
           '....hhhh....',
           '...hhhhhh...',
           '..hhhhhhHH..',
           '..hhshksHH..',
           '..hhssssHH..',
-          '...ssmss....',
-          '..aaaaaaww..',  // arm extended with weapon(w)
+          '...ssmsss...',
+          '..aaaaaaww..',   // right arm extends with weapon
           '..aaAbbAww..',
           '..aabbbba...',
           '..aabbbba...',
@@ -168,11 +169,11 @@
         var up0 = [
           '....hhhh....',
           '...hhhhhh...',
-          '..hhhhhhhh..',
+          '..hhhhhhhh..',   // back of head, all hair
           '..hhhhhhhh..',
           '..hhhhhhHH..',
-          '...hhhhhH...',
-          '...aaaaaa...',
+          '...hhhhhhH..',
+          '..aaaaaaa...',   // shoulders
           '..aaAaaAaa..',
           '..aabbbbaa..',
           '..aabbbbaa..',
@@ -192,8 +193,8 @@
           '..hhhhhhhh..',
           '..hhhhhhhh..',
           '..hhhhhhHH..',
-          '...hhhhhH...',
-          '...aaaaaa...',
+          '...hhhhhhH..',
+          '..aaaaaaa...',
           '..aaAaaAaa..',
           '..aabbbbaa..',
           '..aabbbbaa..',
@@ -213,7 +214,7 @@
           '..hhhhhhhh..',
           '..hhhhhhhh..',
           '..hhhhhhHH..',
-          '...hhhhhH...',
+          '...hhhhhhH..',
           '..aaaaaaww..',
           '..aaAaaAww..',
           '..aabbbba...',
@@ -233,14 +234,14 @@
           '.....hhhh...',
           '....hhhhhh..',
           '...hhhhhhhH.',
-          '...hhhhkhsH.',  // eye(k) visible, skin(s)
-          '...hhhssssH.',
-          '....ssmss...',
-          '...aaaaaa...',
-          '..aaAbbbba..',
-          '..aabbbbba..',
-          '..aabbbbba..',
-          '...aBBBba...',
+          '...hhshkhsH.',   // profile: skin, eye(k), skin
+          '...hhssssHH.',
+          '....ssmsss..',   // chin
+          '...aaaaaaa..',   // shoulders
+          '..aaAbbbbaa.',
+          '..aabbbbbaa.',
+          '..aabbbbbaa.',
+          '...aBBBBa...',
           '....bbbbb...',
           '....dd.dd...',
           '....dd.dd...',
@@ -254,14 +255,14 @@
           '.....hhhh...',
           '....hhhhhh..',
           '...hhhhhhhH.',
-          '...hhhhkhsH.',
-          '...hhhssssH.',
-          '....ssmss...',
-          '...aaaaaa...',
-          '..aaAbbbba..',
-          '..aabbbbba..',
-          '..aabbbbba..',
-          '...aBBBba...',
+          '...hhshkhsH.',
+          '...hhssssHH.',
+          '....ssmsss..',
+          '...aaaaaaa..',
+          '..aaAbbbbaa.',
+          '..aabbbbbaa.',
+          '..aabbbbbaa.',
+          '...aBBBBa...',
           '....bbbbb...',
           '...dd..dd...',
           '...dd...dd..',
@@ -271,19 +272,19 @@
           '..ooo...ooo.'
         ];
 
-        // Attack right: arm + weapon extended right
+        // Attack right: arm + weapon extended
         var rightAtk = [
           '.....hhhh...',
           '....hhhhhh..',
           '...hhhhhhhH.',
-          '...hhhhkhsH.',
-          '...hhhssssH.',
-          '....ssmss...',
-          '...aaaaaawww',  // weapon extended right
-          '..aaAbbb.www',
+          '...hhshkhsH.',
+          '...hhssssHH.',
+          '....ssmsss..',
+          '...aaaaaawww',   // weapon extended right
+          '..aaAbbbawww',
           '..aabbbba...',
           '..aabbbba...',
-          '...aBBBba...',
+          '...aBBBBa...',
           '....bbbbb...',
           '....dd.dd...',
           '....dd.dd...',
@@ -363,181 +364,181 @@
         S.create(name, 16, 24, function (ctx) { dp(ctx, rows, pal, 0, 0); });
       }
 
-      // Fawks - Innkeeper: burly, apron, brown hair
+      // Fawks - Innkeeper: burly build, white apron over brown tunic, brown hair
       makeNPC('npc_fawks', [
-        '............',
-        '......hhhh..',
-        '.....hhhhhh.',
-        '....ssksskh.',
-        '....ssssss..',
-        '....ssmmss..',
-        '...wwwwwwww.',
-        '...wwoowwww.',
-        '...wwwwwwww.',
-        '...wwwwwww..',
-        '...wwwwwww..',
-        '....wwwww...',
-        '....dd..dd..',
-        '....dd..dd..',
-        '....dd..dd..',
-        '....dd..dd..',
-        '....bb..bb..',
-        '....bb..bb..'
-      ], { h: P.brown, s: P.skin, k: P.darkGray, m: P.darkSkin, o: P.gold, w: P.white, d: P.darkGray, b: P.darkBrown });
-
-      // Helena - Mayor: dignified, blue dress
-      makeNPC('npc_helena', [
-        '............',
-        '....bbbbbb..',
-        '...bbbbbbb..',
-        '...bskskbb..',
-        '...bssssb...',
-        '...bssmsb...',
-        '..uuuuuuuu..',
-        '..uuuuuuuu..',
-        '..uuUuuUuu..',
-        '..uuuuuuuu..',
-        '...uuuuuu...',
-        '...uuuuuu...',
-        '...uuuuuu...',
-        '...uuuuuu...',
-        '....uuuu....',
-        '....uuuu....',
-        '...dd..dd...',
-        '...dd..dd...'
-      ], { b: P.lightBrown, s: P.skin, k: P.darkGray, m: P.darkSkin, u: P.blue, U: P.lightBlue, d: P.darkBrown });
-
-      // Elira Voss - Captain: armored, stern
-      makeNPC('npc_elira', [
-        '............',
-        '....hhhhh...',
-        '...hhhhhhhh.',
-        '...skskh....',
-        '...ssssh....',
-        '...ssms.....',
-        '..aauuuuaa..',
-        '..aauuuuaa..',
-        '..aauUuUaa..',
-        '..aauuuuaa..',
-        '...uuuuuu..',
-        '...uuuuuu..',
-        '...dd..dd...',
-        '...dd..dd...',
-        '...dd..dd...',
-        '...dd..dd...',
-        '...aa..aa...',
-        '...aa..aa...'
-      ], { h: P.brown, s: P.skin, k: P.darkGray, m: P.darkSkin, a: P.gray, u: P.blue, U: P.lightBlue, d: P.darkGray });
-
-      // Brother Soren - Monk: robed, mysterious
-      makeNPC('npc_soren', [
-        '............',
-        '....gggggg..',
-        '...gggggggg.',
-        '...gkgkgg...',
-        '...ggsggg...',
-        '...ggmggg...',
-        '..rrbbbbbb..',
-        '..rrbbbbbb..',
-        '..rrbbBBbb..',
-        '..rrbbbbbb..',
-        '...bbbbbb...',
-        '...bbbbbb...',
-        '...bbbbbb...',
-        '....bbbb....',
-        '....dd.dd...',
-        '....dd.dd...',
-        '....bb.bb...',
-        '....bb.bb...'
-      ], { g: P.gray, k: P.darkYellow, s: P.skin, m: P.darkSkin, r: P.brown, b: P.brown, B: P.darkBrown, d: P.darkBrown });
-
-      // Braxon - Merchant
-      makeNPC('npc_braxon', [
-        '............',
-        '....bbbbbb..',
-        '...bbbbbbbb.',
-        '...ssksskb..',
-        '...ssssss...',
-        '...ssmmss...',
-        '..llssssssll',
-        '..llssssll..',
-        '..llsSsSll..',
-        '...ssssss...',
-        '...ssssss...',
-        '....ssss....',
-        '...dd..dd...',
-        '...dd..dd...',
-        '...dd..dd...',
-        '...dd..dd...',
-        '...bb..bb...',
-        '...bb..bb...'
-      ], { b: P.brown, s: P.skin, S: P.gold, k: P.darkGray, m: P.darkSkin, l: P.lightBrown, d: P.darkGray });
-
-      // Que'Rubra - Forest spirit/treant
-      makeNPC('npc_querubra', [
-        '..ggGgGggg..',
-        '..gggggggg..',
-        '.ggggggggg..',
-        '.gGggGgggg..',
-        '...bbbbbb...',
-        '...bybbby...',
-        '...bbbbbb...',
-        '...bbmbbb...',
-        '..bbbbbbb...',
-        '..bbbBbbb...',
-        '...bbbbbb...',
-        '...bbbbbb...',
-        '....bbbb....',
-        '....bRRb....',
-        '....bRRb....',
-        '....bRRb....',
-        '....bRRb....',
-        '....bRRb....'
-      ], { g: P.green, G: P.lightGreen, b: P.brown, B: P.darkBrown, y: P.gold, m: P.darkBrown, R: P.darkBrown });
-
-      // Rorik - Blacksmith: stocky, red beard
-      makeNPC('npc_rorik', [
-        '............',
-        '....aaaa....',
-        '...aaaaaa...',
-        '...sksk.a...',
-        '...ssss.....',
-        '...rrrr.....',
-        '...rrrrrr...',
-        '..aarrrrraa.',
-        '..aaaAaAaa..',
-        '..aaaaaaaa..',
-        '...aaaaaa...',
-        '...aaaaaa...',
-        '...dd..dd...',
-        '...dd..dd...',
-        '...dd..dd...',
-        '...dd..dd...',
-        '..bbb..bbb..',
-        '..bbb..bbb..'
-      ], { a: P.gray, A: P.lightGray, s: P.skin, k: P.darkGray, r: P.red, d: P.darkGray, b: P.darkBrown });
-
-      // Svana - Dwarven refugee woman, amber clothes, braided auburn hair
-      makeNPC('npc_svana', [
         '............',
         '....hhhh....',
         '...hhhhhh...',
-        '...hskhsk...',
-        '...hssss.h..',
-        '...hssss.h..',
-        '....cccc....',
-        '...cccccc...',
-        '..aaccccaa..',
-        '..aaccccaa..',
-        '...cccccc...',
-        '...cccccc...',
+        '...hskskh...',   // face: hair frames skin, eyes (k)
+        '...hssssh...',
+        '....ssmss...',   // chin, mouth shadow
+        '...tttttt...',   // shoulders (brown tunic)
+        '..ttwwwwtt..',   // apron (w) over tunic (t)
+        '..ttwwwwtt..',
+        '..ttwwowtt..',   // apron pocket detail (o=gold)
+        '...twwwwt...',
+        '...tttttt...',   // waist
+        '...dd..dd...',   // legs
         '...dd..dd...',
         '...dd..dd...',
         '...dd..dd...',
-        '...dd..dd...',
-        '..bbb..bbb..',
+        '..bbb..bbb..',   // boots
         '..bbb..bbb..'
-      ], { h: P.darkBrown, s: P.skin, k: P.darkGray, c: '#d0a060', a: P.gray, d: P.darkGray, b: P.brown });
+      ], { h: P.brown, s: P.skin, k: P.darkGray, m: P.darkSkin, o: P.gold, w: P.white, t: P.lightBrown, d: P.darkGray, b: P.darkBrown });
+
+      // Helena - Mayor: dignified, upswept brown hair, elegant blue dress
+      makeNPC('npc_helena', [
+        '............',
+        '....hhhh....',
+        '...hhhhhh...',
+        '...hskskh...',   // face framed by hair
+        '...hssssh...',
+        '....ssmss...',   // chin
+        '...uuuuuu...',   // shoulders (blue dress)
+        '..uuuuuuuu..',   // upper bodice
+        '..uuUuuUuu..',   // dress detail (U=light embroidery)
+        '..uuuuuuuu..',
+        '...uuuuuu...',   // waist
+        '...uuuuuu...',   // skirt begins
+        '..uuuuuuuu..',   // skirt widens
+        '..uuuuuuuu..',
+        '..uuuuuuuu..',
+        '...uuuuuu...',
+        '....dd.dd...',   // shoes peek out
+        '....dd.dd...'
+      ], { h: P.lightBrown, s: P.skin, k: P.darkGray, m: P.darkSkin, u: P.blue, U: P.lightBlue, d: P.darkBrown });
+
+      // Elira Voss - Town Guard Captain: short brown hair, gray armor over blue tunic
+      makeNPC('npc_elira', [
+        '............',
+        '....hhhh....',
+        '...hhhhhh...',
+        '...hskskh...',   // stern face
+        '...hssssh...',
+        '....ssmss...',
+        '..aauuuuaa..',   // armored shoulders (a=gray) over tunic (u=blue)
+        '..aauuuuaa..',
+        '..aauUuUaa..',   // chest plate detail
+        '..aauuuuaa..',
+        '...auuuua...',   // armored waist
+        '...uuuuuu...',   // tunic below armor
+        '...dd..dd...',   // legs
+        '...dd..dd...',
+        '...dd..dd...',
+        '...dd..dd...',
+        '...aa..aa...',   // armored boots
+        '...aa..aa...'
+      ], { h: P.brown, s: P.skin, k: P.darkGray, m: P.darkSkin, a: P.gray, u: P.blue, U: P.lightBlue, d: P.darkGray });
+
+      // Brother Soren - Monk: hooded brown robe, shadowed face, golden eyes
+      makeNPC('npc_soren', [
+        '............',
+        '....rrrr....',
+        '...rrrrrr...',   // hood
+        '...rrrrrrr..',
+        '...rkskrr...',   // shadowed face under hood (k=gold eyes)
+        '...rssmrr...',
+        '..rrbbbbrr..',   // robe shoulders
+        '..rrbbbbrr..',
+        '..rrbBBbrr..',   // rope belt detail (B=dark)
+        '...rbbbbr...',
+        '...bbbbbb...',   // robe body
+        '...bbbbbb...',
+        '...bbbbbb...',
+        '..bbbbbbbb..',   // robe widens at hem
+        '..bbbbbbbb..',
+        '...bbbbbb...',
+        '....dd.dd...',   // sandals peek out
+        '....dd.dd...'
+      ], { r: P.brown, k: P.darkYellow, s: P.skin, m: P.darkSkin, b: P.brown, B: P.darkBrown, d: P.darkBrown });
+
+      // Braxon - Blacksmith: stocky, leather apron, bald with thick arms
+      makeNPC('npc_braxon', [
+        '............',
+        '....bbbb....',
+        '...bbbbbb...',   // bald head (b=brown/tanned)
+        '...bskskb...',   // eyes
+        '...bssssb...',
+        '....ssmss...',   // chin
+        '..llaaaall..',   // beefy arms (l=light brown skin), apron (a)
+        '..llaaaall..',
+        '..llaaGall..',   // apron with gold buckle
+        '...laaaal...',
+        '...aaaaaa...',   // apron lower
+        '...aaaaaa...',
+        '...dd..dd...',   // sturdy legs
+        '...dd..dd...',
+        '...dd..dd...',
+        '...dd..dd...',
+        '..kkk..kkk..',   // heavy boots
+        '..kkk..kkk..'
+      ], { b: P.lightBrown, s: P.skin, k: P.darkGray, m: P.darkSkin, l: P.skin, a: P.darkBrown, G: P.gold, d: P.darkGray });
+
+      // Que'Rubra - Forest spirit/treant: living tree with face, leafy crown, roots for legs
+      makeNPC('npc_querubra', [
+        '..gGgGgGgG..',   // leafy canopy crown
+        '..ggGggGgg..',
+        '.gGggggggGg.',
+        '.ggGggggGgg.',   // leaves connect to trunk below
+        '...bbbbbb...',   // trunk/face area
+        '...bybbby...',   // golden eyes (y)
+        '...bbbbbb...',
+        '...bbbmbb...',   // mouth (m=dark knot)
+        '..bbbbbbbb..',   // wide trunk body
+        '..bbbBBbbb..',   // bark detail (B=dark)
+        '...bbbbbb...',
+        '...bbbbbb...',
+        '...bbbbbb...',   // trunk narrows
+        '..RRbbbbRR..',   // root-legs splay out (R=dark brown)
+        '..RR.bb.RR..',
+        '.RR..bb..RR.',
+        '.RR......RR.',
+        'RR........RR'
+      ], { g: P.green, G: P.lightGreen, b: P.brown, B: P.darkBrown, y: P.gold, m: P.darkBrown, R: P.darkBrown });
+
+      // Rorik - Dwarven prisoner: stocky, gray tunic, big red beard, shackled look
+      makeNPC('npc_rorik', [
+        '............',
+        '....hhhh....',
+        '...hhhhhh...',   // messy red-brown hair
+        '...hskskh...',   // face
+        '...hssssh...',
+        '....rrrr....',   // big red beard
+        '...rrrrrr...',   // beard continues into torso
+        '..aarrrrraa.',   // arms (a=gray tunic) holding beard
+        '..aaaaaAaa..',   // torso, torn tunic detail (A=light)
+        '..aaaaaaaa..',
+        '...aaaaaa...',   // waist
+        '...aaaaaa...',
+        '...dd..dd...',   // legs
+        '...dd..dd...',
+        '...dd..dd...',
+        '...dd..dd...',
+        '..bbb..bbb..',   // boots
+        '..bbb..bbb..'
+      ], { h: P.darkBrown, a: P.gray, A: P.lightGray, s: P.skin, k: P.darkGray, r: P.red, d: P.darkGray, b: P.darkBrown });
+
+      // Svana - Dwarven refugee: auburn braids, amber dress with gray shawl
+      makeNPC('npc_svana', [
+        '............',
+        '....hhhh....',
+        '...hhhhhh...',   // auburn hair
+        '...hskskh...',   // face
+        '...hssssh...',
+        '..hhssmshh..',   // braids hang by cheeks (h on sides)
+        '..aaccccaa..',   // gray shawl (a) over amber dress (c)
+        '..aaccccaa..',
+        '..aaccccaa..',
+        '...cccccc...',   // dress body
+        '...cccccc...',
+        '...cccccc...',
+        '..cccccccc..',   // skirt widens
+        '..cccccccc..',
+        '..cccccccc..',
+        '...cccccc...',
+        '....dd.dd...',   // shoes
+        '....dd.dd...'
+      ], { h: P.darkBrown, s: P.skin, k: P.darkGray, m: P.darkSkin, c: '#d0a060', a: P.gray, d: P.darkGray });
 
       // NPC aliases
       S.cache['npc_elira_voss'] = S.cache['npc_elira'];
@@ -549,140 +550,153 @@
       // =================================================================
 
       // --- Goblin ---
-      var gPal = { g: P.green, G: P.darkGreen, r: P.red, R: P.darkRed, b: P.brown, B: P.darkBrown, k: P.black, w: P.white, y: P.gold };
+      // Small green-skinned creature with red eyes, loincloth, holding a club.
+      // 12 columns wide within a 16x16 canvas (offset by 2).
+      var gPal = { g: P.green, G: P.darkGreen, r: P.red, R: P.darkRed, b: P.brown, B: P.darkBrown, k: P.black, w: P.white, y: P.gold, t: P.tan };
 
       // Goblin facing down, frame 0
       S.create('goblin_0', 16, 16, function (ctx) {
         dp(ctx, [
-          '....gGGg....',
-          '...gGGGGg...',
-          '...grrgrg...',  // red eyes
-          '...gggGgg...',
-          '..gbggggbg..',  // body, arms
-          '..gbggggbg..',
-          '...gggggg...',
-          '...gBBBBg...',  // belt
+          '....GGGG....',
+          '...GgGGgG...',
+          '...GrGGrG...',   // red eyes in dark face
+          '...GgggGG...',
+          '....gggg....',   // neck
+          '..bgggggb...',   // torso with arms
+          '..bgggggb...',
+          '...tBBBt....',   // belt/loincloth
+          '...tgggt....',
+          '....gg.gg...',   // legs connected to torso
           '....gg.gg...',
-          '....gg.gg...',  // legs
-          '...BBB.BBB..',  // boots
+          '...BBB.BBB..',   // boots
         ], gPal, 2, 2);
-        // weapon: small club
+        // weapon: small club in right hand
         ctx.fillStyle = P.brown;
-        ctx.fillRect(13, 3, 2, 7);
+        ctx.fillRect(13, 5, 2, 6);
         ctx.fillStyle = P.darkBrown;
-        ctx.fillRect(13, 2, 2, 2);
+        ctx.fillRect(13, 3, 2, 3);
       });
 
       // Goblin frame 1 (walking)
       S.create('goblin_1', 16, 16, function (ctx) {
         dp(ctx, [
-          '....gGGg....',
-          '...gGGGGg...',
-          '...grrgrg...',
-          '...gggGgg...',
-          '..gbggggbg..',
-          '..gbggggbg..',
-          '...gggggg...',
-          '...gBBBBg...',
+          '....GGGG....',
+          '...GgGGgG...',
+          '...GrGGrG...',
+          '...GgggGG...',
+          '....gggg....',
+          '..bgggggb...',
+          '..bgggggb...',
+          '...tBBBt....',
+          '...tgggt....',
+          '...gg...gg..',   // legs apart in stride
           '...gg...gg..',
-          '..gg....gg..',  // legs apart
           '..BBB..BBB..',
         ], gPal, 2, 2);
         ctx.fillStyle = P.brown;
-        ctx.fillRect(13, 3, 2, 7);
+        ctx.fillRect(13, 5, 2, 6);
         ctx.fillStyle = P.darkBrown;
-        ctx.fillRect(13, 2, 2, 2);
+        ctx.fillRect(13, 3, 2, 3);
       });
 
       // Goblin attack
       S.create('goblin_atk', 16, 16, function (ctx) {
         dp(ctx, [
-          '....gGGg....',
-          '...gGGGGg...',
-          '...grrgrg...',
-          '...gggGgg...',
-          '..gbggggbg..',
-          '..gbggggbg..',
-          '...gggggg...',
-          '...gBBBBg...',
+          '....GGGG....',
+          '...GgGGgG...',
+          '...GrGGrG...',
+          '...GgggGG...',
+          '....gggg....',
+          '..bgggggb...',
+          '..bgggggb...',
+          '...tBBBt....',
+          '...tgggt....',
           '....gg.gg...',
           '....gg.gg...',
           '...BBB.BBB..',
         ], gPal, 2, 2);
-        // weapon swung forward
+        // club swung overhead
         ctx.fillStyle = P.brown;
-        ctx.fillRect(13, 0, 2, 10);
+        ctx.fillRect(13, 1, 2, 8);
         ctx.fillStyle = P.darkBrown;
         ctx.fillRect(12, 0, 3, 3);
       });
 
-      // --- Spinecleaver (larger goblin with blade) ---
-      var sPal = { g: P.darkGreen, G: P.black, r: P.red, b: P.darkBrown, w: P.white, k: P.darkGray, B: P.darkBrown };
+      // --- Spinecleaver (larger goblin warrior with blade) ---
+      // Bulkier goblin with war paint, armor plates, and a large cleaver.
+      var sPal = { g: P.darkGreen, G: P.black, r: P.red, b: P.darkBrown, w: P.white, k: P.darkGray, B: P.darkBrown, a: P.gray };
 
       S.create('spinecleaver_0', 16, 16, function (ctx) {
         dp(ctx, [
-          '....gGGg....',
-          '...gGGGGg...',
-          '..wgrrgrg...',  // white war paint
-          '..wgggGggw..',
-          '..kbggggbk..',  // armor trim(k)
-          '..kbggggbk..',
-          '...gggggg...',
-          '...gBBBBg...',
+          '....GGGG....',
+          '...GgGGgG...',
+          '..wGrGGrGw..',   // white war paint on cheeks
+          '...GgggGG...',
+          '....gggg....',
+          '..agaaaaga..',   // armored torso (gray plates)
+          '..agaaaaga..',
+          '...aBBBa....',   // belt
+          '...aggga....',
+          '....gg.gg...',   // legs
           '....gg.gg...',
-          '....gg.gg...',
-          '...kkk.kkk..',
+          '...kkk.kkk..',   // armored boots
         ], sPal, 2, 2);
-        // Large blade
+        // Large cleaver blade
         ctx.fillStyle = P.lightGray;
-        ctx.fillRect(14, 1, 2, 9);
+        ctx.fillRect(14, 2, 2, 8);
         ctx.fillStyle = P.white;
-        ctx.fillRect(15, 2, 1, 7);
+        ctx.fillRect(15, 3, 1, 6);
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(14, 9, 2, 2);
       });
 
       S.create('spinecleaver_1', 16, 16, function (ctx) {
         dp(ctx, [
-          '....gGGg....',
-          '...gGGGGg...',
-          '..wgrrgrg...',
-          '..wgggGggw..',
-          '..kbggggbk..',
-          '..kbggggbk..',
-          '...gggggg...',
-          '...gBBBBg...',
+          '....GGGG....',
+          '...GgGGgG...',
+          '..wGrGGrGw..',
+          '...GgggGG...',
+          '....gggg....',
+          '..agaaaaga..',
+          '..agaaaaga..',
+          '...aBBBa....',
+          '...aggga....',
+          '...gg...gg..',   // stride
           '...gg...gg..',
-          '..gg....gg..',
           '..kkk..kkk..',
         ], sPal, 2, 2);
         ctx.fillStyle = P.lightGray;
-        ctx.fillRect(14, 1, 2, 9);
+        ctx.fillRect(14, 2, 2, 8);
         ctx.fillStyle = P.white;
-        ctx.fillRect(15, 2, 1, 7);
+        ctx.fillRect(15, 3, 1, 6);
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(14, 9, 2, 2);
       });
 
       S.create('spinecleaver_atk', 16, 16, function (ctx) {
         dp(ctx, [
-          '....gGGg....',
-          '...gGGGGg...',
-          '..wgrrgrg...',
-          '..wgggGggw..',
-          '..kbggggbk..',
-          '..kbggggbk..',
-          '...gggggg...',
-          '...gBBBBg...',
+          '....GGGG....',
+          '...GgGGgG...',
+          '..wGrGGrGw..',
+          '...GgggGG...',
+          '....gggg....',
+          '..agaaaaga..',
+          '..agaaaaga..',
+          '...aBBBa....',
+          '...aggga....',
           '....gg.gg...',
           '....gg.gg...',
           '...kkk.kkk..',
         ], sPal, 2, 2);
-        // Blade swung overhead
+        // Blade swung horizontally
         ctx.fillStyle = P.lightGray;
-        ctx.fillRect(13, 0, 3, 5);
+        ctx.fillRect(12, 1, 4, 3);
         ctx.fillStyle = P.white;
-        ctx.fillRect(14, 0, 1, 4);
-        // Slash arc effect
-        ctx.globalAlpha = 0.4;
+        ctx.fillRect(13, 1, 2, 2);
+        // Slash arc
+        ctx.globalAlpha = 0.3;
         ctx.fillStyle = P.white;
-        ctx.fillRect(11, 0, 5, 2);
+        ctx.fillRect(10, 0, 6, 1);
         ctx.globalAlpha = 1;
       });
 
@@ -694,106 +708,123 @@
       // =================================================================
       // BOSS SPRITES (32x32 - Queen Bargnot)
       // =================================================================
+      //
+      // Bargnot is a large goblin queen: jagged crown, heavy red robes,
+      // green skin, red eyes, carrying a scepter. 32x32 canvas.
+      // Every body part is connected to form a solid silhouette.
 
       var bPal = {
-        g: P.darkGreen, G: P.black, r: P.red, R: P.darkRed,
-        c: P.gray, i: P.lightGray, w: P.white, k: P.darkGray,
-        y: P.gold, p: P.purple
+        g: P.darkGreen, G: '#1a3a1a', r: P.red, R: P.darkRed,
+        c: P.gray, C: P.lightGray, w: P.white, k: P.darkGray,
+        y: P.gold, Y: P.darkYellow, s: P.skin, p: P.purple,
+        n: P.black
       };
 
       var bossBody = [
-        '........cccccccc........',
-        '......cciicciicc........',
-        '......cciicciicc........',
-        '.....gggggggggggg......',
-        '....gggggggggggggg.....',
-        '....gGrrGggGrrGgg......',
-        '....gggggggggggggg.....',
-        '....ggggggwwgggggg.....',
-        '...RRRRggggggggRRRR....',
-        '...RRkRRRRRRRRRkRR.....',
-        '...RRkRRRRRRRRRkRR.....',
-        '...RRRRRRRRRRRRRkRR....',
-        '....RRRRRRRRRRRRRR.....',
-        '....RRRRRRRRRRRRRR.....',
-        '....RRRRRRRRRRRR.......',
-        '....gggg....gggg........',
-        '....gggg....gggg........',
-        '....kkkk....kkkk........'
+        '..........yy.y.yy.........',
+        '.........yyYyyYyy..........',
+        '........yyyYYYyyy..........',
+        '.......ggggggggggg.........',
+        '......gggggggggggggg.......',
+        '......gGrrGGGGrrGgg.......',
+        '......gggggggggggggg.......',
+        '......ggGGggwwGGgggg.......',
+        '.....RRggggggggggggRR.....',
+        '....RRRRRRRRRRRRRRRRRk....',
+        '....RRkRRRRRRRRRRRkRRk....',
+        '....RRRRRRyRRyRRRRRRRk....',
+        '.....RRRRRRRRRRRRRRRR.....',
+        '.....RRRRRRRRRRRRRRR......',
+        '.....RRRRRRRRRRRRRRk.....',
+        '......RRRRRggRRRRRR......',
+        '......gggggggggggggg......',
+        '.......gggg..gggg.........',
+        '.......gggg..gggg.........',
+        '.......kkkk..kkkk.........'
       ];
 
       function makeBoss(name, fn) {
         S.create(name, 32, 32, function (ctx) {
-          dp(ctx, bossBody, bPal, 4, 2);
+          dp(ctx, bossBody, bPal, 3, 1);
           fn(ctx);
         });
       }
 
       // Idle frame 0
       makeBoss('bargnot_0', function (ctx) {
-        // Scepter
-        ctx.fillStyle = P.red;
-        ctx.fillRect(26, 8, 2, 14);
+        // Scepter in right hand
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(26, 8, 2, 16);
         ctx.fillStyle = P.gold;
-        ctx.fillRect(25, 6, 4, 3);
+        ctx.fillRect(25, 5, 4, 4);
         ctx.fillStyle = P.red;
-        ctx.fillRect(26, 6, 2, 1);
+        ctx.fillRect(26, 6, 2, 2);
       });
 
-      // Idle frame 1 (slight leg shift)
+      // Idle frame 1 (slight sway)
       makeBoss('bargnot_1', function (ctx) {
-        ctx.fillStyle = P.red;
-        ctx.fillRect(26, 8, 2, 14);
+        // Scepter
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(26, 9, 2, 15);
         ctx.fillStyle = P.gold;
-        ctx.fillRect(25, 6, 4, 3);
+        ctx.fillRect(25, 6, 4, 4);
         ctx.fillStyle = P.red;
-        ctx.fillRect(26, 6, 2, 1);
-        // Shifted legs
-        ctx.fillStyle = P.darkGreen;
-        ctx.fillRect(8, 28, 4, 4);
-        ctx.fillRect(18, 28, 4, 4);
+        ctx.fillRect(26, 7, 2, 2);
       });
 
-      // Attack: scepter thrust
+      // Attack: scepter thrust overhead
       makeBoss('bargnot_atk', function (ctx) {
-        ctx.fillStyle = P.red;
-        ctx.fillRect(26, 2, 2, 18);
+        // Scepter raised high
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(26, 1, 2, 18);
         ctx.fillStyle = P.gold;
         ctx.fillRect(25, 0, 4, 3);
-        // Attack flash
-        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = P.red;
+        ctx.fillRect(26, 0, 2, 1);
+        // Attack energy glow
+        ctx.globalAlpha = 0.4;
         ctx.fillStyle = P.red;
         ctx.fillRect(23, 0, 8, 5);
         ctx.globalAlpha = 1;
       });
 
-      // Rage phase (phase 2)
+      // Rage phase (phase 2) - red glow aura
       makeBoss('bargnot_rage', function (ctx) {
-        ctx.fillStyle = P.red;
-        ctx.fillRect(26, 8, 2, 14);
+        // Scepter
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(26, 8, 2, 16);
         ctx.fillStyle = P.gold;
-        ctx.fillRect(25, 6, 4, 3);
-        // Rage particles
-        for (var i = 0; i < 16; i++) {
+        ctx.fillRect(25, 5, 4, 4);
+        ctx.fillStyle = P.red;
+        ctx.fillRect(26, 6, 2, 2);
+        // Rage aura - scattered red/gold embers around body
+        var embers = [[5,4],[24,6],[8,20],[22,18],[14,2],[18,22],[3,12],[27,14]];
+        for (var i = 0; i < embers.length; i++) {
           ctx.fillStyle = i % 2 ? P.red : P.gold;
-          ctx.fillRect(rn(2, 29), rn(2, 29), 2, 2);
+          ctx.fillRect(embers[i][0], embers[i][1], 2, 2);
         }
       });
 
-      // Shadow phase (phase 3)
+      // Shadow phase (phase 3) - purple recolor with shadow wisps
       S.create('bargnot_shadow', 32, 32, function (ctx) {
         var sp = {
           g: P.darkPurple, G: P.black, r: P.purple, R: P.darkPurple,
-          c: P.gray, i: P.lightGray, w: P.lightPurple, k: P.darkGray
+          c: P.gray, C: P.lightGray, w: P.lightPurple, k: P.darkGray,
+          y: P.purple, Y: P.darkPurple, s: P.paleSkin, p: P.lightPurple,
+          n: P.black
         };
-        dp(ctx, bossBody, sp, 4, 2);
+        dp(ctx, bossBody, sp, 3, 1);
+        // Shadow scepter
+        ctx.fillStyle = P.darkPurple;
+        ctx.fillRect(26, 8, 2, 16);
         ctx.fillStyle = P.purple;
-        ctx.fillRect(26, 8, 2, 14);
-        // Shadow wisps
-        for (var i = 0; i < 10; i++) {
+        ctx.fillRect(25, 5, 4, 4);
+        // Shadow tendrils rising from body
+        var tendrils = [[8,0,2],[14,0,3],[20,0,2],[11,2,1],[17,1,2],[6,3,1],[23,2,1]];
+        for (var i = 0; i < tendrils.length; i++) {
           ctx.fillStyle = P.lightPurple;
-          ctx.globalAlpha = 0.3 + Math.random() * 0.4;
-          ctx.fillRect(rn(2, 29), rn(2, 29), 2, 3);
+          ctx.globalAlpha = 0.35;
+          ctx.fillRect(tendrils[i][0], tendrils[i][1], 2, tendrils[i][2]);
         }
         ctx.globalAlpha = 1;
       });

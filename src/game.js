@@ -3246,14 +3246,6 @@
             });
         }
 
-        // Firework confetti bursts
-        if (Game.victoryDialogueDone && Game.frame % 90 === 0) {
-            var fx = Utils.randInt(40, W - 40);
-            var fy = Utils.randInt(20, H / 2);
-            Particles.confetti(fx, fy, 15);
-            Audio.play('fanfare');
-        }
-
         Particles.update();
 
         // Scroll credits

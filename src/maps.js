@@ -162,7 +162,7 @@
         },
         npcs: [
             { id: 'npc_fawks',        sprite: 'npc_fawks',        x: 3,  y: 2,  dialogue: 'fawks_greeting' },
-            { id: 'npc_mayor_helena', sprite: 'npc_mayor_helena', x: 8,  y: 6,  dialogue: 'helena_greeting' },
+            { id: 'npc_mayor_helena', sprite: 'npc_mayor_helena', x: 4,  y: 8,  dialogue: 'helena_greeting' },
             { id: 'npc_elira_voss',   sprite: 'npc_elira_voss',   x: 12, y: 8,  dialogue: 'elira_greeting' },
         ],
         enemies: [],

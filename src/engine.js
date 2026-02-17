@@ -1049,23 +1049,27 @@
 
       ctx.fillStyle = color;
 
+      // Snap pixel dimensions to integers to prevent sub-pixel blur
+      var pxW = Math.ceil(size);
+      var pxH = Math.ceil(size);
+
       var str = text.toUpperCase();
       for (var i = 0; i < str.length; i++) {
         var ch = str[i];
         var glyph = FONT[ch];
         if (!glyph) continue; // skip unknown characters
 
-        var cx = x + i * CHAR_W * size;
+        var cx = Math.round(x + i * CHAR_W * size);
         for (var row = 0; row < 7; row++) {
           var bits = glyph[row];
           for (var col = 0; col < 5; col++) {
             // Bit 4 is leftmost pixel, bit 0 is rightmost
             if (bits & (1 << (4 - col))) {
               ctx.fillRect(
-                cx + col * size,
-                y + row * size,
-                size,
-                size
+                Math.round(cx + col * size),
+                Math.round(y + row * size),
+                pxW,
+                pxH
               );
             }
           }

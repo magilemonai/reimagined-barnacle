@@ -61,6 +61,13 @@
       { speaker: 'Braxon', text: 'Goblin armor is weak at the joints. Bring me their teeth and I can forge you something useful.' }
     ],
 
+    braxon_greeting_daxon: [
+      { speaker: 'Braxon', text: 'Daxon! My boy! You have returned to us at last.' },
+      { speaker: 'Daxon', text: 'Father! I heard the goblins have taken the temple. I came as fast as I could.' },
+      { speaker: 'Braxon', text: 'Aye, and they have poor Rorik prisoner in there too. Be careful, son.' },
+      { speaker: 'Braxon', text: 'Here - take what you need from the forge. I will not let you face those monsters unarmed.' }
+    ],
+
     soren_greeting: [
       { speaker: 'Soren', text: 'Blessings of the spirits upon you. I tend to the dwarven refugees here.' },
       { speaker: 'Soren', text: 'They fled from the goblins in the mountains. The Temple of Nitriti was once sacred...' },
@@ -173,10 +180,10 @@
     ],
 
     ending_final: [
-      { speaker: '', text: 'With Queen Bargnot defeated, peace returns to Ebon Vale... But the Bonemoon prophecy looms.' },
-      { speaker: '', text: 'An infinite sea of darkness awaits. Never again shall Valisar see the stars...' },
-      { speaker: '', text: 'The heroes must grow stronger. For the true darkness has yet to come.' },
-      { speaker: '', text: 'VALISAR: SHADOWS OF THE ELDSPYRE. Thank you for playing!' }
+      { speaker: '', text: 'With Queen Bargnot defeated, peace returns to Ebon Vale... But the Bonemoon prophecy looms.', scene: 'vale_peace' },
+      { speaker: '', text: 'An infinite sea of darkness awaits. Never again shall Valisar see the stars...', scene: 'bonemoon' },
+      { speaker: '', text: 'The heroes must grow stronger. For the true darkness has yet to come.', scene: 'heroes_path' },
+      { speaker: '', text: 'VALISAR: SHADOWS OF THE ELDSPYRE. Thank you for playing!', scene: 'title_card' }
     ],
 
     // -----------------------------------------------------------------

@@ -324,9 +324,9 @@
         w: P.lightGray   // weapon
       });
 
-      // --- LUIGI: Purple warlock, black hair, teal accents ---
+      // --- LUIGI: Purple warlock, old man with grey hair, teal accents ---
       makeCharacter('luigi', {
-        h: P.black,
+        h: P.gray,
         H: P.darkGray,
         s: P.paleSkin,
         k: P.teal,       // glowing eyes
@@ -340,10 +340,10 @@
         w: P.teal
       });
 
-      // --- LIRIELLE: Green druid, silver hair, nature accents ---
+      // --- LIRIELLE: Green druid, blonde hair, nature accents ---
       makeCharacter('lirielle', {
-        h: P.lightGray,
-        H: P.gray,
+        h: P.gold,
+        H: '#a08830',
         s: P.paleSkin,
         k: P.darkGreen,  // green eyes
         m: P.darkSkin,

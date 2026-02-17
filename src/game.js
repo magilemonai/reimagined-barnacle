@@ -519,9 +519,13 @@
                             // Return visits go straight to shop
                             openShop();
                         } else {
-                            // First visit: show greeting dialogue, then open shop
+                            // First visit: character-specific greeting, then open shop
                             npc.interacted = true;
-                            Dialogue.start(npc.dialogueId, function () {
+                            var braxonDialogue = npc.dialogueId;
+                            if (Game.player && Game.player.characterId === 'daxon' && window.DialogueData['braxon_greeting_daxon']) {
+                                braxonDialogue = 'braxon_greeting_daxon';
+                            }
+                            Dialogue.start(braxonDialogue, function () {
                                 openShop();
                             });
                             Audio.play('select');
@@ -3327,6 +3331,244 @@
         eldspyre: drawEpilogueEldspyre
     };
 
+    // -----------------------------------------------------------------
+    // Victory / ending_final scene renderers
+    // -----------------------------------------------------------------
+
+    function drawVictoryValePeace(ctx) {
+        // Peaceful night sky over Ebon Vale - warm lights in windows
+        ctx.fillStyle = '#0a0a1a';
+        ctx.fillRect(0, 0, W, 50);
+        ctx.fillStyle = '#0c0c22';
+        ctx.fillRect(0, 50, W, 20);
+        ctx.fillStyle = '#101830';
+        ctx.fillRect(0, 70, W, 15);
+
+        // Stars
+        var peaceStars = [[15,8],[40,20],[70,5],[100,18],[135,10],[170,22],[200,6],[230,14],[55,30],[160,35],[245,25],[25,38],[110,32],[190,40]];
+        for (var ps = 0; ps < peaceStars.length; ps++) {
+            ctx.fillStyle = 'rgba(255,255,255,' + (0.3 + Math.sin(Game.frame * 0.03 + ps * 2) * 0.2) + ')';
+            ctx.fillRect(peaceStars[ps][0], peaceStars[ps][1], 1, 1);
+        }
+
+        // Ground
+        ctx.fillStyle = '#0c1a0c';
+        ctx.fillRect(0, 85, W, 75);
+
+        // Left building silhouette
+        ctx.fillStyle = '#0a0a14';
+        ctx.fillRect(20, 60, 40, 25);
+        ctx.fillRect(15, 55, 50, 6);  // roof
+        // Window glow
+        ctx.fillStyle = 'rgba(255,180,80,0.5)';
+        ctx.fillRect(28, 68, 4, 5);
+        ctx.fillRect(44, 68, 4, 5);
+        // Warm light spill
+        ctx.fillStyle = 'rgba(255,180,80,0.1)';
+        ctx.fillRect(26, 74, 8, 11);
+        ctx.fillRect(42, 74, 8, 11);
+
+        // Center building (tavern)
+        ctx.fillStyle = '#0a0a14';
+        ctx.fillRect(95, 55, 55, 30);
+        ctx.fillRect(90, 50, 65, 6);
+        // Windows
+        ctx.fillStyle = 'rgba(255,200,100,0.6)';
+        ctx.fillRect(103, 63, 5, 6);
+        ctx.fillRect(118, 63, 5, 6);
+        ctx.fillRect(133, 63, 5, 6);
+        // Door glow
+        ctx.fillStyle = 'rgba(255,200,100,0.3)';
+        ctx.fillRect(118, 72, 8, 13);
+
+        // Right building
+        ctx.fillStyle = '#0a0a14';
+        ctx.fillRect(185, 62, 45, 23);
+        ctx.fillRect(180, 57, 55, 6);
+        ctx.fillStyle = 'rgba(255,180,80,0.4)';
+        ctx.fillRect(193, 70, 4, 5);
+        ctx.fillRect(213, 70, 4, 5);
+        ctx.fillStyle = 'rgba(255,180,80,0.1)';
+        ctx.fillRect(191, 76, 8, 9);
+
+        // Well silhouette in center
+        ctx.fillStyle = '#080810';
+        ctx.fillRect(122, 88, 10, 6);
+        ctx.fillRect(120, 87, 14, 2);
+
+        // Path
+        ctx.fillStyle = '#141a14';
+        ctx.fillRect(115, 85, 20, 75);
+
+        // Tiny figure near the tavern (peaceful NPC)
+        ctx.fillStyle = '#0e0e18';
+        ctx.fillRect(140, 86, 3, 5);
+    }
+
+    function drawVictoryBonemoon(ctx) {
+        // Ominous dark sky with the Bonemoon - a sickly pale moon
+        ctx.fillStyle = '#020208';
+        ctx.fillRect(0, 0, W, H);
+
+        // Subtle dark purple clouds
+        ctx.fillStyle = 'rgba(30,10,40,0.5)';
+        ctx.fillRect(0, 30, 80, 8);
+        ctx.fillRect(100, 20, 60, 6);
+        ctx.fillRect(180, 35, 76, 7);
+        ctx.fillRect(30, 50, 50, 5);
+        ctx.fillRect(200, 55, 56, 5);
+
+        // The Bonemoon - large, pale, sickly
+        var moonX = 118, moonY = 40, moonR = 20;
+        // Outer eerie glow
+        var moonPulse = 0.7 + Math.sin(Game.frame * 0.02) * 0.15;
+        ctx.fillStyle = 'rgba(180,160,200,' + (moonPulse * 0.08) + ')';
+        ctx.fillRect(moonX - moonR - 12, moonY - moonR - 12, (moonR + 12) * 2, (moonR + 12) * 2);
+        ctx.fillStyle = 'rgba(200,180,220,' + (moonPulse * 0.12) + ')';
+        ctx.fillRect(moonX - moonR - 6, moonY - moonR - 6, (moonR + 6) * 2, (moonR + 6) * 2);
+
+        // Moon body - pale bone color
+        ctx.fillStyle = 'rgba(220,210,230,' + (moonPulse * 0.3) + ')';
+        ctx.fillRect(moonX - moonR, moonY - moonR, moonR * 2, moonR * 2);
+        ctx.fillStyle = 'rgba(200,190,210,' + (moonPulse * 0.5) + ')';
+        ctx.fillRect(moonX - moonR + 4, moonY - moonR + 4, moonR * 2 - 8, moonR * 2 - 8);
+        ctx.fillStyle = 'rgba(180,170,200,' + (moonPulse * 0.7) + ')';
+        ctx.fillRect(moonX - moonR + 8, moonY - moonR + 8, moonR * 2 - 16, moonR * 2 - 16);
+
+        // Craters / dark patches on the moon
+        ctx.fillStyle = 'rgba(100,80,120,' + (moonPulse * 0.3) + ')';
+        ctx.fillRect(moonX - 6, moonY - 8, 5, 4);
+        ctx.fillRect(moonX + 4, moonY + 2, 6, 5);
+        ctx.fillRect(moonX - 10, moonY + 4, 4, 3);
+
+        // Few dim stars being swallowed by darkness
+        var dimStars = [[30,15],[70,60],[200,20],[240,50],[160,70],[45,45],[230,30]];
+        for (var ds = 0; ds < dimStars.length; ds++) {
+            var fade = 0.15 + Math.sin(Game.frame * 0.02 + ds * 1.5) * 0.1;
+            ctx.fillStyle = 'rgba(255,255,255,' + fade + ')';
+            ctx.fillRect(dimStars[ds][0], dimStars[ds][1], 1, 1);
+        }
+
+        // Dark tendrils creeping from edges
+        ctx.fillStyle = 'rgba(10,0,20,0.6)';
+        ctx.fillRect(0, 80, W, 80);
+        ctx.fillStyle = 'rgba(10,0,20,0.3)';
+        ctx.fillRect(0, 70, 60, 10);
+        ctx.fillRect(W - 60, 70, 60, 10);
+    }
+
+    function drawVictoryHeroesPath(ctx) {
+        // Three heroes walking forward on a winding road into the unknown
+        ctx.fillStyle = '#0a0a18';
+        ctx.fillRect(0, 0, W, 50);
+        ctx.fillStyle = '#0e0e20';
+        ctx.fillRect(0, 50, W, 15);
+        ctx.fillStyle = '#121228';
+        ctx.fillRect(0, 65, W, 10);
+
+        // Distant horizon glow
+        ctx.fillStyle = 'rgba(60,40,80,0.3)';
+        ctx.fillRect(0, 72, W, 8);
+
+        // Stars
+        var pathStars = [[20,6],[60,18],[100,8],[140,22],[180,10],[220,15],[40,30],[160,5],[250,28],[80,35],[200,38]];
+        for (var i = 0; i < pathStars.length; i++) {
+            ctx.fillStyle = 'rgba(255,255,255,' + (0.3 + Math.sin(Game.frame * 0.04 + i) * 0.2) + ')';
+            ctx.fillRect(pathStars[i][0], pathStars[i][1], 1, 1);
+        }
+
+        // Ground
+        ctx.fillStyle = '#0c120c';
+        ctx.fillRect(0, 80, W, 80);
+
+        // Winding road
+        ctx.fillStyle = '#161a16';
+        ctx.fillRect(110, 80, 30, 80);
+        ctx.fillRect(105, 85, 40, 6);
+        ctx.fillRect(100, 92, 50, 4);
+
+        // Road narrows into distance
+        ctx.fillStyle = '#141814';
+        ctx.fillRect(118, 75, 14, 5);
+        ctx.fillRect(122, 70, 6, 5);
+
+        // Three heroes walking up the road (from behind)
+        var baseX = 108, baseY = 86;
+
+        // Left hero (warrior) - blue hint
+        ctx.fillStyle = '#060610';
+        ctx.fillRect(baseX + 4, baseY, 4, 4);     // head
+        ctx.fillRect(baseX + 3, baseY + 4, 6, 6);  // body
+        ctx.fillRect(baseX + 3, baseY + 10, 2, 4); // legs
+        ctx.fillRect(baseX + 7, baseY + 10, 2, 4);
+        ctx.fillRect(baseX + 8, baseY + 1, 1, 7);  // sword
+        ctx.fillStyle = 'rgba(40,70,180,0.25)';
+        ctx.fillRect(baseX + 4, baseY + 5, 4, 4);
+
+        // Center hero (warlock) - purple hint
+        ctx.fillStyle = '#060610';
+        ctx.fillRect(baseX + 16, baseY - 1, 5, 4);  // hooded head
+        ctx.fillRect(baseX + 15, baseY + 3, 7, 7);   // robes
+        ctx.fillRect(baseX + 15, baseY + 10, 7, 4);  // robe hem
+        ctx.fillStyle = 'rgba(100,50,160,0.25)';
+        ctx.fillRect(baseX + 16, baseY + 4, 5, 5);
+
+        // Right hero (druid) - green hint
+        ctx.fillStyle = '#060610';
+        ctx.fillRect(baseX + 28, baseY, 4, 4);      // head
+        ctx.fillRect(baseX + 30, baseY + 1, 2, 4);   // hair
+        ctx.fillRect(baseX + 27, baseY + 4, 6, 6);   // body
+        ctx.fillRect(baseX + 27, baseY + 10, 2, 4);  // legs
+        ctx.fillRect(baseX + 31, baseY + 10, 2, 4);
+        ctx.fillRect(baseX + 26, baseY - 2, 1, 12);  // staff
+        ctx.fillStyle = 'rgba(50,150,70,0.25)';
+        ctx.fillRect(baseX + 28, baseY + 5, 4, 4);
+    }
+
+    function drawVictoryTitleCard(ctx) {
+        // Dramatic title card with the game name
+        ctx.fillStyle = '#050510';
+        ctx.fillRect(0, 0, W, H);
+
+        // Subtle radial glow behind title
+        var pulse = 0.5 + Math.sin(Game.frame * 0.025) * 0.2;
+        ctx.fillStyle = 'rgba(100,60,20,' + (pulse * 0.1) + ')';
+        ctx.fillRect(40, 20, W - 80, 60);
+        ctx.fillStyle = 'rgba(100,60,20,' + (pulse * 0.15) + ')';
+        ctx.fillRect(60, 30, W - 120, 40);
+
+        // "VALISAR" in large text
+        var titleText = 'VALISAR';
+        var titleX = Math.floor((W - titleText.length * 18) / 2);
+        // Shadow
+        Utils.drawText(ctx, titleText, titleX + 1, 31, '#2a1a0a', 3);
+        // Gold text
+        Utils.drawText(ctx, titleText, titleX, 30, C.gold, 3);
+
+        // "SHADOWS OF THE ELDSPYRE" subtitle
+        var subText = 'SHADOWS OF THE ELDSPYRE';
+        var subX = Math.floor((W - subText.length * 6) / 2);
+        Utils.drawText(ctx, subText, subX, 58, C.lightGray, 1);
+
+        // Decorative line
+        ctx.fillStyle = C.gold;
+        ctx.fillRect(60, 72, W - 120, 1);
+
+        // Small stars scattered
+        var titleStars = [[20,15],[50,80],[80,10],[180,85],[210,12],[240,75],[30,50],[155,8],[250,45]];
+        for (var ts = 0; ts < titleStars.length; ts++) {
+            ctx.fillStyle = 'rgba(255,255,255,' + (0.2 + Math.sin(Game.frame * 0.03 + ts * 1.3) * 0.15) + ')';
+            ctx.fillRect(titleStars[ts][0], titleStars[ts][1], 1, 1);
+        }
+    }
+
+    var victorySceneRenderers = {
+        vale_peace: drawVictoryValePeace,
+        bonemoon: drawVictoryBonemoon,
+        heroes_path: drawVictoryHeroesPath,
+        title_card: drawVictoryTitleCard
+    };
+
     function renderEpilogue() {
         var ctx = buf;
 
@@ -3404,6 +3646,16 @@
         // Black background
         ctx.fillStyle = C.black;
         ctx.fillRect(0, 0, W, H);
+
+        // Draw scene art during dialogue phase
+        if (!Game.victoryDialogueDone && Dialogue.isActive()) {
+            var vScene = Dialogue.getScene();
+            if (vScene && victorySceneRenderers[vScene]) {
+                victorySceneRenderers[vScene](ctx);
+                ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                ctx.fillRect(0, 0, W, H);
+            }
+        }
 
         // Particles behind text
         Particles.render(ctx);

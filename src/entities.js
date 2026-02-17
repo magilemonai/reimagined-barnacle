@@ -52,10 +52,19 @@
 
             // Flag set by useSpecial when Luigi fires a projectile
             this._pendingProjectile = false;
+
+            // Hitstop: freezes the entity for N frames on hit for juicy impact feel
+            this.hitstop = 0;
         }
 
         /* ----- main update ------------------------------------------ */
         update(room) {
+            // Hitstop: freeze in place for dramatic impact
+            if (this.hitstop > 0) {
+                this.hitstop--;
+                return;
+            }
+
             // Handle knockback
             if (this.knockback) {
                 this.x += this.knockback.vx;
@@ -344,7 +353,14 @@
 
             // Item drop set on death
             this._dropItem = null;
-        }
+
+            // Hitstop: freezes entity for impact feel
+            this.hitstop = 0;
+
+            // Stagger: consecutive hits stun the enemy
+            this.staggerCount = 0;
+            this.staggerTimer = 0;
+            this.staggered = false;
 
         /**
          * @returns {boolean} true when the enemy should be removed from the list
@@ -354,6 +370,32 @@
             if (this.dead) {
                 this.deathTimer--;
                 return this.deathTimer <= 0; // remove when done
+            }
+
+            // Hitstop: freeze for impact feel
+            if (this.hitstop > 0) {
+                this.hitstop--;
+                return false;
+            }
+
+            // Stagger: stunned from consecutive hits
+            if (this.staggered) {
+                this.staggerTimer--;
+                if (this.staggerTimer <= 0) {
+                    this.staggered = false;
+                    this.staggerCount = 0;
+                }
+                // Flash while staggered
+                this.flash = 2;
+                return false;
+            }
+
+            // Decay stagger count over time
+            if (this.staggerCount > 0 && !this.staggered) {
+                this.staggerTimer--;
+                if (this.staggerTimer <= 0) {
+                    this.staggerCount = 0;
+                }
             }
 
             // Knockback
@@ -404,10 +446,23 @@
                 if (!this.collidesWithMap(room, newX, this.y)) this.x = newX;
                 if (!this.collidesWithMap(room, this.x, newY)) this.y = newY;
 
-                // Attack if in range
+                // Attack if in range - with telegraph warning
                 if (distToPlayer < this.attackRange && this.attackCooldown <= 0) {
-                    this.attacking = true;
-                    this.attackTimer = 20;
+                    if (!this._telegraphing) {
+                        // Start telegraph: flash for 8 frames before attacking
+                        this._telegraphing = true;
+                        this._telegraphTimer = 8;
+                        this.flash = 8;
+                    } else {
+                        this._telegraphTimer--;
+                        if (this._telegraphTimer <= 0) {
+                            this.attacking = true;
+                            this.attackTimer = 20;
+                            this._telegraphing = false;
+                        }
+                    }
+                } else {
+                    this._telegraphing = false;
                 }
             } else {
                 // Patrol: walk in current direction, change periodically
@@ -458,11 +513,23 @@
             this.invincible = 20;
             this.flash = 6;
 
+            // Hitstop: both attacker and target freeze for 3 frames
+            this.hitstop = 3;
+
+            // Stagger system: 3 rapid hits = stunned
+            this.staggerCount++;
+            this.staggerTimer = 45; // window for consecutive hits
+            if (this.staggerCount >= 3) {
+                this.staggered = true;
+                this.staggerTimer = 40; // stun duration
+                Particles.burst(this.x + this.w / 2, this.y - 4, 6, C.yellow);
+            }
+
             var angle = Math.atan2(this.y - fromY, this.x - fromX);
             this.knockback = {
-                vx: Math.cos(angle) * 4,
-                vy: Math.sin(angle) * 4,
-                timer: 6
+                vx: Math.cos(angle) * 5,
+                vy: Math.sin(angle) * 5,
+                timer: 5
             };
 
             Audio.play('hit');
@@ -1055,6 +1122,9 @@
     function resolveCombat(player, enemies, boss, projectiles) {
         var i, enemy, atkBox, enemyBox, playerBox, bossBox, bossAtk, projBox, pBox, p;
 
+        // Per-frame hit guard: only allow one damage source to hit the player per frame
+        var playerHitThisFrame = false;
+
         // Determine player attack damage
         var atkDmg = (player.characterId === 'daxon') ? 3 : 2;
 
@@ -1067,6 +1137,7 @@
                 if (Utils.aabb(player.attackHitbox, enemyBox)) {
                     enemy.takeDamage(atkDmg, player.x + player.w / 2, player.y + player.h / 2);
                     player.attackDealt = true;
+                    player.hitstop = 3; // Attacker also freezes for juicy impact
                 }
             }
 
@@ -1076,7 +1147,7 @@
                 if (Utils.aabb(player.attackHitbox, bossBox)) {
                     boss.takeDamage(atkDmg, player.x + player.w / 2, player.y + player.h / 2);
                     player.attackDealt = true;
-                }
+                    player.hitstop = 3;
             }
         }
 
@@ -1110,52 +1181,64 @@
 
         // --- Enemies attacking player (melee + contact) ---
         for (i = 0; i < enemies.length; i++) {
+            if (playerHitThisFrame) break;
             enemy = enemies[i];
             if (enemy.dead) continue;
 
-            // Melee attack hitbox
+            // Melee attack hitbox (priority over contact)
             atkBox = enemy.getAttackHitbox();
             if (atkBox) {
                 playerBox = { x: player.x, y: player.y, w: player.w, h: player.h };
                 if (Utils.aabb(atkBox, playerBox)) {
                     player.takeDamage(enemy.damage, enemy.x + enemy.w / 2, enemy.y + enemy.h / 2);
+                    playerHitThisFrame = true;
+                    continue;
                 }
             }
 
-            // Contact damage
+            // Contact damage (only if melee didn't hit)
             enemyBox = { x: enemy.x, y: enemy.y, w: enemy.w, h: enemy.h };
             playerBox = { x: player.x, y: player.y, w: player.w, h: player.h };
             if (Utils.aabb(enemyBox, playerBox)) {
                 player.takeDamage(enemy.damage, enemy.x + enemy.w / 2, enemy.y + enemy.h / 2);
+                playerHitThisFrame = true;
             }
         }
 
         // --- Boss attacks hitting player ---
-        if (boss && !boss.dead) {
+        if (boss && !boss.dead && !playerHitThisFrame) {
             // Melee
             bossAtk = boss.getAttackHitbox();
-            if (bossAtk) {
+            if (bossAtk && !playerHitThisFrame) {
                 playerBox = { x: player.x, y: player.y, w: player.w, h: player.h };
                 if (Utils.aabb(bossAtk, playerBox)) {
                     player.takeDamage(boss.damage, boss.x + boss.w / 2, boss.y + boss.h / 2);
+                    playerHitThisFrame = true;
                 }
             }
 
-            // Contact damage
-            bossBox = { x: boss.x, y: boss.y, w: boss.w, h: boss.h };
-            playerBox = { x: player.x, y: player.y, w: player.w, h: player.h };
-            if (Utils.aabb(bossBox, playerBox)) {
-                player.takeDamage(boss.damage, boss.x + boss.w / 2, boss.y + boss.h / 2);
+            // Contact damage (only if melee didn't hit)
+            if (!playerHitThisFrame) {
+                bossBox = { x: boss.x, y: boss.y, w: boss.w, h: boss.h };
+                playerBox = { x: player.x, y: player.y, w: player.w, h: player.h };
+                if (Utils.aabb(bossBox, playerBox)) {
+                    player.takeDamage(boss.damage, boss.x + boss.w / 2, boss.y + boss.h / 2);
+                    playerHitThisFrame = true;
+                }
             }
 
             // Boss projectiles hitting player
-            for (i = 0; i < boss.projectiles.length; i++) {
-                p = boss.projectiles[i];
-                projBox = { x: p.x - p.w / 2, y: p.y - p.h / 2, w: p.w, h: p.h };
-                pBox    = { x: player.x, y: player.y, w: player.w, h: player.h };
-                if (Utils.aabb(projBox, pBox)) {
-                    player.takeDamage(p.damage, p.x, p.y);
-                    p.life = 0; // destroy projectile on hit
+            if (!playerHitThisFrame) {
+                for (i = 0; i < boss.projectiles.length; i++) {
+                    p = boss.projectiles[i];
+                    projBox = { x: p.x - p.w / 2, y: p.y - p.h / 2, w: p.w, h: p.h };
+                    pBox    = { x: player.x, y: player.y, w: player.w, h: player.h };
+                    if (Utils.aabb(projBox, pBox)) {
+                        player.takeDamage(p.damage, p.x, p.y);
+                        p.life = 0; // destroy projectile on hit
+                        playerHitThisFrame = true;
+                        break;
+                    }
                 }
             }
         }

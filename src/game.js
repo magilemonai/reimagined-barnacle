@@ -25,6 +25,7 @@
     var Maps      = window.Maps;
     var Dialogue  = window.Dialogue;
     var Entities  = window.Entities;
+    var Music     = window.Music;
     var buf       = window.buf;
     var display   = window.display;
     var TILE      = window.TILE;
@@ -101,6 +102,12 @@
         bossDialogueStage: 0,
         bossDeathTimer: 0,
 
+        // Floating damage/heal numbers
+        floatingTexts: [],
+
+        // Enemy kill counter (for HUD)
+        enemiesDefeated: 0,
+
         // Luigi Brog special tracking
         brogTarget: null,
         brogTimer: 0,
@@ -148,6 +155,61 @@
     function centerTextX(text, size) {
         var charW = 6 * (size || 1);
         return Math.floor((W - text.length * charW) / 2);
+    }
+
+    // =====================================================================
+    // FLOATING DAMAGE/HEAL NUMBERS
+    // =====================================================================
+
+    function spawnFloatingText(x, y, text, color) {
+        Game.floatingTexts.push({
+            x: x,
+            y: y,
+            text: String(text),
+            color: color || C.white,
+            life: 40,
+            maxLife: 40
+        });
+    }
+
+    function updateFloatingTexts() {
+        for (var i = Game.floatingTexts.length - 1; i >= 0; i--) {
+            var ft = Game.floatingTexts[i];
+            ft.y -= 0.5;
+            ft.life--;
+            if (ft.life <= 0) {
+                Game.floatingTexts.splice(i, 1);
+            }
+        }
+    }
+
+    function renderFloatingTexts(ctx) {
+        for (var i = 0; i < Game.floatingTexts.length; i++) {
+            var ft = Game.floatingTexts[i];
+            var alpha = ft.life / ft.maxLife;
+            ctx.globalAlpha = alpha;
+            Utils.drawText(ctx, ft.text, Math.floor(ft.x), Math.floor(ft.y), ft.color, 1);
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    // =====================================================================
+    // MUSIC THEME SELECTION
+    // =====================================================================
+
+    function getMusicForRoom(roomId) {
+        if (!roomId) return 'town';
+        if (roomId.indexOf('ebon_vale') === 0)   return 'town';
+        if (roomId.indexOf('ebon_forest') === 0)  return 'forest';
+        if (roomId === 'temple_boss')              return null; // boss music handled separately
+        if (roomId.indexOf('temple') === 0)        return 'temple';
+        return 'town';
+    }
+
+    function playRoomMusic(roomId) {
+        if (!Music) return;
+        var theme = getMusicForRoom(roomId);
+        if (theme) Music.play(theme);
     }
 
     // =====================================================================
@@ -213,6 +275,9 @@
         if (roomId !== 'temple_boss') {
             Game.boss = null;
         }
+
+        // Play appropriate music for this room
+        playRoomMusic(roomId);
 
         // Track safe rooms (town rooms)
         if (roomId === 'ebon_vale_square' || roomId === 'ebon_vale_market' || roomId === 'ebon_vale_north') {
@@ -490,9 +555,9 @@
         for (var i = Game.enemies.length - 1; i >= 0; i--) {
             var enemy = Game.enemies[i];
             if (enemy.dead && (!enemy.deathTimer || enemy.deathTimer <= 0)) {
-                // Chance to drop a heart
-                if (Math.random() < 0.4) {
-                    spawnHeartDrop(enemy.x, enemy.y);
+                // Use the entity's own drop flag (set in die() at 30% chance)
+                if (enemy._dropItem) {
+                    spawnHeartDrop(enemy._dropItem.x, enemy._dropItem.y);
                 }
                 Game.enemies.splice(i, 1);
             }
@@ -617,6 +682,7 @@
             if (Game.state === 'game') {
                 Game.state = 'boss_intro';
                 Game.bossDialogueStage = 0;
+                if (Music) Music.stop();
                 Dialogue.start('boss_intro', function () {
                     // Spawn boss at center of room
                     try {
@@ -625,6 +691,7 @@
                         console.warn('Error creating boss:', e);
                     }
                     Game.state = 'boss';
+                    if (Music) Music.play('boss');
                 });
             }
         }
@@ -849,6 +916,7 @@
         if (Input.pressed['Enter']) {
             Game.state = 'select';
             Audio.play('select');
+            if (Music) Music.stop();
             // Clear particles for clean transition
             Particles.particles = [];
         }
@@ -1138,9 +1206,28 @@
         // Update heart drops
         updateHeartDrops();
 
+        // Track HP before combat for floating damage numbers
+        var playerHPBefore = Game.player ? Game.player.hp : 0;
+        var enemyHPBefore = [];
+        for (var ei = 0; ei < Game.enemies.length; ei++) {
+            enemyHPBefore.push(Game.enemies[ei].hp);
+        }
+
         // Combat resolution
         if (Game.player) {
             Entities.resolveCombat(Game.player, Game.enemies, Game.boss);
+        }
+
+        // Spawn floating damage numbers based on HP changes
+        if (Game.player && Game.player.hp < playerHPBefore) {
+            var dmg = playerHPBefore - Game.player.hp;
+            spawnFloatingText(Game.player.x + 2, Game.player.y - 4, dmg, C.red);
+        }
+        for (var ej = 0; ej < Game.enemies.length; ej++) {
+            if (ej < enemyHPBefore.length && Game.enemies[ej].hp < enemyHPBefore[ej]) {
+                var edmg = enemyHPBefore[ej] - Game.enemies[ej].hp;
+                spawnFloatingText(Game.enemies[ej].x + 2, Game.enemies[ej].y - 6, edmg, C.white);
+            }
         }
 
         // Handle Luigi's Brog special
@@ -1149,6 +1236,9 @@
 
         // Check dead enemies & drops
         checkDeadEnemies();
+
+        // Update floating texts
+        updateFloatingTexts();
 
         // Update particles
         Particles.update();
@@ -1162,9 +1252,9 @@
         // Check game over
         checkGameOver();
 
-        // Screenshake from player damage
+        // Screenshake from player damage (increased for impact)
         if (Game.player && Game.player._wasHurt) {
-            Game.shake = 2;
+            Game.shake = 4;
             Game.player._wasHurt = false;
         }
     }
@@ -1226,6 +1316,9 @@
 
         // Render particles
         Particles.render(ctx);
+
+        // Render floating damage numbers
+        renderFloatingTexts(ctx);
 
         // Render HUD
         renderHUD(ctx);
@@ -1297,9 +1390,21 @@
             }
         }
 
+        // Track HP before combat for floating damage numbers
+        var bPlayerHP = Game.player ? Game.player.hp : 0;
+        var bBossHP = (Game.boss && !Game.boss.dead) ? Game.boss.hp : 0;
+
         // Combat resolution
         if (Game.player) {
             Entities.resolveCombat(Game.player, Game.enemies, Game.boss);
+        }
+
+        // Spawn floating damage numbers
+        if (Game.player && Game.player.hp < bPlayerHP) {
+            spawnFloatingText(Game.player.x + 2, Game.player.y - 4, bPlayerHP - Game.player.hp, C.red);
+        }
+        if (Game.boss && !Game.boss.dead && Game.boss.hp < bBossHP) {
+            spawnFloatingText(Game.boss.x + 8, Game.boss.y - 6, bBossHP - Game.boss.hp, C.white);
         }
 
         // Handle Luigi's Brog special
@@ -1312,21 +1417,24 @@
         // Dead enemies
         checkDeadEnemies();
 
+        // Update floating texts
+        updateFloatingTexts();
+
         // Particles
         Particles.update();
 
         // Check game over
         checkGameOver();
 
-        // Screenshake from player damage
+        // Screenshake from player damage (increased for impact)
         if (Game.player && Game.player._wasHurt) {
-            Game.shake = 2;
+            Game.shake = 4;
             Game.player._wasHurt = false;
         }
 
-        // Boss screenshake on hit
+        // Boss screenshake on hit (increased)
         if (Game.boss && Game.boss._wasHurt) {
-            Game.shake = 3;
+            Game.shake = 5;
             Game.boss._wasHurt = false;
         }
 
@@ -1353,6 +1461,7 @@
                             Game.victoryDialogueDone = false;
                             Game.creditsY = H + 20;
                             Audio.play('victory');
+                            if (Music) Music.play('victory');
                         });
                     });
                 });
@@ -1413,6 +1522,9 @@
 
         // Particles
         Particles.render(ctx);
+
+        // Floating damage numbers
+        renderFloatingTexts(ctx);
 
         // HUD
         renderHUD(ctx);
@@ -1640,6 +1752,8 @@
         Game.brogTarget = null;
         Game.brogTimer = 0;
         Game.brogActive = false;
+        Game.floatingTexts = [];
+        Game.enemiesDefeated = 0;
         Game.titleSparkles = [];
         Game.creditsY = 0;
         Game.victoryDialogueDone = false;
@@ -1652,6 +1766,8 @@
         if (Dialogue.active) {
             Dialogue.close();
         }
+
+        if (Music) Music.play('title');
     }
 
     // =====================================================================
@@ -1718,6 +1834,10 @@
             if (!audioStarted) {
                 if (Audio && Audio.init) {
                     Audio.init();
+                }
+                if (Music && Music.init) {
+                    Music.init();
+                    Music.play('title');
                 }
                 audioStarted = true;
             }

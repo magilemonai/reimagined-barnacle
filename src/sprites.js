@@ -1167,6 +1167,67 @@
 
       mt('dark', function (ctx) { fill(ctx, P.black); });
 
+      mt('spike', function (ctx) {
+        // Temple floor base
+        fill(ctx, P.lightGray);
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(0, 0, 16, 1);
+        ctx.fillRect(0, 8, 16, 1);
+        ctx.fillRect(0, 0, 1, 16);
+        ctx.fillRect(8, 0, 1, 16);
+        // Spike points (metallic gray triangles)
+        ctx.fillStyle = P.darkGray;
+        // Center spike
+        ctx.beginPath(); ctx.moveTo(8, 3); ctx.lineTo(6, 13); ctx.lineTo(10, 13); ctx.fill();
+        // Left spike
+        ctx.beginPath(); ctx.moveTo(3, 5); ctx.lineTo(1, 13); ctx.lineTo(5, 13); ctx.fill();
+        // Right spike
+        ctx.beginPath(); ctx.moveTo(13, 5); ctx.lineTo(11, 13); ctx.lineTo(15, 13); ctx.fill();
+        // Metallic highlights
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(8, 4, 1, 2);
+        ctx.fillRect(3, 6, 1, 2);
+        ctx.fillRect(13, 6, 1, 2);
+      });
+
+      mt('mushroom', function (ctx) {
+        // Dark grass base
+        fill(ctx, P.green);
+        dots(ctx, P.darkGreen, 10);
+        // Mushroom stem
+        ctx.fillStyle = P.tan;
+        ctx.fillRect(6, 10, 4, 6);
+        ctx.fillStyle = P.lightBrown;
+        ctx.fillRect(7, 10, 2, 6);
+        // Mushroom cap
+        circ(ctx, 8, 9, 5, P.red);
+        circ(ctx, 8, 8, 4, P.lightRed);
+        // White spots on cap
+        ctx.fillStyle = P.white;
+        ctx.fillRect(6, 6, 2, 2);
+        ctx.fillRect(9, 7, 2, 2);
+        ctx.fillRect(7, 9, 1, 1);
+      });
+
+      mt('cracked_floor', function (ctx) {
+        // Temple floor base
+        fill(ctx, P.lightGray);
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(0, 0, 16, 1);
+        ctx.fillRect(0, 8, 16, 1);
+        ctx.fillRect(0, 0, 1, 16);
+        ctx.fillRect(8, 0, 1, 16);
+        // Cracks
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(3, 3, 1, 5);
+        ctx.fillRect(4, 7, 3, 1);
+        ctx.fillRect(7, 5, 1, 3);
+        ctx.fillRect(10, 2, 1, 4);
+        ctx.fillRect(11, 5, 3, 1);
+        ctx.fillRect(5, 11, 1, 3);
+        ctx.fillRect(5, 13, 4, 1);
+      });
+
       // =================================================================
       // ITEM SPRITES
       // =================================================================

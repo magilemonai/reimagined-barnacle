@@ -130,7 +130,41 @@
         playTime: 0, // frames of gameplay
 
         // Save system
-        hasSaveData: false
+        hasSaveData: false,
+
+        // Difficulty: 0=Easy, 1=Normal, 2=Hard
+        difficulty: 1,
+
+        // Speed run timer (opt-in)
+        speedRunEnabled: false,
+        speedRunTime: 0,
+
+        // Goblin teeth currency (drop from goblins)
+        goblinTeeth: 0,
+
+        // Shop state
+        shopOpen: false,
+        shopIndex: 0,
+
+        // Soren's blessing active
+        sorenBlessing: false,
+        sorenBlessingTimer: 0,
+
+        // Spike trap damage cooldown
+        spikeCooldown: 0,
+
+        // Sign interaction
+        nearSign: null,
+
+        // Area name banner slide animation
+        roomBannerSlide: 0,
+
+        // Title screen enhancements
+        titleStars: [],
+        subtitleReveal: 0,
+
+        // Difficulty menu
+        difficultyMenuIndex: 1
     };
 
     window.Game = Game;
@@ -226,6 +260,7 @@
     function renderMap(ctx, room) {
         if (!room || !room.tiles) return;
         var waterFrame = Math.floor(Game.frame / 30) % 2; // alternate every 30 frames
+        var spikePhase = Math.floor(Game.frame / 40) % 2; // spikes toggle
         for (var row = 0; row < ROWS; row++) {
             for (var col = 0; col < COLS; col++) {
                 var tileId = Maps.getTile(room, col, row);
@@ -237,6 +272,15 @@
                         spriteKey = 'tile_water_1';
                     }
                     safeDraw(ctx, spriteKey, col * TILE, row * TILE);
+
+                    // Spike trap retracted state: draw floor-only when spikes are down
+                    if (tileId === window.T.SPIKE && spikePhase === 1) {
+                        // Draw a semi-transparent overlay to show spikes are retracted
+                        ctx.fillStyle = C.lightGray;
+                        ctx.globalAlpha = 0.4;
+                        ctx.fillRect(col * TILE + 2, row * TILE + 10, 12, 4);
+                        ctx.globalAlpha = 1;
+                    }
                 }
             }
         }
@@ -272,11 +316,25 @@
         if (!Game.clearedRooms[roomId] && room.enemies && room.enemies.length > 0) {
             for (var i = 0; i < room.enemies.length; i++) {
                 var eData = room.enemies[i];
-                // Normalize enemy type: maps use 'goblin_lackey', entity expects 'goblin'
                 var etype = eData.type;
-                if (etype === 'goblin_lackey') etype = 'goblin';
-                var enemy = new Entities.Enemy(etype, eData.x, eData.y);
-                Game.enemies.push(enemy);
+                if (etype === 'goblin_archer') {
+                    var archer = new Entities.GoblinArcher(eData.x, eData.y);
+                    Game.enemies.push(archer);
+                } else {
+                    // Normalize enemy type: maps use 'goblin_lackey', entity expects 'goblin'
+                    if (etype === 'goblin_lackey') etype = 'goblin';
+                    var enemy = new Entities.Enemy(etype, eData.x, eData.y);
+                    // Apply difficulty scaling
+                    if (Game.difficulty === 0) { // Easy
+                        enemy.speed *= 0.7;
+                        enemy.damage = Math.max(1, enemy.damage - 1);
+                    } else if (Game.difficulty === 2) { // Hard
+                        enemy.speed *= 1.2;
+                        enemy.maxHp = Math.ceil(enemy.maxHp * 1.5);
+                        enemy.hp = enemy.maxHp;
+                    }
+                    Game.enemies.push(enemy);
+                }
             }
         }
 
@@ -436,10 +494,25 @@
             if (d < 24) {
                 Game.nearNPC = npc;
                 if (Input.pressed['z'] && !Dialogue.isActive()) {
-                    var dialogueId = npc.dialogueId || npc.dialogue;
-                    if (dialogueId) {
-                        Dialogue.start(dialogueId);
-                        Audio.play('select');
+                    // Special NPC interactions
+                    if (npc.id === 'npc_braxon') {
+                        if (npc.interacted && Game.goblinTeeth > 0) {
+                            openShop();
+                        } else {
+                            var dialogueId = npc.dialogueId || npc.dialogue;
+                            if (dialogueId) {
+                                npc.interact();
+                            }
+                        }
+                    } else if (npc.id === 'npc_brother_soren' && npc.interacted) {
+                        // Brother Soren gives blessing on return visits
+                        sorenBlessing();
+                        Dialogue.start(null, null, 'May the light guide you, child. I have restored your strength.');
+                    } else {
+                        var dialogueId2 = npc.dialogueId || npc.dialogue;
+                        if (dialogueId2) {
+                            npc.interact();
+                        }
                     }
                 }
                 break;
@@ -506,10 +579,12 @@
 
             if (distToStatue < 28 && Input.pressed['z']) {
                 Game.flags.puzzleSolved = true;
-                Audio.play('pickup');
+                Audio.play('fanfare');
                 Dialogue.start('statue_complete');
-                Particles.burst(statueX, statueY, 20, C.purple);
-                Game.shake = 5;
+                Particles.ring(statueX, statueY, 20, 16, C.purple);
+                Particles.burst(statueX, statueY, 25, C.gold);
+                Particles.confetti(statueX, statueY - 10, 12);
+                Game.shake = 8;
             }
         }
     }
@@ -540,6 +615,106 @@
         }
 
         return zoneEnemies === 0;
+    }
+
+    // =====================================================================
+    // SIGN INTERACTION
+    // =====================================================================
+
+    function checkSignInteraction() {
+        if (!Game.player || !Game.currentRoom || !Game.currentRoom.signs) return;
+        if (Dialogue.isActive()) return;
+        Game.nearSign = null;
+
+        for (var i = 0; i < Game.currentRoom.signs.length; i++) {
+            var sign = Game.currentRoom.signs[i];
+            var sx = sign.x * TILE;
+            var sy = sign.y * TILE;
+            var d = Utils.dist(
+                { x: Game.player.x + 8, y: Game.player.y + 8 },
+                { x: sx + 8, y: sy + 8 }
+            );
+
+            if (d < 24) {
+                Game.nearSign = sign;
+                if (Input.pressed['z']) {
+                    // Show sign text as dialogue
+                    Dialogue.start(null, null, sign.text);
+                    Audio.play('select');
+                }
+                break;
+            }
+        }
+    }
+
+    function renderSignPrompt(ctx) {
+        if (!Game.nearSign || Dialogue.isActive()) return;
+        var sign = Game.nearSign;
+        var bobY = Math.sin(Game.frame * 0.15) * 2;
+        var promptX = Math.floor(sign.x * TILE + 4);
+        var promptY = Math.floor(sign.y * TILE - 10 + bobY);
+        Utils.drawText(ctx, 'Z', promptX, promptY, C.yellow, 1);
+    }
+
+    // =====================================================================
+    // SPIKE TRAP HAZARD
+    // =====================================================================
+
+    function checkSpikeTraps() {
+        if (!Game.player || !Game.currentRoom) return;
+        if (Game.spikeCooldown > 0) { Game.spikeCooldown--; return; }
+
+        // Check if player is standing on a spike tile
+        var cx = Math.floor((Game.player.x + Game.player.w / 2) / TILE);
+        var cy = Math.floor((Game.player.y + Game.player.h / 2) / TILE);
+        var tileId = Maps.getTile(Game.currentRoom, cx, cy);
+
+        if (tileId === window.T.SPIKE) {
+            // Spikes activate in a cycle: up for 40 frames, down for 40 frames
+            var spikePhase = Math.floor(Game.frame / 40) % 2;
+            if (spikePhase === 0) { // Spikes are up
+                var dmg = 1;
+                if (Game.difficulty === 2) dmg = 2; // Hard mode
+                if (Game.difficulty === 0) dmg = 0; // Easy mode - no spike damage
+
+                if (dmg > 0 && Game.player.invincible <= 0) {
+                    Game.player.hp -= dmg;
+                    Game.player.invincible = 30;
+                    Game.player._wasHurt = true;
+                    Game.spikeCooldown = 30;
+                    Audio.play('spike');
+                    Particles.burst(Game.player.x + 5, Game.player.y + 6, 6, C.red);
+                    spawnFloatingText(Game.player.x + 2, Game.player.y - 4, dmg, C.red);
+                }
+            }
+        }
+    }
+
+    // =====================================================================
+    // AMBIENT SOUNDS
+    // =====================================================================
+
+    function updateAmbientSounds() {
+        if (!Game.currentRoom) return;
+        var roomId = Game.currentRoom.id;
+
+        // Forest: occasional bird chirps
+        if (roomId && roomId.indexOf('ebon_forest') === 0) {
+            if (Game.frame % 180 === 0 && Math.random() < 0.5) {
+                Audio.play('bird');
+            }
+            // Wind gusts
+            if (Game.frame % 300 === 0 && Math.random() < 0.3) {
+                Audio.play('wind');
+            }
+        }
+
+        // Temple: water drips
+        if (roomId && roomId.indexOf('temple') === 0) {
+            if (Game.frame % 120 === 0 && Math.random() < 0.4) {
+                Audio.play('drip');
+            }
+        }
     }
 
     // =====================================================================
@@ -602,6 +777,12 @@
                     spawnHeartDrop(enemy._dropItem.x, enemy._dropItem.y);
                 }
                 Game.enemiesDefeated++;
+                // Drop goblin teeth (currency) from goblin-type enemies
+                if (enemy.type === 'goblin' || enemy.type === 'goblin_archer') {
+                    Game.goblinTeeth += 1;
+                } else if (enemy.type === 'spinecleaver') {
+                    Game.goblinTeeth += 2;
+                }
                 Game.enemies.splice(i, 1);
             }
         }
@@ -1085,14 +1266,180 @@
         Game.roomNameTimer--;
 
         var alpha = 1;
-        if (Game.roomNameTimer < 30) {
-            alpha = Game.roomNameTimer / 30;
+        // Slide in during first 15 frames, slide out during last 15
+        var slideX = 0;
+        var totalTime = 120; // frames for the banner
+        var elapsed = totalTime - Game.roomNameTimer;
+        if (elapsed < 15) {
+            slideX = -W + (W * elapsed / 15);
+            alpha = elapsed / 15;
+        } else if (Game.roomNameTimer < 15) {
+            slideX = W * (1 - Game.roomNameTimer / 15);
+            alpha = Game.roomNameTimer / 15;
         }
 
         ctx.globalAlpha = alpha;
-        var tx = centerTextX(Game.roomNameText, 1);
-        Utils.drawText(ctx, Game.roomNameText, tx, 22, C.white, 1);
+
+        // Draw banner background with gold border
+        var textLen = Game.roomNameText.length * 6;
+        var bannerW = textLen + 20;
+        var bannerX = Math.floor((W - bannerW) / 2 + slideX);
+        var bannerY = 18;
+
+        ctx.fillStyle = C.black;
+        ctx.globalAlpha = alpha * 0.7;
+        ctx.fillRect(bannerX, bannerY, bannerW, 14);
+        ctx.globalAlpha = alpha;
+        // Gold border top and bottom
+        ctx.fillStyle = C.gold;
+        ctx.fillRect(bannerX, bannerY, bannerW, 1);
+        ctx.fillRect(bannerX, bannerY + 13, bannerW, 1);
+        // Left and right border
+        ctx.fillRect(bannerX, bannerY, 1, 14);
+        ctx.fillRect(bannerX + bannerW - 1, bannerY, 1, 14);
+
+        var tx = Math.floor(bannerX + 10);
+        Utils.drawText(ctx, Game.roomNameText, tx, bannerY + 4, C.white, 1);
         ctx.globalAlpha = 1;
+    }
+
+    // =====================================================================
+    // SPEED RUN TIMER
+    // =====================================================================
+
+    function renderSpeedRunTimer(ctx) {
+        var totalSecs = Math.floor(Game.speedRunTime / 60);
+        var mins = Math.floor(totalSecs / 60);
+        var secs = totalSecs % 60;
+        var frames = Game.speedRunTime % 60;
+        var timeStr = mins + ':' + (secs < 10 ? '0' : '') + secs + '.' + (frames < 10 ? '0' : '') + frames;
+        Utils.drawText(ctx, timeStr, W - 58, 2, C.lightGray, 1);
+    }
+
+    // =====================================================================
+    // GOBLIN TEETH COUNTER
+    // =====================================================================
+
+    function renderTeethCount(ctx) {
+        // Small icon + count next to enemy counter area
+        Utils.drawText(ctx, 'TEETH:' + Game.goblinTeeth, W - 70, H - 10, C.gold, 1);
+    }
+
+    // =====================================================================
+    // BLACKSMITH SHOP
+    // =====================================================================
+
+    var SHOP_ITEMS = [
+        { name: 'Healing Salve',    cost: 3, desc: 'Restore 4 HP',       action: 'heal' },
+        { name: 'Toughened Hide',   cost: 8, desc: '+2 Max HP',          action: 'maxhp' },
+        { name: 'Keen Edge',        cost: 6, desc: 'Stronger attacks',   action: 'damage' },
+    ];
+
+    function openShop() {
+        Game.shopOpen = true;
+        Game.shopIndex = 0;
+    }
+
+    function updateShop() {
+        if (!Game.shopOpen) return;
+
+        if (Input.pressed['ArrowUp']) {
+            Game.shopIndex = (Game.shopIndex - 1 + SHOP_ITEMS.length) % SHOP_ITEMS.length;
+            Audio.play('select');
+        }
+        if (Input.pressed['ArrowDown']) {
+            Game.shopIndex = (Game.shopIndex + 1) % SHOP_ITEMS.length;
+            Audio.play('select');
+        }
+        if (Input.pressed['z']) {
+            var item = SHOP_ITEMS[Game.shopIndex];
+            if (Game.goblinTeeth >= item.cost) {
+                Game.goblinTeeth -= item.cost;
+                Audio.play('buy');
+                switch (item.action) {
+                    case 'heal':
+                        if (Game.player) {
+                            Game.player.hp = Math.min(Game.player.maxHp, Game.player.hp + 4);
+                            Particles.sparkle(Game.player.x + 5, Game.player.y, C.lightGreen);
+                        }
+                        break;
+                    case 'maxhp':
+                        if (Game.player) {
+                            Game.player.maxHp += 2;
+                            Game.player.hp += 2;
+                            Particles.ring(Game.player.x + 5, Game.player.y + 6, 10, 8, C.red);
+                        }
+                        break;
+                    case 'damage':
+                        if (Game.player) {
+                            Game.player._dmgBoost = (Game.player._dmgBoost || 0) + 1;
+                            Particles.sparkle(Game.player.x + 5, Game.player.y, C.gold);
+                        }
+                        break;
+                }
+            } else {
+                Audio.play('deny');
+            }
+        }
+        if (Input.pressed['x'] || Input.pressed['Escape']) {
+            Game.shopOpen = false;
+            Audio.play('select');
+        }
+    }
+
+    function renderShop(ctx) {
+        if (!Game.shopOpen) return;
+
+        // Semi-transparent background
+        ctx.fillStyle = C.black;
+        ctx.globalAlpha = 0.85;
+        ctx.fillRect(30, 30, W - 60, H - 60);
+        ctx.globalAlpha = 1;
+
+        // Border
+        ctx.fillStyle = C.gold;
+        ctx.fillRect(30, 30, W - 60, 1);
+        ctx.fillRect(30, H - 31, W - 60, 1);
+        ctx.fillRect(30, 30, 1, H - 60);
+        ctx.fillRect(W - 31, 30, 1, H - 60);
+
+        Utils.drawText(ctx, "BRAXON'S FORGE", centerTextX("BRAXON'S FORGE", 1), 38, C.gold, 1);
+        Utils.drawText(ctx, 'TEETH: ' + Game.goblinTeeth, centerTextX('TEETH: ' + Game.goblinTeeth, 1), 50, C.yellow, 1);
+
+        for (var i = 0; i < SHOP_ITEMS.length; i++) {
+            var item = SHOP_ITEMS[i];
+            var y = 68 + i * 28;
+            var color = (Game.goblinTeeth >= item.cost) ? C.white : C.gray;
+            if (i === Game.shopIndex) {
+                ctx.fillStyle = C.darkPurple;
+                ctx.globalAlpha = 0.5;
+                ctx.fillRect(36, y - 2, W - 72, 22);
+                ctx.globalAlpha = 1;
+                Utils.drawText(ctx, '>', 38, y + 2, C.yellow, 1);
+            }
+            Utils.drawText(ctx, item.name, 48, y + 2, color, 1);
+            Utils.drawText(ctx, item.cost + ' TEETH', W - 90, y + 2, C.gold, 1);
+            Utils.drawText(ctx, item.desc, 48, y + 12, C.lightGray, 1);
+        }
+
+        Utils.drawText(ctx, 'Z: BUY  X: CLOSE', centerTextX('Z: BUY  X: CLOSE', 1), H - 42, C.lightGray, 1);
+    }
+
+    // =====================================================================
+    // BROTHER SOREN'S BLESSING
+    // =====================================================================
+
+    function sorenBlessing() {
+        if (!Game.player) return;
+        // Heal player to full
+        Game.player.hp = Game.player.maxHp;
+        // Temporary speed boost
+        Game.sorenBlessing = true;
+        Game.sorenBlessingTimer = 600; // 10 seconds
+        Game.player.speed = 2.0;
+        Audio.play('heal');
+        Particles.ring(Game.player.x + 5, Game.player.y + 6, 15, 12, C.paleBlue);
+        Particles.sparkle(Game.player.x + 5, Game.player.y, C.white);
     }
 
     // =====================================================================
@@ -1193,6 +1540,32 @@
         // Check for save data
         Game.hasSaveData = hasSaveData();
 
+        // Initialize title stars once
+        if (Game.titleStars.length === 0) {
+            for (var si = 0; si < 40; si++) {
+                Game.titleStars.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    speed: 0.1 + Math.random() * 0.3,
+                    brightness: Math.random(),
+                    size: Math.random() < 0.3 ? 2 : 1
+                });
+            }
+        }
+
+        // Update stars (parallax drift)
+        for (var si2 = 0; si2 < Game.titleStars.length; si2++) {
+            var star = Game.titleStars[si2];
+            star.y += star.speed;
+            star.brightness = 0.3 + Math.sin(Game.frame * 0.05 + si2) * 0.4;
+            if (star.y > H) { star.y = 0; star.x = Math.random() * W; }
+        }
+
+        // Letter-by-letter subtitle reveal
+        if (Game.subtitleReveal < 23) { // "Shadows of the Eldspyre" = 23 chars
+            if (Game.frame % 4 === 0) Game.subtitleReveal++;
+        }
+
         // Generate sparkle particles on title screen
         if (Game.frame % 8 === 0) {
             Particles.add(Utils.randInt(20, W - 20), H - 10, {
@@ -1246,6 +1619,15 @@
             ctx.fillRect(0, row, W, 1);
         }
 
+        // Render parallax star field
+        for (var si = 0; si < Game.titleStars.length; si++) {
+            var star = Game.titleStars[si];
+            ctx.globalAlpha = Math.max(0, Math.min(1, star.brightness));
+            ctx.fillStyle = C.white;
+            ctx.fillRect(Math.floor(star.x), Math.floor(star.y), star.size, star.size);
+        }
+        ctx.globalAlpha = 1;
+
         // Eldspyre crystal in center
         var cx = W / 2;
         var cy = H / 2 - 10;
@@ -1282,10 +1664,17 @@
         Utils.drawText(ctx, titleText, titleX + 1, 31, C.darkBrown, 3);
         Utils.drawText(ctx, titleText, titleX, 30, C.gold, 3);
 
-        // Subtitle
-        var subText = 'Shadows of the Eldspyre';
-        var subX = centerTextX(subText, 1);
-        Utils.drawText(ctx, subText, subX, 58, C.paleBlue, 1);
+        // Subtitle with letter-by-letter reveal
+        var subTextFull = 'Shadows of the Eldspyre';
+        var subTextVisible = subTextFull.substring(0, Math.min(Game.subtitleReveal, subTextFull.length));
+        var subX = centerTextX(subTextFull, 1);
+        Utils.drawText(ctx, subTextVisible, subX, 58, C.paleBlue, 1);
+        // Cursor blink at end of reveal
+        if (Game.subtitleReveal < subTextFull.length && Math.floor(Game.frame / 8) % 2 === 0) {
+            var cursorX = subX + subTextVisible.length * 6;
+            ctx.fillStyle = C.paleBlue;
+            ctx.fillRect(cursorX, 58, 5, 7);
+        }
 
         // Menu options
         if (Game.hasSaveData) {
@@ -1348,6 +1737,19 @@
         }
         if (Input.pressed['ArrowRight']) {
             Game.selectedChar = (Game.selectedChar + 1) % 3;
+            Audio.play('select');
+        }
+        if (Input.pressed['ArrowUp']) {
+            Game.difficulty = (Game.difficulty + 2) % 3;
+            Audio.play('select');
+        }
+        if (Input.pressed['ArrowDown']) {
+            Game.difficulty = (Game.difficulty + 1) % 3;
+            Audio.play('select');
+        }
+        if (Input.pressed['x']) {
+            // Toggle speed run timer
+            Game.speedRunEnabled = !Game.speedRunEnabled;
             Audio.play('select');
         }
         if (Input.pressed['z']) {
@@ -1489,6 +1891,19 @@
             Utils.drawText(ctx, lines[l], lx, panelY + panelH + 8 + l * 10, C.white, 1);
         }
 
+        // Difficulty selector
+        var diffNames = ['EASY', 'NORMAL', 'HARD'];
+        var diffColors = [C.lightGreen, C.yellow, C.red];
+        var diffStr = 'DIFFICULTY: ' + diffNames[Game.difficulty];
+        var diffX = centerTextX(diffStr, 1);
+        Utils.drawText(ctx, diffStr, diffX, H - 34, diffColors[Game.difficulty], 1);
+        Utils.drawText(ctx, 'UP/DOWN TO CHANGE', centerTextX('UP/DOWN TO CHANGE', 1), H - 24, C.darkGray, 1);
+
+        // Speed run toggle
+        var srText = 'SPEED RUN: ' + (Game.speedRunEnabled ? 'ON' : 'OFF');
+        Utils.drawText(ctx, srText, W - 80, H - 34, Game.speedRunEnabled ? C.gold : C.darkGray, 1);
+        Utils.drawText(ctx, 'X:TOGGLE', W - 56, H - 24, C.darkGray, 1);
+
         // "Z to Confirm" blinking with arrow indicators
         if (Math.floor(Game.frame / 30) % 2 === 0) {
             var confText = 'Z to Confirm';
@@ -1545,6 +1960,21 @@
             console.warn('Error creating player:', e);
         }
 
+        // Apply difficulty scaling to player
+        if (Game.player) {
+            if (Game.difficulty === 0) { // Easy
+                Game.player.maxHp += 4;
+                Game.player.hp = Game.player.maxHp;
+                Game.player.speed = 1.7;
+            } else if (Game.difficulty === 2) { // Hard
+                Game.player.maxHp = Math.max(4, Game.player.maxHp - 2);
+                Game.player.hp = Game.player.maxHp;
+            }
+        }
+
+        // Reset speed run timer
+        Game.speedRunTime = 0;
+
         // Load starting room
         loadRoom(Maps.startRoom);
 
@@ -1559,12 +1989,28 @@
     function updateGame() {
         // Track play time
         Game.playTime++;
+        if (Game.speedRunEnabled) Game.speedRunTime++;
+
+        // Soren's blessing timer
+        if (Game.sorenBlessing && Game.sorenBlessingTimer > 0) {
+            Game.sorenBlessingTimer--;
+            if (Game.sorenBlessingTimer <= 0) {
+                Game.sorenBlessing = false;
+                if (Game.player) Game.player.speed = 1.5; // Reset speed
+            }
+        }
 
         // Pause check
         if (Input.pressed['p'] || Input.pressed['Escape']) {
             Game.pausedFromState = 'game';
             Game.state = 'paused';
             Audio.play('select');
+            return;
+        }
+
+        // If shop is open: only update shop
+        if (Game.shopOpen) {
+            updateShop();
             return;
         }
 
@@ -1650,6 +2096,15 @@
 
         // Update particles
         Particles.update();
+
+        // Check sign interaction
+        checkSignInteraction();
+
+        // Check spike trap hazards
+        checkSpikeTraps();
+
+        // Ambient sounds
+        updateAmbientSounds();
 
         // Check room exits
         checkRoomExits();
@@ -1740,14 +2195,34 @@
         // Render NPC interaction prompt
         renderNPCPrompt(ctx);
 
+        // Render sign interaction prompt
+        renderSignPrompt(ctx);
+
+        // Render speed run timer
+        if (Game.speedRunEnabled) renderSpeedRunTimer(ctx);
+
+        // Render goblin teeth count (when player has some)
+        if (Game.goblinTeeth > 0) renderTeethCount(ctx);
+
         // Render dialogue box
         Dialogue.render(ctx);
+
+        // Render shop overlay
+        renderShop(ctx);
 
         // Render transition overlay
         renderTransition(ctx);
 
         // Render room name
         renderRoomName(ctx);
+
+        // Render Soren blessing indicator
+        if (Game.sorenBlessing) {
+            var blinkOn = Math.floor(Game.sorenBlessingTimer / 30) % 2 === 0 || Game.sorenBlessingTimer > 120;
+            if (blinkOn) {
+                Utils.drawText(ctx, 'BLESSED', 2, H - 20, C.paleBlue, 1);
+            }
+        }
     }
 
     // =====================================================================
@@ -2052,16 +2527,51 @@
         ctx.fillStyle = 'rgba(80, 10, 10, 0.7)';
         ctx.fillRect(0, 0, W, H);
 
+        // Character sprite lying down (rotated)
+        if (Game.player) {
+            var charId = Game.player.characterId;
+            var sprKey = charId + '_down_0';
+            var sprCanvas = Sprites.get(sprKey);
+            if (sprCanvas) {
+                ctx.save();
+                ctx.translate(W / 2, H / 2 - 40);
+                ctx.rotate(Math.PI / 2); // Lying on side
+                ctx.globalAlpha = 0.6;
+                ctx.drawImage(sprCanvas, -8, -12);
+                ctx.globalAlpha = 1;
+                ctx.restore();
+            }
+        }
+
         // "YOU HAVE FALLEN" text
         var deathText = 'YOU HAVE FALLEN';
         var dtX = centerTextX(deathText, 2);
-        Utils.drawText(ctx, deathText, dtX, H / 2 - 20, C.red, 2);
+        Utils.drawText(ctx, deathText, dtX + 1, H / 2 - 15, C.darkRed, 2);
+        Utils.drawText(ctx, deathText, dtX, H / 2 - 16, C.red, 2);
+
+        // Run stats
+        var statsY = H / 2 + 8;
+        var playMins = Math.floor(Game.playTime / 3600);
+        var playSecs = Math.floor((Game.playTime % 3600) / 60);
+        var timeStr = 'TIME: ' + playMins + ':' + (playSecs < 10 ? '0' : '') + playSecs;
+        Utils.drawText(ctx, timeStr, centerTextX(timeStr, 1), statsY, C.lightGray, 1);
+
+        var enemyStr = 'ENEMIES DEFEATED: ' + Game.enemiesDefeated;
+        Utils.drawText(ctx, enemyStr, centerTextX(enemyStr, 1), statsY + 12, C.lightGray, 1);
+
+        var teethStr = 'GOBLIN TEETH: ' + Game.goblinTeeth;
+        Utils.drawText(ctx, teethStr, centerTextX(teethStr, 1), statsY + 24, C.gold, 1);
+
+        // Difficulty indicator
+        var diffNames = ['EASY', 'NORMAL', 'HARD'];
+        var diffStr = 'DIFFICULTY: ' + diffNames[Game.difficulty];
+        Utils.drawText(ctx, diffStr, centerTextX(diffStr, 1), statsY + 36, C.gray, 1);
 
         // "Press ENTER to Continue" blinking
         if (Game.gameOverTimer > 60 && Math.floor(Game.frame / 30) % 2 === 0) {
             var contText = 'Press ENTER to Continue';
             var cX = centerTextX(contText, 1);
-            Utils.drawText(ctx, contText, cX, H / 2 + 20, C.white, 1);
+            Utils.drawText(ctx, contText, cX, H - 20, C.white, 1);
         }
     }
 
@@ -2097,6 +2607,14 @@
             });
         }
 
+        // Firework confetti bursts
+        if (Game.victoryDialogueDone && Game.frame % 90 === 0) {
+            var fx = Utils.randInt(40, W - 40);
+            var fy = Utils.randInt(20, H / 2);
+            Particles.confetti(fx, fy, 15);
+            Audio.play('fanfare');
+        }
+
         Particles.update();
 
         // Scroll credits
@@ -2119,6 +2637,17 @@
 
         // Particles behind text
         Particles.render(ctx);
+
+        // Walking character animation at bottom
+        if (Game.victoryDialogueDone && Game.player) {
+            var walkX = (Game.frame * 0.5) % (W + 32) - 16;
+            var walkFrame = Math.floor(Game.frame / 10) % 2;
+            var charSprKey = Game.player.characterId + '_right_' + walkFrame;
+            var charSpr = Sprites.get(charSprKey);
+            if (charSpr) {
+                ctx.drawImage(charSpr, Math.floor(walkX), H - 40);
+            }
+        }
 
         if (Game.victoryDialogueDone) {
             // "THE END" in large gold text with shadow
@@ -2147,8 +2676,11 @@
                 'Class: ' + (Game.charClasses[Game.selectedChar] || ''),
                 '',
                 'Enemies Defeated: ' + (Game.enemiesDefeated || 0),
+                'Goblin Teeth Earned: ' + (Game.goblinTeeth || 0),
                 'Rooms Explored: ' + Object.keys(Game.visitedRooms || {}).length + '/8',
                 'Time: ' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds,
+                Game.speedRunEnabled ? ('Speed Run: ' + Math.floor(Game.speedRunTime / 3600) + ':' + (Math.floor((Game.speedRunTime % 3600) / 60) < 10 ? '0' : '') + Math.floor((Game.speedRunTime % 3600) / 60)) : '',
+                'Difficulty: ' + ['Easy', 'Normal', 'Hard'][Game.difficulty],
                 '',
                 'Heroes of Ebon Vale:',
                 'Daxon Lamn - Eldritch Knight',

@@ -1252,6 +1252,295 @@
     }
 
     /* ===================================================================
+     *  GoblinArcher  --  ranged enemy that shoots arrows
+     * =================================================================*/
+    class GoblinArcher {
+        constructor(x, y) {
+            this.type = 'goblin_archer';
+            this.x = x * TILE;
+            this.y = y * TILE;
+            this.w = 12;
+            this.h = 12;
+            this.spriteW = 16;
+            this.spriteH = 16;
+            this.dir = 'down';
+            this.frame = 0;
+            this.frameTimer = 0;
+
+            this.speed = 0.4;
+            this.maxHp = 3;
+            this.hp = this.maxHp;
+            this.damage = 1;
+            this.attackRange = 80;
+            this.aggroRange = 100;
+            this.minRange = 40; // back away if too close
+
+            this.state = 'idle';
+            this.stateTimer = 0;
+            this.patrolDir = Utils.choice(['left', 'right', 'up', 'down']);
+            this.patrolTimer = 60;
+
+            this.attacking = false;
+            this.attackTimer = 0;
+            this.attackCooldown = 0;
+            this.invincible = 0;
+            this.knockback = null;
+            this.flash = 0;
+            this.dead = false;
+            this.deathTimer = 0;
+            this._dropItem = null;
+            this.hitstop = 0;
+            this.staggerCount = 0;
+            this.staggerTimer = 0;
+            this.staggered = false;
+
+            // Arrow tracking
+            this.arrows = [];
+            this.shootCooldown = 0;
+            this._telegraphing = false;
+            this._telegraphTimer = 0;
+        }
+
+        update(room, player) {
+            if (this.dead) {
+                this.deathTimer--;
+                return this.deathTimer <= 0;
+            }
+
+            if (this.hitstop > 0) { this.hitstop--; return false; }
+
+            if (this.staggered) {
+                this.staggerTimer--;
+                if (this.staggerTimer <= 0) { this.staggered = false; this.staggerCount = 0; }
+                this.flash = 2;
+                return false;
+            }
+
+            if (this.staggerCount > 0 && !this.staggered) {
+                this.staggerTimer--;
+                if (this.staggerTimer <= 0) this.staggerCount = 0;
+            }
+
+            if (this.knockback) {
+                var kbx = this.x + this.knockback.vx;
+                var kby = this.y + this.knockback.vy;
+                if (!this.collidesWithMap(room, kbx, kby)) { this.x = kbx; this.y = kby; }
+                else if (!this.collidesWithMap(room, kbx, this.y)) { this.x = kbx; }
+                else if (!this.collidesWithMap(room, this.x, kby)) { this.y = kby; }
+                this.knockback.timer--;
+                if (this.knockback.timer <= 0) this.knockback = null;
+                this.clampToRoom();
+                return false;
+            }
+
+            if (this.invincible > 0) this.invincible--;
+            if (this.attackCooldown > 0) this.attackCooldown--;
+            if (this.shootCooldown > 0) this.shootCooldown--;
+            if (this.flash > 0) this.flash--;
+
+            // Update arrows
+            for (var ai = this.arrows.length - 1; ai >= 0; ai--) {
+                var ar = this.arrows[ai];
+                ar.x += ar.vx;
+                ar.y += ar.vy;
+                ar.life--;
+                if (ar.life <= 0 || ar.x < -16 || ar.x > W + 16 || ar.y < -16 || ar.y > H + 16) {
+                    this.arrows.splice(ai, 1);
+                }
+            }
+
+            var distToPlayer = Utils.dist(this, player);
+
+            // AI: stay at range, shoot arrows
+            if (distToPlayer < this.aggroRange) {
+                this.state = 'chase';
+                var angle = Math.atan2(player.y - this.y, player.x - this.x);
+                this.dir = this.angleToDir(angle);
+
+                if (distToPlayer < this.minRange) {
+                    // Back away
+                    var dx = Math.cos(angle) * -this.speed;
+                    var dy = Math.sin(angle) * -this.speed;
+                    var newX = this.x + dx;
+                    var newY = this.y + dy;
+                    if (!this.collidesWithMap(room, newX, this.y)) this.x = newX;
+                    if (!this.collidesWithMap(room, this.x, newY)) this.y = newY;
+                } else if (distToPlayer > this.attackRange * 0.8) {
+                    // Move closer to get in range
+                    var dx2 = Math.cos(angle) * this.speed * 0.5;
+                    var dy2 = Math.sin(angle) * this.speed * 0.5;
+                    var nx = this.x + dx2;
+                    var ny = this.y + dy2;
+                    if (!this.collidesWithMap(room, nx, this.y)) this.x = nx;
+                    if (!this.collidesWithMap(room, this.x, ny)) this.y = ny;
+                }
+
+                // Shoot if in range and cooldown is ready
+                if (distToPlayer < this.attackRange && this.shootCooldown <= 0) {
+                    if (!this._telegraphing) {
+                        this._telegraphing = true;
+                        this._telegraphTimer = 12;
+                        this.flash = 12;
+                    } else {
+                        this._telegraphTimer--;
+                        if (this._telegraphTimer <= 0) {
+                            this._telegraphing = false;
+                            this.shootArrow(player);
+                            this.shootCooldown = 90;
+                        }
+                    }
+                } else {
+                    this._telegraphing = false;
+                }
+            } else {
+                this.state = 'patrol';
+                this._telegraphing = false;
+                this.patrolTimer--;
+                if (this.patrolTimer <= 0) {
+                    this.patrolDir = Utils.choice(['left', 'right', 'up', 'down']);
+                    this.patrolTimer = 60 + Utils.randInt(0, 90);
+                }
+                var pdx = 0, pdy = 0;
+                if (this.patrolDir === 'left')  pdx = -1;
+                if (this.patrolDir === 'right') pdx = 1;
+                if (this.patrolDir === 'up')    pdy = -1;
+                if (this.patrolDir === 'down')  pdy = 1;
+                this.dir = this.patrolDir;
+                var px = this.x + pdx * this.speed * 0.4;
+                var py = this.y + pdy * this.speed * 0.4;
+                if (!this.collidesWithMap(room, px, this.y)) this.x = px;
+                if (!this.collidesWithMap(room, this.x, py)) this.y = py;
+            }
+
+            // Animation
+            this.frameTimer++;
+            if (this.frameTimer >= 14) { this.frame = 1 - this.frame; this.frameTimer = 0; }
+            this.clampToRoom();
+            return false;
+        }
+
+        shootArrow(player) {
+            var sx = this.x + this.w / 2;
+            var sy = this.y + this.h / 2;
+            var angle = Math.atan2(player.y + 6 - sy, player.x + 5 - sx);
+            var speed = 2;
+            this.arrows.push({
+                x: sx, y: sy,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 90,
+                damage: 1,
+                w: 4, h: 4
+            });
+            Audio.play('arrow');
+        }
+
+        angleToDir(angle) {
+            var deg = angle * 180 / Math.PI;
+            if (deg > -45 && deg <= 45)   return 'right';
+            if (deg > 45 && deg <= 135)   return 'down';
+            if (deg > -135 && deg <= -45) return 'up';
+            return 'left';
+        }
+
+        takeDamage(amount, fromX, fromY) {
+            if (this.invincible > 0 || this.dead) return;
+            this.hp -= amount;
+            this.invincible = 20;
+            this.flash = 6;
+            this.hitstop = 3;
+            this.staggerCount++;
+            this.staggerTimer = 45;
+            if (this.staggerCount >= 3) {
+                this.staggered = true;
+                this.staggerTimer = 40;
+                Particles.burst(this.x + this.w / 2, this.y - 4, 6, C.yellow);
+                Audio.play('stagger');
+            }
+            var angle = Math.atan2(this.y - fromY, this.x - fromX);
+            this.knockback = { vx: Math.cos(angle) * 5, vy: Math.sin(angle) * 5, timer: 5 };
+            Audio.play('hit');
+            Particles.blood(this.x + this.w / 2, this.y + this.h / 2);
+            if (this.hp <= 0) this.die();
+        }
+
+        die() {
+            this.dead = true;
+            this.deathTimer = 30;
+            Audio.play('death');
+            Particles.burst(this.x + this.w / 2, this.y + this.h / 2, 12, C.green);
+            if (Math.random() < 0.3) {
+                this._dropItem = { type: 'heart_drop', x: this.x, y: this.y };
+            }
+        }
+
+        getAttackHitbox() { return null; } // ranged only
+
+        collidesWithMap(room, px, py) {
+            var points = [
+                { x: px + 1, y: py + 1 },
+                { x: px + this.w - 2, y: py + 1 },
+                { x: px + 1, y: py + this.h - 2 },
+                { x: px + this.w - 2, y: py + this.h - 2 }
+            ];
+            for (var i = 0; i < points.length; i++) {
+                if (Maps.isSolidAt(room, points[i].x, points[i].y)) return true;
+            }
+            return false;
+        }
+
+        clampToRoom() {
+            this.x = Utils.clamp(this.x, 0, W - this.w);
+            this.y = Utils.clamp(this.y, 0, H - this.h);
+        }
+
+        render(ctx) {
+            if (this.dead) {
+                ctx.globalAlpha = this.deathTimer / 30;
+            }
+            if (this.invincible > 0 && Math.floor(this.invincible / 2) % 2 === 0) {
+                if (!this.dead) { ctx.globalAlpha = 1; return; }
+            }
+
+            // Use goblin sprite with tint for now (drawn as goblin with bow indicator)
+            var spriteKey = 'goblin_' + this.frame;
+            var sx = this.x + this.w / 2 - this.spriteW / 2;
+            var sy = this.y + this.h - this.spriteH;
+
+            if (this.flash > 0) {
+                ctx.fillStyle = C.white;
+                ctx.fillRect(Math.floor(sx), Math.floor(sy), this.spriteW, this.spriteH);
+            }
+
+            var flip = (this.dir === 'left');
+            Sprites.draw(ctx, spriteKey, Math.floor(sx), Math.floor(sy), flip);
+
+            // Draw small bow indicator (brown line)
+            ctx.fillStyle = C.brown;
+            if (this.dir === 'right') {
+                ctx.fillRect(Math.floor(sx + 14), Math.floor(sy + 5), 3, 6);
+            } else if (this.dir === 'left') {
+                ctx.fillRect(Math.floor(sx - 1), Math.floor(sy + 5), 3, 6);
+            } else {
+                ctx.fillRect(Math.floor(sx + 5), Math.floor(sy + (this.dir === 'down' ? 14 : -1)), 6, 3);
+            }
+
+            ctx.globalAlpha = 1;
+
+            // Render arrows
+            for (var i = 0; i < this.arrows.length; i++) {
+                var ar = this.arrows[i];
+                ctx.fillStyle = C.brown;
+                ctx.fillRect(Math.floor(ar.x - 2), Math.floor(ar.y - 1), 4, 2);
+                // Arrow tip
+                ctx.fillStyle = C.lightGray;
+                var tipX = ar.vx > 0 ? ar.x + 2 : ar.x - 3;
+                ctx.fillRect(Math.floor(tipX), Math.floor(ar.y - 1), 1, 2);
+            }
+        }
+    }
+
+    /* ===================================================================
      *  Combat Resolution  --  called from the main game loop each frame
      * =================================================================*/
     function resolveCombat(player, enemies, boss, projectiles) {
@@ -1315,11 +1604,28 @@
             }
         }
 
-        // --- Enemies attacking player (melee + contact) ---
+        // --- Enemies attacking player (melee + contact + arrows) ---
         for (i = 0; i < enemies.length; i++) {
             if (playerHitThisFrame) break;
             enemy = enemies[i];
             if (enemy.dead) continue;
+
+            // Goblin archer arrows
+            if (enemy.arrows && enemy.arrows.length > 0 && !playerHitThisFrame) {
+                for (var ai = enemy.arrows.length - 1; ai >= 0; ai--) {
+                    var ar = enemy.arrows[ai];
+                    var arrowBox = { x: ar.x - ar.w / 2, y: ar.y - ar.h / 2, w: ar.w, h: ar.h };
+                    playerBox = { x: player.x, y: player.y, w: player.w, h: player.h };
+                    if (Utils.aabb(arrowBox, playerBox)) {
+                        player.takeDamage(ar.damage, ar.x, ar.y);
+                        enemy.arrows.splice(ai, 1);
+                        playerHitThisFrame = true;
+                        break;
+                    }
+                }
+            }
+
+            if (playerHitThisFrame) break;
 
             // Melee attack hitbox (priority over contact)
             atkBox = enemy.getAttackHitbox();
@@ -1386,6 +1692,7 @@
     window.Entities = {
         Player:        Player,
         Enemy:         Enemy,
+        GoblinArcher:  GoblinArcher,
         NPC:           NPC,
         Boss:          Boss,
         HeartDrop:     HeartDrop,

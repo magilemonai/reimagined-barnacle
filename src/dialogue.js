@@ -395,6 +395,64 @@
       { speaker: 'Statue', text: 'The face has been defaced' },
       { speaker: 'Statue', text: 'by goblin claws.' },
       { speaker: 'Statue', text: 'It once depicted Nitriti.' }
+    ],
+
+    // -----------------------------------------------------------------
+    // Return-visit dialogues (shown after first interaction)
+    // -----------------------------------------------------------------
+
+    fawks_return: [
+      { speaker: 'Fawks', text: 'Back again? Need a drink?' },
+      { speaker: 'Fawks', text: 'The goblins raided our' },
+      { speaker: 'Fawks', text: 'storehouse last week.' },
+      { speaker: 'Fawks', text: 'Collect their teeth for' },
+      { speaker: 'Fawks', text: 'Braxon. He buys them.' }
+    ],
+
+    helena_return: [
+      { speaker: 'Helena', text: 'Any progress against' },
+      { speaker: 'Helena', text: 'the goblins?' },
+      { speaker: 'Helena', text: 'Visit Brother Soren if' },
+      { speaker: 'Helena', text: 'you need healing.' },
+      { speaker: 'Helena', text: 'His blessing is powerful.' }
+    ],
+
+    elira_return: [
+      { speaker: 'Elira', text: 'Still standing? Good.' },
+      { speaker: 'Elira', text: 'My scouts report archers' },
+      { speaker: 'Elira', text: 'in the deeper forest.' },
+      { speaker: 'Elira', text: 'Watch for their arrows.' }
+    ],
+
+    braxon_return: [
+      { speaker: 'Braxon', text: 'Got goblin teeth?' },
+      { speaker: 'Braxon', text: 'I can forge useful things' },
+      { speaker: 'Braxon', text: 'from their remains.' },
+      { speaker: 'Braxon', text: 'Bring me teeth and I will' },
+      { speaker: 'Braxon', text: 'trade with you.' }
+    ],
+
+    soren_return: [
+      { speaker: 'Soren', text: 'Rest here, child.' },
+      { speaker: 'Soren', text: 'I sense your weariness.' },
+      { speaker: 'Soren', text: 'Let me restore your' },
+      { speaker: 'Soren', text: 'strength once more.' }
+    ],
+
+    rorik_market_return: [
+      { speaker: 'Rorik', text: 'Back from the fight?' },
+      { speaker: 'Rorik', text: 'I heard explosions from' },
+      { speaker: 'Rorik', text: 'the forest...' },
+      { speaker: 'Rorik', text: 'Forge-spirits protect you.' }
+    ],
+
+    querubra_return: [
+      { speaker: 'Que\'Rubra', text: 'The forest trembles...' },
+      { speaker: 'Que\'Rubra', text: 'Bargnot\'s power grows.' },
+      { speaker: 'Que\'Rubra', text: 'Have you collected the' },
+      { speaker: 'Que\'Rubra', text: 'three relics yet?' },
+      { speaker: 'Que\'Rubra', text: 'Crown, Cape, Scepter...' },
+      { speaker: 'Que\'Rubra', text: 'Place them on the statue.' }
     ]
   };
 
@@ -487,11 +545,17 @@
      * @param {Function} [onComplete] - Optional callback fired when the
      *                                  player closes the final line.
      */
-    start: function (dialogueId, onComplete) {
-      var data = DialogueData[dialogueId];
-      if (!data || data.length === 0) {
-        console.warn('Dialogue not found: ' + dialogueId);
-        return;
+    start: function (dialogueId, onComplete, inlineText) {
+      var data;
+      if (inlineText) {
+        // Support inline text strings for signs and dynamic messages
+        data = [{ speaker: 'Sign', text: inlineText }];
+      } else {
+        data = DialogueData[dialogueId];
+        if (!data || data.length === 0) {
+          console.warn('Dialogue not found: ' + dialogueId);
+          return;
+        }
       }
 
       this.lines = data;

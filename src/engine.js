@@ -135,14 +135,105 @@
     /** Keys pressed this frame only (true for one frame) */
     pressed: {},
 
+    /** Input buffer: stores recent presses for a few frames */
+    _buffer: {},
+    /** Buffer window in frames */
+    _bufferWindow: 6,
+
+    /**
+     * Check if a key was pressed recently (within buffer window).
+     * Consumes the buffer so it only fires once.
+     */
+    buffered: function (key) {
+      if (this.pressed[key]) return true;
+      if (this._buffer[key] && this._buffer[key] > 0) {
+        this._buffer[key] = 0;
+        return true;
+      }
+      return false;
+    },
+
     /**
      * Called each frame after input has been processed.
      * Clears the pressed state so each press is only seen once.
+     * Also ticks down input buffers and polls gamepads.
      */
     update: function () {
       for (var key in this.pressed) {
         this.pressed[key] = false;
       }
+      // Tick down buffers
+      for (var bk in this._buffer) {
+        if (this._buffer[bk] > 0) this._buffer[bk]--;
+      }
+      // Poll gamepad
+      this._pollGamepad();
+    },
+
+    /**
+     * Poll connected gamepads and map to game keys.
+     * Standard gamepad mapping:
+     *   D-pad: buttons 12-15 (up/down/left/right)
+     *   Left stick: axes 0,1
+     *   A (button 0) -> z (attack/confirm)
+     *   B (button 1) -> x (special)
+     *   X (button 2) -> z (alt attack)
+     *   Start (button 9) -> Enter
+     *   Select (button 8) -> p (pause)
+     */
+    _gpPrevButtons: {},
+    _gpDeadzone: 0.4,
+
+    _pollGamepad: function () {
+      var gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      var gp = null;
+      for (var gi = 0; gi < gamepads.length; gi++) {
+        if (gamepads[gi]) { gp = gamepads[gi]; break; }
+      }
+      if (!gp) return;
+
+      var mapping = [
+        [0, 'z'],       // A -> attack/confirm
+        [1, 'x'],       // B -> special
+        [2, 'z'],       // X -> attack (alt)
+        [8, 'p'],       // Select -> pause
+        [9, 'Enter'],   // Start -> Enter
+        [12, 'ArrowUp'],
+        [13, 'ArrowDown'],
+        [14, 'ArrowLeft'],
+        [15, 'ArrowRight']
+      ];
+
+      for (var mi = 0; mi < mapping.length; mi++) {
+        var btnIdx = mapping[mi][0];
+        var keyName = mapping[mi][1];
+        var btn = gp.buttons[btnIdx];
+        if (!btn) continue;
+
+        var wasPressed = !!this._gpPrevButtons[btnIdx];
+        var isPressed = btn.pressed;
+
+        if (isPressed && !wasPressed) {
+          this.pressed[keyName] = true;
+          this._buffer[keyName] = this._bufferWindow;
+        }
+        if (isPressed) {
+          this.keys[keyName] = true;
+        } else if (wasPressed) {
+          this.keys[keyName] = false;
+        }
+        this._gpPrevButtons[btnIdx] = isPressed;
+      }
+
+      // Left stick
+      var lx = gp.axes[0] || 0;
+      var ly = gp.axes[1] || 0;
+      var dz = this._gpDeadzone;
+
+      this.keys['ArrowLeft']  = this.keys['ArrowLeft']  || (lx < -dz);
+      this.keys['ArrowRight'] = this.keys['ArrowRight'] || (lx > dz);
+      this.keys['ArrowUp']    = this.keys['ArrowUp']    || (ly < -dz);
+      this.keys['ArrowDown']  = this.keys['ArrowDown']  || (ly > dz);
     }
   };
 
@@ -151,6 +242,10 @@
       e.preventDefault();
       if (!window.Input.keys[e.key]) {
         window.Input.pressed[e.key] = true;
+        // Buffer Z and X presses for combat responsiveness
+        if (e.key === 'z' || e.key === 'x') {
+          window.Input._buffer[e.key] = window.Input._bufferWindow;
+        }
       }
       window.Input.keys[e.key] = true;
     }
@@ -468,6 +563,121 @@
           this._osc('square', 660, gain, t + 0.3, t + 0.4);
           break;
 
+        // ---- Fanfare: ascending arpeggio for puzzle solve (600ms) ----
+        case 'fanfare':
+          gain = this._gain(0.45);
+          gain.gain.setValueAtTime(0.45 * this.masterVolume, t);
+          gain.gain.setValueAtTime(0.45 * this.masterVolume, t + 0.55);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+          // C4 - E4 - G4 - B4 - C5 ascending major 7th arpeggio
+          this._osc('square', 262, gain, t, t + 0.12);
+          this._osc('square', 330, gain, t + 0.12, t + 0.24);
+          this._osc('square', 392, gain, t + 0.24, t + 0.36);
+          this._osc('square', 494, gain, t + 0.36, t + 0.48);
+          this._osc('square', 523, gain, t + 0.48, t + 0.6);
+          // Layered triangle for richness
+          var fanGain = this._gain(0.25);
+          fanGain.gain.setValueAtTime(0.25 * this.masterVolume, t);
+          fanGain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+          this._osc('triangle', 523, fanGain, t + 0.48, t + 0.6);
+          break;
+
+        // ---- Bird chirp: quick sine warble (100ms) ----
+        case 'bird':
+          gain = this._gain(0.08);
+          gain.gain.setValueAtTime(0.08 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+          osc = this.ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(2200, t);
+          osc.frequency.setValueAtTime(2800, t + 0.03);
+          osc.frequency.setValueAtTime(2400, t + 0.06);
+          osc.frequency.setValueAtTime(3000, t + 0.08);
+          osc.connect(gain);
+          osc.start(t);
+          osc.stop(t + 0.1);
+          break;
+
+        // ---- Water drip: sine plop (80ms) ----
+        case 'drip':
+          gain = this._gain(0.06);
+          gain.gain.setValueAtTime(0.06 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+          osc = this.ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1200, t);
+          osc.frequency.exponentialRampToValueAtTime(400, t + 0.08);
+          osc.connect(gain);
+          osc.start(t);
+          osc.stop(t + 0.08);
+          break;
+
+        // ---- Wind gust: filtered noise (300ms) ----
+        case 'wind':
+          gain = this._gain(0.04);
+          gain.gain.setValueAtTime(0.001, t);
+          gain.gain.linearRampToValueAtTime(0.04 * this.masterVolume, t + 0.1);
+          gain.gain.linearRampToValueAtTime(0.001, t + 0.3);
+          this._noise(0.3, gain, t);
+          break;
+
+        // ---- Shop buy: cash register chime (200ms) ----
+        case 'buy':
+          gain = this._gain(0.4);
+          gain.gain.setValueAtTime(0.4 * this.masterVolume, t);
+          gain.gain.setValueAtTime(0.4 * this.masterVolume, t + 0.15);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+          this._osc('triangle', 880, gain, t, t + 0.06);
+          this._osc('triangle', 1320, gain, t + 0.06, t + 0.2);
+          break;
+
+        // ---- Heal: ascending gentle chime (300ms) ----
+        case 'heal':
+          gain = this._gain(0.35);
+          gain.gain.setValueAtTime(0.35 * this.masterVolume, t);
+          gain.gain.setValueAtTime(0.35 * this.masterVolume, t + 0.25);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+          this._osc('sine', 440, gain, t, t + 0.1);
+          this._osc('sine', 554, gain, t + 0.1, t + 0.2);
+          this._osc('sine', 660, gain, t + 0.2, t + 0.3);
+          break;
+
+        // ---- Arrow: quick whistle (70ms) ----
+        case 'arrow':
+          gain = this._gain(0.3);
+          gain.gain.setValueAtTime(0.3 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.07);
+          osc = this.ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1000, t);
+          osc.frequency.exponentialRampToValueAtTime(600, t + 0.07);
+          osc.connect(gain);
+          osc.start(t);
+          osc.stop(t + 0.07);
+          break;
+
+        // ---- Spike trap: sharp noise hit (60ms) ----
+        case 'spike':
+          gain = this._gain(0.5);
+          gain.gain.setValueAtTime(0.5 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.06);
+          this._noise(0.06, gain, t);
+          var spikeOscGain = this._gain(0.3);
+          spikeOscGain.gain.setValueAtTime(0.3 * this.masterVolume, t);
+          spikeOscGain.gain.exponentialRampToValueAtTime(0.01, t + 0.06);
+          this._osc('square', 300, spikeOscGain, t, t + 0.06);
+          break;
+
+        // ---- Error/deny: two descending tones (200ms) ----
+        case 'deny':
+          gain = this._gain(0.35);
+          gain.gain.setValueAtTime(0.35 * this.masterVolume, t);
+          gain.gain.setValueAtTime(0.35 * this.masterVolume, t + 0.15);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+          this._osc('square', 400, gain, t, t + 0.1);
+          this._osc('square', 300, gain, t + 0.1, t + 0.2);
+          break;
+
         default:
           console.warn('Unknown sound effect:', name);
       }
@@ -605,6 +815,72 @@
           color: window.C.darkRed,
           size: 1,
           gravity: 0.05
+        });
+      }
+    },
+
+    /**
+     * Trail: emit particles along a path behind a moving object.
+     * @param {number} x
+     * @param {number} y
+     * @param {string} color
+     * @param {number} [count] - Number of trail particles (default 2)
+     */
+    trail: function (x, y, color, count) {
+      count = count || 2;
+      for (var i = 0; i < count; i++) {
+        this.add(x + (Math.random() * 4 - 2), y + (Math.random() * 4 - 2), {
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          life: 8 + Math.floor(Math.random() * 8),
+          color: color || window.C.white,
+          size: 1,
+          gravity: 0
+        });
+      }
+    },
+
+    /**
+     * Ring: emit particles in a circle pattern.
+     * @param {number} x
+     * @param {number} y
+     * @param {number} radius
+     * @param {number} count
+     * @param {string} color
+     */
+    ring: function (x, y, radius, count, color) {
+      for (var i = 0; i < count; i++) {
+        var angle = (i / count) * Math.PI * 2;
+        this.add(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius, {
+          vx: Math.cos(angle) * 0.8,
+          vy: Math.sin(angle) * 0.8,
+          life: 15 + Math.floor(Math.random() * 10),
+          color: color || window.C.gold,
+          size: 1,
+          gravity: 0
+        });
+      }
+    },
+
+    /**
+     * Confetti: colorful particles bursting upward and floating down.
+     * @param {number} x
+     * @param {number} y
+     * @param {number} count
+     */
+    confetti: function (x, y, count) {
+      var colors = [window.C.gold, window.C.red, window.C.blue, window.C.green,
+                    window.C.purple, window.C.yellow, window.C.teal, window.C.pink];
+      for (var i = 0; i < count; i++) {
+        var angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.8;
+        var speed = 1.5 + Math.random() * 2;
+        this.add(x + (Math.random() * 10 - 5), y, {
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 40 + Math.floor(Math.random() * 30),
+          color: colors[Math.floor(Math.random() * colors.length)],
+          size: 1 + Math.floor(Math.random() * 2),
+          gravity: 0.04
         });
       }
     }

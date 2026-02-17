@@ -43,6 +43,9 @@
         SIGN:        25,   // tile_sign          - solid (interactive)
         CARPET:      26,   // tile_carpet        - passable
         DARK:        27,   // tile_dark          - solid (void)
+        SPIKE:       28,   // tile_spike         - passable (hazard)
+        MUSHROOM:    29,   // tile_mushroom      - passable (decoration)
+        CRACKED:     30,   // tile_cracked_floor - passable (decoration)
     };
 
     window.T = T;
@@ -81,6 +84,9 @@
     window.TileProps[T.SIGN]         = { solid: true,  name: 'tile_sign',   hitbox: { x: 4, y: 5, w: 8, h: 11 } };
     window.TileProps[T.CARPET]       = { solid: false, name: 'tile_carpet' };
     window.TileProps[T.DARK]         = { solid: true,  name: 'tile_dark' };
+    window.TileProps[T.SPIKE]        = { solid: false, name: 'tile_spike',  hazard: true, damage: 1 };
+    window.TileProps[T.MUSHROOM]     = { solid: false, name: 'tile_mushroom' };
+    window.TileProps[T.CRACKED]      = { solid: false, name: 'tile_cracked_floor' };
 
     // =========================================================================
     //  Shorthand aliases for readability in tile grids
@@ -114,6 +120,9 @@
     var Sg = T.SIGN;         // 25 sign
     var Cp = T.CARPET;       // 26 carpet
     var Dk = T.DARK;         // 27 dark/void
+    var Sp = T.SPIKE;        // 28 spike trap
+    var Mu = T.MUSHROOM;     // 29 mushroom
+    var Cr = T.CRACKED;      // 30 cracked floor
 
     // =========================================================================
     //  Room Definitions
@@ -158,6 +167,9 @@
         ],
         enemies: [],
         items: [],
+        signs: [
+            { x: 8, y: 5, text: 'Welcome to Ebon Vale! Town square ahead.' }
+        ],
         onEnter: null,
     };
 
@@ -233,6 +245,9 @@
         npcs: [],
         enemies: [],
         items: [],
+        signs: [
+            { x: 7, y: 4, text: 'Warning: Ebon Forest lies beyond. Travelers beware!' }
+        ],
         onEnter: null,
     };
 
@@ -272,9 +287,13 @@
             { type: 'goblin_lackey', x: 7,  y: 3  },
             { type: 'goblin_lackey', x: 9,  y: 7  },
             { type: 'goblin_lackey', x: 10, y: 10 },
+            { type: 'goblin_archer', x: 3,  y: 5  },
         ],
         items: [
             { type: 'item_potion', x: 4, y: 9, id: 'forest_entry_potion' },
+        ],
+        signs: [
+            { x: 7, y: 4, text: 'Beware! Goblins infest the path ahead.' }
         ],
         onEnter: null,
     };
@@ -317,6 +336,7 @@
             { type: 'goblin_lackey',   x: 3,  y: 3 },
             { type: 'goblin_lackey',   x: 10, y: 10 },
             { type: 'spinecleaver',    x: 14, y: 5 },
+            { type: 'goblin_archer',   x: 6,  y: 9 },
         ],
         items: [
             { type: 'item_potion', x: 4, y: 5, id: 'deep_forest_potion' },
@@ -338,16 +358,16 @@
         //   0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
             [TW,  TW,  TW,  TW,  TW,  TW,  TW,  TD,  TD,  TW,  TW,  TW,  TW,  TW,  TW,  TW ],  // row 0  - exit north (door)
             [TW,  To,  TF,  TF,  Pi,  TF,  TF,  Cp,  Cp,  TF,  TF,  Pi,  TF,  TF,  To,  TW ],  // row 1
-            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 2
-            [TW,  TF,  St,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  St,  TF,  TW ],  // row 3  - defaced statues
+            [TW,  TF,  Cr,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  Cr,  TF,  TW ],  // row 2  - cracked floor
+            [TW,  TF,  St,  TF,  TF,  Sp,  TF,  Cp,  Cp,  TF,  Sp,  TF,  TF,  St,  TF,  TW ],  // row 3  - spike traps + statues
             [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 4
             [TW,  To,  TF,  TF,  Pi,  TF,  TF,  Cp,  Cp,  TF,  TF,  Pi,  TF,  TF,  To,  TW ],  // row 5  - pillars & torches
-            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 6
+            [TW,  TF,  TF,  Sp,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  Sp,  TF,  TF,  TW ],  // row 6  - spike traps
             [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 7
             [TW,  TF,  St,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  St,  TF,  TW ],  // row 8  - more defaced statues
             [TW,  To,  TF,  TF,  Pi,  TF,  TF,  Cp,  Cp,  TF,  TF,  Pi,  TF,  TF,  To,  TW ],  // row 9  - pillars & torches
-            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 10
-            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 11
+            [TW,  TF,  TF,  TF,  TF,  Sp,  TF,  Cp,  Cp,  TF,  Sp,  TF,  TF,  TF,  TF,  TW ],  // row 10 - spike traps
+            [TW,  TF,  Cr,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  Cr,  TF,  TW ],  // row 11 - cracked floor
             [TW,  TW,  TW,  TW,  TW,  TF,  TF,  Cp,  Cp,  TF,  TF,  TW,  TW,  TW,  TW,  TW ],  // row 12
             [Dk,  Dk,  Dk,  Dk,  TW,  TW,  TW,  TD,  TD,  TW,  TW,  TW,  Dk,  Dk,  Dk,  Dk ],  // row 13 - exit south (entrance from forest)
         ],

@@ -755,7 +755,8 @@
             this.actionQueue          = []; // sequence of actions
             this.phaseTransition      = false;
             this.phaseTransitionTimer = 0;
-            this._chargeWindup        = 0; // set per-charge for telegraph timing
+            this._chargeWindup        = 0; // frames where boss telegraphs before dashing
+            this._chargeExhaust       = 0; // frames where boss is tired after dashing
             this._summonedPhase2      = false; // track if we already summoned minions
         }
 
@@ -828,8 +829,8 @@
             this.phaseTransition = true;
             this.phaseTransitionTimer = 90; // 1.5 s transition
             this.invincible = 90;
-            this.speed += 0.2;
-            this.damage = (phase === 3) ? 3 : 2;
+            this.speed += 0.15;
+            this.damage = 2; // consistent damage across phases (difficulty is in speed/patterns)
 
             if (phase === 2) {
                 Dialogue.start('boss_phase2');
@@ -855,18 +856,20 @@
                 actions = ['chase', 'chase', 'shoot'];
                 this.stateTimer = 60 + Utils.randInt(0, 30);
             } else if (this.phase === 2) {
-                actions = ['chase', 'charge', 'shoot', 'shoot'];
-                this.stateTimer = 45 + Utils.randInt(0, 20);
+                actions = ['chase', 'chase', 'charge', 'shoot'];
+                this.stateTimer = 55 + Utils.randInt(0, 25);
             } else {
-                actions = ['charge', 'shoot', 'shoot', 'barrage'];
-                this.stateTimer = 35 + Utils.randInt(0, 15);
+                actions = ['chase', 'charge', 'shoot', 'barrage'];
+                this.stateTimer = 45 + Utils.randInt(0, 20);
             }
 
             this.state = Utils.choice(actions);
 
-            // Set charge telegraph timing
+            // Charge has a fixed 3-phase structure: wind-up → dash → exhaustion
             if (this.state === 'charge') {
-                this._chargeWindup = this.stateTimer - 18; // 18 frames of wind-up
+                this.stateTimer = 58;    // total charge duration
+                this._chargeWindup = 28; // dash when timer <= 28 (30 frames telegraph)
+                this._chargeExhaust = 12; // exhaustion when timer <= 12 (recovery window)
             }
 
             // If close to player, prefer melee
@@ -887,11 +890,11 @@
                     break;
 
                 case 'charge':
-                    // Telegraph: first 20 frames of charge are wind-up
                     if (this.stateTimer > this._chargeWindup) {
-                        // Wind-up: boss pauses, particles gather inward
+                        // TELEGRAPH (30 frames): boss pauses, particles gather inward
                         this.flash = 2;
-                        if (this.stateTimer % 4 === 0) {
+                        this.dir = this.angleToDir(angle);
+                        if (this.stateTimer % 3 === 0) {
                             var gatherAngle = Math.random() * Math.PI * 2;
                             var gatherDist = 20 + Math.random() * 15;
                             Particles.add(
@@ -907,10 +910,10 @@
                                 }
                             );
                         }
-                    } else {
-                        // Actual charge: fast dash
-                        this.x += Math.cos(angle) * this.speed * 3;
-                        this.y += Math.sin(angle) * this.speed * 3;
+                    } else if (this.stateTimer > this._chargeExhaust) {
+                        // DASH (16 frames): fast charge at 2x speed
+                        this.x += Math.cos(angle) * this.speed * 2;
+                        this.y += Math.sin(angle) * this.speed * 2;
                         this.dir = this.angleToDir(angle);
                         if (this.stateTimer % 3 === 0) {
                             Particles.burst(
@@ -918,6 +921,9 @@
                                 (this.phase === 3) ? C.purple : C.red
                             );
                         }
+                    } else {
+                        // EXHAUSTION (12 frames): boss staggers, vulnerable
+                        this.flash = (this.stateTimer % 4 < 2) ? 1 : 0;
                     }
                     break;
 
@@ -930,10 +936,10 @@
                     break;
 
                 case 'barrage':
-                    // Phase 3: fire in multiple directions
-                    if (this.stateTimer % 8 === 0) {
-                        for (var i = 0; i < 4; i++) {
-                            this.fireProjectile(angle + (i * Math.PI / 6) - Math.PI / 4);
+                    // Phase 3: fire in multiple directions (slower cadence, wider spread)
+                    if (this.stateTimer % 12 === 0) {
+                        for (var i = 0; i < 3; i++) {
+                            this.fireProjectile(angle + (i * Math.PI / 4) - Math.PI / 4);
                         }
                     }
                     break;

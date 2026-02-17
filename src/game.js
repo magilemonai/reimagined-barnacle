@@ -279,6 +279,9 @@
         // Play appropriate music for this room
         playRoomMusic(roomId);
 
+        // Mark room as visited for minimap
+        Game.visitedRooms[roomId] = true;
+
         // Track safe rooms (town rooms)
         if (roomId === 'ebon_vale_square' || roomId === 'ebon_vale_market' || roomId === 'ebon_vale_north') {
             Game.lastSafeRoom = roomId;
@@ -711,6 +714,148 @@
     }
 
     // =====================================================================
+    // TEMPLE LIGHTING SYSTEM
+    // =====================================================================
+
+    // Cache torch positions per room to avoid scanning every frame
+    var _torchCache = {};
+
+    function getTorchPositions(room) {
+        if (!room || !room.tiles) return [];
+        if (_torchCache[room.id]) return _torchCache[room.id];
+
+        var torches = [];
+        var T = window.T;
+        for (var row = 0; row < ROWS; row++) {
+            for (var col = 0; col < COLS; col++) {
+                if (room.tiles[row][col] === T.TORCH) {
+                    torches.push({
+                        x: col * TILE + TILE / 2,
+                        y: row * TILE + TILE / 2
+                    });
+                }
+            }
+        }
+        _torchCache[room.id] = torches;
+        return torches;
+    }
+
+    function isTempleRoom(roomId) {
+        return roomId && roomId.indexOf('temple') === 0;
+    }
+
+    function renderTorchGlow(ctx, room) {
+        if (!room || !isTempleRoom(room.id)) return;
+
+        var torches = getTorchPositions(room);
+        var flickerSeed = Game.frame * 0.12;
+
+        // Draw torch glow circles (warm light around each torch)
+        for (var i = 0; i < torches.length; i++) {
+            var tx = torches[i].x;
+            var ty = torches[i].y;
+            var flickerR = 28 + Math.sin(flickerSeed + i * 2.5) * 4;
+            var flickerA = 0.12 + Math.sin(flickerSeed * 1.3 + i) * 0.04;
+
+            // Warm glow gradient
+            var grad = ctx.createRadialGradient(tx, ty, 0, tx, ty, flickerR);
+            grad.addColorStop(0, 'rgba(255,200,80,' + (flickerA + 0.06) + ')');
+            grad.addColorStop(0.5, 'rgba(255,150,40,' + flickerA + ')');
+            grad.addColorStop(1, 'rgba(255,100,20,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(tx - flickerR, ty - flickerR, flickerR * 2, flickerR * 2);
+        }
+    }
+
+    function renderDarknessOverlay(ctx, room) {
+        if (!room || !isTempleRoom(room.id)) return;
+
+        var torches = getTorchPositions(room);
+        var flickerSeed = Game.frame * 0.12;
+
+        // Create a temporary canvas for the darkness mask
+        var dCanvas = document.createElement('canvas');
+        dCanvas.width = W;
+        dCanvas.height = H;
+        var dCtx = dCanvas.getContext('2d');
+
+        // Fill with semi-darkness
+        dCtx.fillStyle = 'rgba(0,0,10,0.55)';
+        dCtx.fillRect(0, 0, W, H);
+
+        // Cut out light circles using destination-out compositing
+        dCtx.globalCompositeOperation = 'destination-out';
+
+        // Light around each torch
+        for (var i = 0; i < torches.length; i++) {
+            var tx = torches[i].x;
+            var ty = torches[i].y;
+            var lr = 32 + Math.sin(flickerSeed + i * 2.5) * 5;
+
+            var grad = dCtx.createRadialGradient(tx, ty, 0, tx, ty, lr);
+            grad.addColorStop(0, 'rgba(0,0,0,1)');
+            grad.addColorStop(0.6, 'rgba(0,0,0,0.6)');
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            dCtx.fillStyle = grad;
+            dCtx.beginPath();
+            dCtx.arc(tx, ty, lr, 0, Math.PI * 2);
+            dCtx.fill();
+        }
+
+        // Light around the player
+        if (Game.player) {
+            var px = Game.player.x + Game.player.w / 2;
+            var py = Game.player.y + Game.player.h / 2;
+            var pr = 36;
+
+            var pGrad = dCtx.createRadialGradient(px, py, 0, px, py, pr);
+            pGrad.addColorStop(0, 'rgba(0,0,0,1)');
+            pGrad.addColorStop(0.5, 'rgba(0,0,0,0.7)');
+            pGrad.addColorStop(1, 'rgba(0,0,0,0)');
+            dCtx.fillStyle = pGrad;
+            dCtx.beginPath();
+            dCtx.arc(px, py, pr, 0, Math.PI * 2);
+            dCtx.fill();
+        }
+
+        // Light around boss projectiles
+        if (Game.boss && Game.boss.projectiles) {
+            for (var j = 0; j < Game.boss.projectiles.length; j++) {
+                var p = Game.boss.projectiles[j];
+                var ppGrad = dCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 14);
+                ppGrad.addColorStop(0, 'rgba(0,0,0,0.8)');
+                ppGrad.addColorStop(1, 'rgba(0,0,0,0)');
+                dCtx.fillStyle = ppGrad;
+                dCtx.beginPath();
+                dCtx.arc(p.x, p.y, 14, 0, Math.PI * 2);
+                dCtx.fill();
+            }
+        }
+
+        // Draw the darkness overlay onto the main buffer
+        dCtx.globalCompositeOperation = 'source-over';
+        ctx.drawImage(dCanvas, 0, 0);
+    }
+
+    // =====================================================================
+    // MINIMAP DATA
+    // =====================================================================
+
+    var MINIMAP_ROOMS = [
+        { id: 'ebon_vale_market',   col: 0, row: 0, color: '#4a7' },
+        { id: 'ebon_vale_square',   col: 1, row: 0, color: '#4a7' },
+        { id: 'ebon_vale_north',    col: 2, row: 0, color: '#4a7' },
+        { id: 'ebon_forest_entry',  col: 3, row: 0, color: '#276' },
+        { id: 'ebon_forest_deep',   col: 3, row: 1, color: '#276' },
+        { id: 'temple_entrance',    col: 3, row: 2, color: '#666' },
+        { id: 'temple_puzzle',      col: 3, row: 3, color: '#666' },
+        { id: 'temple_boss',        col: 3, row: 4, color: '#a33' }
+    ];
+
+    // Track visited rooms for minimap
+    Game.visitedRooms = {};
+
+    // =====================================================================
     // HUD RENDERING
     // =====================================================================
 
@@ -727,18 +872,57 @@
             var hpForThisHeart = currentHP - i * 2;
 
             if (hpForThisHeart >= 2) {
-                // Full heart
                 safeDraw(ctx, 'item_heart', hx, hy);
             } else if (hpForThisHeart === 1) {
-                // Half heart
                 safeDraw(ctx, 'item_heart_half', hx, hy);
             } else {
-                // Empty heart
                 safeDraw(ctx, 'item_heart_empty', hx, hy);
             }
         }
 
-        // Puzzle items collected - top right
+        // Special ability cooldown bar under hearts with label
+        if (Game.player.specialCooldown !== undefined && Game.player.specialMaxCooldown) {
+            var barX = 4;
+            var barY = 16;
+            var barW = 40;
+            var barH = 3;
+            var ratio = 1 - (Game.player.specialCooldown / Game.player.specialMaxCooldown);
+
+            // "SP" label
+            Utils.drawText(ctx, 'SP', barX, barY - 1, C.gray, 0.5);
+
+            ctx.fillStyle = C.darkGray;
+            ctx.fillRect(barX + 8, barY, barW - 8, barH);
+
+            if (ratio >= 1) {
+                ctx.fillStyle = C.teal;
+            } else {
+                ctx.fillStyle = C.blue;
+            }
+            ctx.fillRect(barX + 8, barY, Math.floor((barW - 8) * ratio), barH);
+        }
+
+        // Enemy counter (in combat rooms)
+        if (Game.enemies.length > 0) {
+            var aliveEnemies = 0;
+            for (var ei = 0; ei < Game.enemies.length; ei++) {
+                if (!Game.enemies[ei].dead) aliveEnemies++;
+            }
+            if (aliveEnemies > 0) {
+                var ecX = 4;
+                var ecY = 22;
+                // Small skull icon (4x5 pixel)
+                ctx.fillStyle = C.lightGray;
+                ctx.fillRect(ecX, ecY, 4, 3);
+                ctx.fillRect(ecX + 1, ecY + 3, 2, 1);
+                ctx.fillStyle = C.darkGray;
+                ctx.fillRect(ecX, ecY + 1, 1, 1);
+                ctx.fillRect(ecX + 3, ecY + 1, 1, 1);
+                Utils.drawText(ctx, 'x' + aliveEnemies, ecX + 6, ecY, C.lightGray, 1);
+            }
+        }
+
+        // Puzzle items collected - top right (above minimap)
         var ix = W - 16;
         if (Game.flags.puzzleCrown) {
             safeDraw(ctx, 'item_crown', ix, 4);
@@ -753,23 +937,61 @@
             ix -= 14;
         }
 
-        // Special ability cooldown bar under hearts
-        if (Game.player.specialCooldown !== undefined && Game.player.specialMaxCooldown) {
-            var barX = 4;
-            var barY = 16;
-            var barW = 40;
-            var barH = 3;
-            var ratio = 1 - (Game.player.specialCooldown / Game.player.specialMaxCooldown);
+        // Minimap - bottom right corner
+        renderMinimap(ctx);
+    }
 
-            ctx.fillStyle = C.darkGray;
-            ctx.fillRect(barX, barY, barW, barH);
+    // =====================================================================
+    // MINIMAP RENDERING
+    // =====================================================================
 
-            if (ratio >= 1) {
-                ctx.fillStyle = C.teal;
+    function renderMinimap(ctx) {
+        var cellW = 7;
+        var cellH = 5;
+        var padding = 2;
+        // Calculate minimap bounds (4 cols wide x 5 rows tall)
+        var mapW = 4 * cellW + padding * 2;
+        var mapH = 5 * cellH + padding * 2;
+        var mapX = W - mapW - 3;
+        var mapY = H - mapH - 3;
+
+        // Semi-transparent background
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(mapX, mapY, mapW, mapH);
+        ctx.strokeStyle = C.gray;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(mapX + 0.5, mapY + 0.5, mapW - 1, mapH - 1);
+
+        var currentId = Game.currentRoom ? Game.currentRoom.id : null;
+
+        for (var i = 0; i < MINIMAP_ROOMS.length; i++) {
+            var mr = MINIMAP_ROOMS[i];
+            var rx = mapX + padding + mr.col * cellW;
+            var ry = mapY + padding + mr.row * cellH;
+
+            if (Game.visitedRooms[mr.id]) {
+                // Visited room: show colored
+                ctx.fillStyle = mr.color;
+                ctx.fillRect(rx, ry, cellW - 1, cellH - 1);
+
+                // Cleared rooms get a dot
+                if (Game.clearedRooms[mr.id]) {
+                    ctx.fillStyle = C.white;
+                    ctx.fillRect(rx + 2, ry + 1, 2, 2);
+                }
             } else {
-                ctx.fillStyle = C.blue;
+                // Unvisited: dim
+                ctx.fillStyle = 'rgba(60,60,60,0.4)';
+                ctx.fillRect(rx, ry, cellW - 1, cellH - 1);
             }
-            ctx.fillRect(barX, barY, Math.floor(barW * ratio), barH);
+
+            // Current room: blinking border
+            if (mr.id === currentId) {
+                if (Math.floor(Game.frame / 15) % 2 === 0) {
+                    ctx.strokeStyle = C.yellow;
+                    ctx.strokeRect(rx - 0.5, ry - 0.5, cellW, cellH);
+                }
+            }
         }
     }
 
@@ -1271,6 +1493,9 @@
         // Render map tiles
         renderMap(ctx, Game.currentRoom);
 
+        // Torch warm glow (drawn on top of map, under entities)
+        renderTorchGlow(ctx, Game.currentRoom);
+
         // Render general items (potions, etc.)
         renderItems(ctx);
 
@@ -1316,6 +1541,9 @@
 
         // Render particles
         Particles.render(ctx);
+
+        // Temple darkness overlay (over entities, under HUD)
+        renderDarknessOverlay(ctx, Game.currentRoom);
 
         // Render floating damage numbers
         renderFloatingTexts(ctx);
@@ -1481,6 +1709,9 @@
         // Render map tiles
         renderMap(ctx, Game.currentRoom);
 
+        // Torch warm glow
+        renderTorchGlow(ctx, Game.currentRoom);
+
         // Render NPCs
         for (var n = 0; n < Game.npcs.length; n++) {
             var npc = Game.npcs[n];
@@ -1522,6 +1753,9 @@
 
         // Particles
         Particles.render(ctx);
+
+        // Temple darkness overlay
+        renderDarknessOverlay(ctx, Game.currentRoom);
 
         // Floating damage numbers
         renderFloatingTexts(ctx);
@@ -1738,6 +1972,7 @@
         };
         Game.clearedRooms = {};
         Game.collectedItems = {};
+        Game.visitedRooms = {};
         Game.transition = { active: false, timer: 0, maxTime: 30, type: 'fade', targetRoom: null, spawnX: 0, spawnY: 0 };
         Game.cutsceneTimer = 0;
         Game.shake = 0;

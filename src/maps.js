@@ -57,28 +57,28 @@
     window.TileProps[T.GRASS_D]      = { solid: false, name: 'tile_grass_dark' };
     window.TileProps[T.PATH]         = { solid: false, name: 'tile_path' };
     window.TileProps[T.WATER]        = { solid: true,  name: 'tile_water' };
-    window.TileProps[T.TREE]         = { solid: true,  name: 'tile_tree' };
-    window.TileProps[T.BUSH]         = { solid: true,  name: 'tile_bush' };
+    window.TileProps[T.TREE]         = { solid: true,  name: 'tile_tree',  hitbox: { x: 4, y: 9, w: 8, h: 7 } };
+    window.TileProps[T.BUSH]         = { solid: true,  name: 'tile_bush',  hitbox: { x: 3, y: 6, w: 10, h: 9 } };
     window.TileProps[T.FLOWERS]      = { solid: false, name: 'tile_flowers' };
     window.TileProps[T.WOOD_WALL]    = { solid: true,  name: 'tile_wood_wall' };
     window.TileProps[T.WOOD_FLOOR]   = { solid: false, name: 'tile_wood_floor' };
     window.TileProps[T.WOOD_DOOR]    = { solid: false, name: 'tile_wood_door' };
     window.TileProps[T.STONE_WALL]   = { solid: true,  name: 'tile_stone_wall' };
     window.TileProps[T.STONE_FLOOR]  = { solid: false, name: 'tile_stone_floor' };
-    window.TileProps[T.FENCE]        = { solid: true,  name: 'tile_fence' };
-    window.TileProps[T.WELL]         = { solid: true,  name: 'tile_well' };
+    window.TileProps[T.FENCE]        = { solid: true,  name: 'tile_fence',  hitbox: { x: 0, y: 4, w: 16, h: 8 } };
+    window.TileProps[T.WELL]         = { solid: true,  name: 'tile_well',   hitbox: { x: 1, y: 2, w: 14, h: 13 } };
     window.TileProps[T.MARKET]       = { solid: true,  name: 'tile_market_stall' };
     window.TileProps[T.TEMPLE_WALL]  = { solid: true,  name: 'tile_temple_wall' };
     window.TileProps[T.TEMPLE_FLOOR] = { solid: false, name: 'tile_temple_floor' };
     window.TileProps[T.TEMPLE_DOOR]  = { solid: false, name: 'tile_temple_door' };
     window.TileProps[T.ALTAR]        = { solid: true,  name: 'tile_altar' };
-    window.TileProps[T.PILLAR]       = { solid: true,  name: 'tile_pillar' };
+    window.TileProps[T.PILLAR]       = { solid: true,  name: 'tile_pillar', hitbox: { x: 3, y: 2, w: 10, h: 14 } };
     window.TileProps[T.TORCH]        = { solid: true,  name: 'tile_torch' };
-    window.TileProps[T.CHEST]        = { solid: true,  name: 'tile_chest' };
-    window.TileProps[T.STATUE]       = { solid: true,  name: 'tile_statue' };
+    window.TileProps[T.CHEST]        = { solid: true,  name: 'tile_chest',  hitbox: { x: 1, y: 3, w: 14, h: 12 } };
+    window.TileProps[T.STATUE]       = { solid: true,  name: 'tile_statue', hitbox: { x: 2, y: 2, w: 12, h: 14 } };
     window.TileProps[T.BRIDGE]       = { solid: false, name: 'tile_bridge' };
     window.TileProps[T.ROOF]         = { solid: true,  name: 'tile_roof' };
-    window.TileProps[T.SIGN]         = { solid: true,  name: 'tile_sign' };
+    window.TileProps[T.SIGN]         = { solid: true,  name: 'tile_sign',   hitbox: { x: 4, y: 5, w: 8, h: 11 } };
     window.TileProps[T.CARPET]       = { solid: false, name: 'tile_carpet' };
     window.TileProps[T.DARK]         = { solid: true,  name: 'tile_dark' };
 
@@ -526,16 +526,31 @@
         },
 
         /**
-         * Pixel-level solidity check.
+         * Pixel-level solidity check with sub-tile hitbox support.
+         * Tiles with a hitbox property only block the defined sub-region,
+         * allowing players to walk past tree canopies, bush edges, etc.
          * @param {Object} room   - A room object.
          * @param {number} pixelX - X position in pixels.
          * @param {number} pixelY - Y position in pixels.
-         * @returns {boolean} True if the tile at this pixel position is solid.
+         * @returns {boolean} True if the pixel position is blocked.
          */
         isSolidAt: function (room, pixelX, pixelY) {
             var col = Math.floor(pixelX / TILE_SIZE);
             var row = Math.floor(pixelY / TILE_SIZE);
-            return this.isSolid(room, col, row);
+            var tileId = this.getTile(room, col, row);
+            var props = window.TileProps[tileId];
+            if (!props || !props.solid) return false;
+
+            // Sub-tile hitbox: only the defined region within the tile is solid
+            if (props.hitbox) {
+                var localX = pixelX - col * TILE_SIZE;
+                var localY = pixelY - row * TILE_SIZE;
+                var hb = props.hitbox;
+                return localX >= hb.x && localX < hb.x + hb.w &&
+                       localY >= hb.y && localY < hb.y + hb.h;
+            }
+
+            return true;
         },
     };
 

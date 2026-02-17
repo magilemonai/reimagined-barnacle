@@ -42,7 +42,7 @@
     helena_greeting: [
       { speaker: 'Helena', text: 'Ah, you must be the ones Braxon mentioned. Our town is in danger.' },
       { speaker: 'Helena', text: 'Goblins from the Ebon Forest grow bolder each day. Their queen, Bargnot... she must be stopped.' },
-      { speaker: 'Helena', text: 'Find her lair in the old Temple of Nitriti, north through the forest.' }
+      { speaker: 'Helena', text: 'Visit Braxon and Brother Soren in the market south of here before heading north to the forest.' }
     ],
 
     elira_greeting: [
@@ -73,9 +73,9 @@
       { speaker: 'Rorik', text: 'May the forge-fire guide your blade.' }
     ],
 
-    rorik_market_greeting: [
-      { speaker: 'Rorik', text: 'Aye, name\'s Rorik Flamebeard. I\'ve set up shop here in the market.' },
-      { speaker: 'Rorik', text: 'Those goblins took everything from my people... If you can stop Bargnot, you\'ll have my eternal gratitude.' }
+    svana_greeting: [
+      { speaker: 'Svana', text: 'I am Svana Ironveil. My kin Rorik was taken by the goblins to their temple...' },
+      { speaker: 'Svana', text: 'Please, if you find him in there, bring him home safe. He is all I have left.' }
     ],
 
     rorik_rescue: [
@@ -167,9 +167,9 @@
     ],
 
     ending_nitriti: [
-      { speaker: 'Nitriti', text: 'Heroes of Ebon Vale... I am Nitriti, Spirit of Night. You have cleansed my temple.' },
-      { speaker: 'Nitriti', text: 'But dark forces still stir. The Bonemoon prophecy approaches. Eternal darkness threatens Valisar.' },
-      { speaker: 'Nitriti', text: 'Seek the Eldspyre, the source of all magic. Your journey has only just begun.' }
+      { speaker: 'Nitriti', text: 'Heroes of Ebon Vale... I am Nitriti, Spirit of Night. You have cleansed my temple.', scene: 'nitriti' },
+      { speaker: 'Nitriti', text: 'But dark forces still stir. The Bonemoon prophecy approaches. Eternal darkness threatens Valisar.', scene: 'darkness' },
+      { speaker: 'Nitriti', text: 'Seek the Eldspyre, the source of all magic. Your journey has only just begun.', scene: 'eldspyre' }
     ],
 
     ending_final: [
@@ -244,8 +244,8 @@
       { speaker: 'Soren', text: 'Rest here, child. I sense your weariness. Let me restore your strength once more.' }
     ],
 
-    rorik_market_return: [
-      { speaker: 'Rorik', text: 'Back from the fight? I heard explosions from the forest... Forge-spirits protect you.' }
+    svana_return: [
+      { speaker: 'Svana', text: 'Have you found Rorik? Please hurry... I heard terrible sounds from the temple.' }
     ],
 
     querubra_return: [
@@ -283,6 +283,7 @@
     'Braxon':      '#b07a3a',  // light brown
     'Soren':       '#aa6ada',  // light purple
     'Rorik':       '#e06060',  // light red
+    'Svana':       '#d0a060',  // warm amber
     'Que\'Rubra':  '#5ac55a',  // light green
     'Bargnot':     '#c03030',  // red
     'Nitriti':     '#8ab8f0',  // pale blue

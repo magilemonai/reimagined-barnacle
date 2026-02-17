@@ -154,7 +154,7 @@
             [Fl,   _,   _,  _,   _,   _,  P,   _,   _,   P,   _,   _,  _,  _,   _,  Fl ],  // row 10
             [ _,   _,   _,  _,  Fl,   _,  P,   _,   _,   P,   _,  Fl,  _,  _,   _,   _ ],  // row 11
             [ _,  Bu,   _,  _,   _,  Bu,  P,   P,   P,   P,  Bu,   _,  _,  _,  Bu,   _ ],  // row 12
-            [ _,   _,  Fl,  _,   _,   _,  P,   P,   P,   P,   _,   _,  _,  Fl,  _,   _ ],  // row 13 - exit south
+            [Fl,   _,   _,  _,  Sg,   _,  P,   P,   P,   P,   _,   _,  _,  _,   _,  Fl ],  // row 13 - exit south + market sign
         ],
         exits: {
             north: { room: 'ebon_vale_north',  spawnX: 7, spawnY: 12 },
@@ -168,7 +168,8 @@
         enemies: [],
         items: [],
         signs: [
-            { x: 8, y: 5, text: 'Welcome to Ebon Vale! Town square ahead.' }
+            { x: 8, y: 5, text: 'Welcome to Ebon Vale! Merchants south, forest north.' },
+            { x: 4, y: 13, text: 'MARKET DISTRICT - Blacksmith & Chapel south.' }
         ],
         onEnter: null,
     };
@@ -205,7 +206,7 @@
         npcs: [
             { id: 'npc_braxon',        sprite: 'npc_braxon',        x: 1,  y: 10, dialogue: 'braxon_greeting' },
             { id: 'npc_brother_soren', sprite: 'npc_brother_soren', x: 14, y: 10, dialogue: 'soren_greeting' },
-            { id: 'npc_rorik',         sprite: 'npc_rorik',         x: 8,  y: 3,  dialogue: 'rorik_market_greeting' },
+            { id: 'npc_svana',         sprite: 'npc_svana',         x: 8,  y: 3,  dialogue: 'svana_greeting' },
         ],
         enemies: [],
         items: [],

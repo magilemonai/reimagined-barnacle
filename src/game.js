@@ -116,6 +116,9 @@
         // Title screen sparkle particles (manual, separate from Particles system)
         titleSparkles: [],
 
+        // Epilogue cutscene
+        epilogueTimer: 0,
+
         // Victory credits
         creditsY: 0,
         victoryDialogueDone: false,
@@ -152,6 +155,10 @@
 
         // Spike trap damage cooldown
         spikeCooldown: 0,
+
+        // Temple puzzle boulders blocking boss entrance
+        boulders: [],
+        bouldersClearing: false,
 
         // Sign interaction
         nearSign: null,
@@ -360,6 +367,18 @@
                 Game.lastSafeY = Math.floor(Game.player.y / TILE);
             }
         }
+
+        // Spawn boulders blocking boss entrance in temple puzzle
+        Game.boulders = [];
+        Game.bouldersClearing = false;
+        if (roomId === 'temple_puzzle' && !Game.flags.puzzleSolved) {
+            Game.boulders = [
+                { x: 6 * TILE, y: 0 * TILE, vx: 0, vy: 0, active: true },
+                { x: 7 * TILE, y: 0 * TILE, vx: 0, vy: 0, active: true },
+                { x: 8 * TILE, y: 0 * TILE, vx: 0, vy: 0, active: true },
+                { x: 9 * TILE, y: 0 * TILE, vx: 0, vy: 0, active: true }
+            ];
+        }
     }
 
     // =====================================================================
@@ -455,8 +474,8 @@
         // North exit
         if (exits.north && py < 2) {
             // Special: temple_puzzle north exit is locked until puzzle is solved
-            if (Game.currentRoom.id === 'temple_puzzle' && !Game.flags.puzzleSolved) {
-                // Push player back
+            if (Game.currentRoom.id === 'temple_puzzle' && (!Game.flags.puzzleSolved || Game.boulders.length > 0)) {
+                // Push player back - boulders still blocking
                 Game.player.y = 2;
                 return;
             }
@@ -496,18 +515,30 @@
                 if (Input.pressed['z'] && !Dialogue.isActive()) {
                     // Special NPC interactions
                     if (npc.id === 'npc_braxon') {
-                        if (npc.interacted && Game.goblinTeeth > 0) {
+                        if (npc.interacted) {
+                            // Return visits go straight to shop
                             openShop();
                         } else {
-                            var dialogueId = npc.dialogueId || npc.dialogue;
-                            if (dialogueId) {
-                                npc.interact();
-                            }
+                            // First visit: show greeting dialogue, then open shop
+                            npc.interacted = true;
+                            Dialogue.start(npc.dialogueId, function () {
+                                openShop();
+                            });
+                            Audio.play('select');
                         }
-                    } else if (npc.id === 'npc_brother_soren' && npc.interacted) {
-                        // Brother Soren gives blessing on return visits
-                        sorenBlessing();
-                        Dialogue.start(null, null, 'May the light guide you, child. I have restored your strength.');
+                    } else if (npc.id === 'npc_brother_soren') {
+                        if (npc.interacted) {
+                            // Return visits give blessing directly
+                            sorenBlessing();
+                            Dialogue.start(null, null, 'May the light guide you, child. I have restored your strength.');
+                        } else {
+                            // First visit: show greeting, then bless
+                            npc.interacted = true;
+                            Dialogue.start(npc.dialogueId, function () {
+                                sorenBlessing();
+                            });
+                            Audio.play('select');
+                        }
                     } else {
                         var dialogueId2 = npc.dialogueId || npc.dialogue;
                         if (dialogueId2) {
@@ -580,7 +611,18 @@
             if (distToStatue < 28 && Input.pressed['z']) {
                 Game.flags.puzzleSolved = true;
                 Audio.play('fanfare');
-                Dialogue.start('statue_complete');
+                Dialogue.start('statue_complete', function () {
+                    // Animate boulders rolling away
+                    Game.bouldersClearing = true;
+                    Game.shake = 6;
+                    Audio.play('explosion');
+                    for (var b = 0; b < Game.boulders.length; b++) {
+                        var boulder = Game.boulders[b];
+                        // Roll left/right away from center
+                        boulder.vx = (boulder.x < 7.5 * TILE) ? -2.5 : 2.5;
+                        boulder.vy = -0.5;
+                    }
+                });
                 Particles.ring(statueX, statueY, 20, 16, C.purple);
                 Particles.burst(statueX, statueY, 25, C.gold);
                 Particles.confetti(statueX, statueY - 10, 12);
@@ -1475,6 +1517,76 @@
     }
 
     // =====================================================================
+    // BOULDER UPDATE & RENDER (temple puzzle door blockers)
+    // =====================================================================
+
+    function updateBoulders() {
+        if (!Game.boulders || Game.boulders.length === 0) return;
+        if (!Game.bouldersClearing) return;
+
+        var allGone = true;
+        for (var b = 0; b < Game.boulders.length; b++) {
+            var boulder = Game.boulders[b];
+            if (!boulder.active) continue;
+            boulder.x += boulder.vx;
+            boulder.y += boulder.vy;
+            // Dust particles as they roll
+            if (Game.frame % 3 === 0) {
+                Particles.add(boulder.x + 8, boulder.y + 14, {
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: -0.3 - Math.random() * 0.3,
+                    life: 15,
+                    color: '#8a7a6a',
+                    size: 1
+                });
+            }
+            // Deactivate when off-screen
+            if (boulder.x < -TILE || boulder.x > COLS * TILE) {
+                boulder.active = false;
+            } else {
+                allGone = false;
+            }
+        }
+        if (allGone) {
+            Game.boulders = [];
+            Game.bouldersClearing = false;
+        }
+    }
+
+    function renderBoulders(ctx) {
+        if (!Game.boulders || Game.boulders.length === 0) return;
+        for (var b = 0; b < Game.boulders.length; b++) {
+            var boulder = Game.boulders[b];
+            if (!boulder.active) continue;
+            var bx = Math.floor(boulder.x);
+            var by = Math.floor(boulder.y);
+            // Draw a rocky boulder - dark stone with highlights
+            ctx.fillStyle = '#4a4a50';
+            ctx.fillRect(bx + 1, by + 2, 14, 12);
+            ctx.fillStyle = '#3a3a40';
+            ctx.fillRect(bx + 2, by + 3, 12, 10);
+            ctx.fillStyle = '#5a5a64';
+            ctx.fillRect(bx + 3, by + 3, 4, 3);
+            ctx.fillRect(bx + 9, by + 6, 3, 2);
+            ctx.fillStyle = '#2a2a30';
+            ctx.fillRect(bx + 5, by + 8, 6, 2);
+        }
+    }
+
+    function isBoulderBlocking(px, py) {
+        if (!Game.boulders || Game.boulders.length === 0) return false;
+        for (var b = 0; b < Game.boulders.length; b++) {
+            var boulder = Game.boulders[b];
+            if (!boulder.active) continue;
+            if (px >= boulder.x && px < boulder.x + TILE &&
+                py >= boulder.y && py < boulder.y + TILE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // =====================================================================
     // GENERAL ITEM RENDERING (potions etc in non-puzzle rooms)
     // =====================================================================
 
@@ -2275,6 +2387,9 @@
             checkPuzzleItems();
         }
 
+        // Update boulders (temple puzzle)
+        updateBoulders();
+
         // Update enemies
         for (var i = 0; i < Game.enemies.length; i++) {
             var enemy = Game.enemies[i];
@@ -2371,6 +2486,9 @@
 
         // Render puzzle items (glowing, bobbing)
         renderPuzzleItems(ctx);
+
+        // Render boulders (temple puzzle entrance blockers)
+        renderBoulders(ctx);
 
         // Render NPCs
         for (var n = 0; n < Game.npcs.length; n++) {
@@ -2586,46 +2704,90 @@
         // Check boss defeated
         if (Game.boss && Game.boss.dead) {
             Game.bossDeathTimer++;
+            var bx = Game.boss.x + 8;
+            var by = Game.boss.y + 8;
 
-            // Cascading explosion spectacle
+            // Phase 1: Initial shock (frames 1-20)
             if (Game.bossDeathTimer === 1) {
                 Game.shake = 10;
                 Audio.play('explosion');
-                Particles.burst(Game.boss.x + 8, Game.boss.y + 8, 30, C.red);
-                Particles.burst(Game.boss.x + 8, Game.boss.y + 8, 20, C.darkPurple);
+                Particles.burst(bx, by, 30, C.red);
+                Particles.burst(bx, by, 20, C.darkPurple);
+                if (Music) Music.stop();
             }
+
+            // Phase 2: Shadow tendrils dissipate (frames 15-50)
             if (Game.bossDeathTimer === 15) {
                 Game.shake = 6;
                 Audio.play('explosion');
-                Particles.burst(Game.boss.x - 10, Game.boss.y + 12, 20, C.gold);
+                Particles.burst(bx - 10, by + 12, 20, C.gold);
             }
-            if (Game.bossDeathTimer === 30) {
+            if (Game.bossDeathTimer === 25) {
+                // Shadow wisps flying outward from boss
+                for (var sw = 0; sw < 8; sw++) {
+                    var angle = (sw / 8) * Math.PI * 2;
+                    Particles.add(bx, by, {
+                        vx: Math.cos(angle) * 1.5,
+                        vy: Math.sin(angle) * 1.5,
+                        life: 40,
+                        color: C.darkPurple,
+                        size: 2,
+                        gravity: -0.02
+                    });
+                }
+                Game.shake = 4;
+            }
+            if (Game.bossDeathTimer === 35) {
                 Game.shake = 8;
                 Audio.play('explosion');
-                Particles.burst(Game.boss.x + 20, Game.boss.y - 5, 25, C.red);
-                Particles.burst(Game.boss.x + 12, Game.boss.y + 12, 15, C.purple);
-            }
-            if (Game.bossDeathTimer === 45) {
-                // Final big burst
-                Game.shake = 12;
-                Particles.burst(Game.boss.x + 8, Game.boss.y + 8, 40, C.gold);
-                Particles.burst(Game.boss.x + 8, Game.boss.y + 8, 30, C.white);
+                Particles.burst(bx + 20, by - 5, 25, C.red);
+                Particles.burst(bx - 15, by + 12, 15, C.purple);
             }
 
-            if (Game.bossDeathTimer === 60) {
+            // Phase 3: Flickering collapse (frames 40-70)
+            if (Game.bossDeathTimer === 45) {
+                Audio.play('explosion');
+                Particles.ring(bx, by, 30, 20, C.red);
+            }
+            if (Game.bossDeathTimer === 55) {
+                Game.shake = 10;
+                Audio.play('explosion');
+                // Massive ring of light
+                Particles.ring(bx, by, 50, 30, C.gold);
+                Particles.burst(bx, by, 40, C.white);
+            }
+            // Continuous small sparks during collapse
+            if (Game.bossDeathTimer > 20 && Game.bossDeathTimer < 70 && Game.bossDeathTimer % 5 === 0) {
+                var sparkX = bx + (Math.random() - 0.5) * 30;
+                var sparkY = by + (Math.random() - 0.5) * 20;
+                Particles.burst(sparkX, sparkY, 5, Utils.choice([C.red, C.purple, C.darkPurple]));
+            }
+
+            // Phase 4: Final purge (frames 65-80)
+            if (Game.bossDeathTimer === 65) {
+                Game.shake = 14;
+                Audio.play('explosion');
+                // Giant white flash (screen goes bright)
+                Particles.burst(bx, by, 50, C.white);
+                Particles.burst(bx, by, 35, C.gold);
+                Particles.confetti(bx, by - 20, 20);
+            }
+            if (Game.bossDeathTimer === 75) {
+                // Room brightens - the darkness lifts
+                Particles.ring(W / 2, H / 2, 80, 40, C.paleBlue);
+            }
+
+            // Phase 5: Bargnot's last words (frame 90)
+            if (Game.bossDeathTimer === 90) {
                 Game.bossDialogueStage = 1;
                 Dialogue.start('boss_defeat', function () {
+                    // Rorik rescue dialogue
                     Game.bossDialogueStage = 2;
                     Dialogue.start('victory_rorik', function () {
+                        // Switch to epilogue cutscene for Nitriti
                         Game.bossDialogueStage = 3;
-                        Dialogue.start('ending_nitriti', function () {
-                            Game.flags.bossDefeated = true;
-                            Game.state = 'victory';
-                            Game.victoryDialogueDone = false;
-                            Game.creditsY = H + 20;
-                            Audio.play('victory');
-                            if (Music) Music.play('victory');
-                        });
+                        Game.state = 'epilogue';
+                        Game.epilogueTimer = 0;
                     });
                 });
             }
@@ -2676,9 +2838,21 @@
             }
         }
 
-        // Render boss
+        // Render boss (with death animation effects)
         if (Game.boss && Game.boss.render) {
-            Game.boss.render(ctx);
+            if (Game.boss.dead && Game.bossDeathTimer > 0) {
+                // Flash white periodically during death sequence
+                var deathFlicker = Game.bossDeathTimer < 65 && Math.floor(Game.bossDeathTimer / 3) % 2 === 0;
+                // Fade out as death progresses
+                var deathAlpha = Game.bossDeathTimer < 65 ? 1 : Math.max(0, 1 - (Game.bossDeathTimer - 65) / 25);
+                ctx.globalAlpha = deathAlpha;
+                if (!deathFlicker) {
+                    Game.boss.render(ctx);
+                }
+                ctx.globalAlpha = 1;
+            } else {
+                Game.boss.render(ctx);
+            }
         }
 
         // Render player
@@ -2689,8 +2863,22 @@
         // Particles
         Particles.render(ctx);
 
-        // Temple darkness overlay
-        renderDarknessOverlay(ctx, Game.currentRoom);
+        // Temple darkness overlay (lighten during boss death)
+        if (Game.boss && Game.boss.dead && Game.bossDeathTimer > 55) {
+            // Room gradually brightens - skip the darkness overlay
+            var brightAlpha = Math.min(1, (Game.bossDeathTimer - 55) / 35);
+            ctx.fillStyle = 'rgba(200,200,255,' + (brightAlpha * 0.08) + ')';
+            ctx.fillRect(0, 0, W, H);
+        } else {
+            renderDarknessOverlay(ctx, Game.currentRoom);
+        }
+
+        // White flash at the moment of final explosion
+        if (Game.boss && Game.boss.dead && Game.bossDeathTimer > 63 && Game.bossDeathTimer < 75) {
+            var flashAlpha = Math.max(0, 1 - (Game.bossDeathTimer - 63) / 12);
+            ctx.fillStyle = 'rgba(255,255,255,' + flashAlpha + ')';
+            ctx.fillRect(0, 0, W, H);
+        }
 
         // Floating damage numbers
         renderFloatingTexts(ctx);
@@ -2808,6 +2996,219 @@
             var cX = centerTextX(contText, 1);
             Utils.drawText(ctx, contText, cX, H - 20, C.white, 1);
         }
+    }
+
+    // =====================================================================
+    // EPILOGUE CUTSCENE (Nitriti's message after boss defeat)
+    // =====================================================================
+
+    function updateEpilogue() {
+        Game.epilogueTimer++;
+
+        if (!Dialogue.isActive() && Game.epilogueTimer === 1) {
+            Dialogue.start('ending_nitriti', function () {
+                Game.flags.bossDefeated = true;
+                Game.state = 'victory';
+                Game.victoryDialogueDone = false;
+                Game.creditsY = H + 20;
+                Audio.play('victory');
+                if (Music) Music.play('victory');
+            });
+        }
+
+        Dialogue.update();
+
+        if (Input.pressed['z']) {
+            Dialogue.advance();
+        }
+        if (Input.pressed['x'] && Dialogue._canSkip) {
+            Dialogue.skipAll();
+        }
+
+        // Ambient particles - gentle spirit sparkles
+        if (Game.epilogueTimer % 8 === 0) {
+            Particles.add(Utils.randInt(20, W - 20), H + 5, {
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: -(0.3 + Math.random() * 0.5),
+                life: 80 + Utils.randInt(0, 40),
+                color: Utils.choice([C.paleBlue, '#aaccff', '#8ab8f0', C.white]),
+                size: 1,
+                gravity: -0.01
+            });
+        }
+
+        Particles.update();
+    }
+
+    function drawEpilogueNitriti(ctx) {
+        // Ethereal spirit realm - deep blue void with starlight
+        ctx.fillStyle = '#050818';
+        ctx.fillRect(0, 0, W, 160);
+
+        // Stars in varying sizes
+        ctx.fillStyle = '#ffffff';
+        var epiStars = [[15,12],[40,30],[80,8],[120,22],[160,15],[200,28],[240,10],
+                        [30,50],[70,42],[110,55],[150,38],[190,48],[230,42],
+                        [25,70],[60,80],[100,68],[140,75],[180,65],[220,78]];
+        for (var s = 0; s < epiStars.length; s++) {
+            var twinkle = Math.sin(Game.epilogueTimer * 0.05 + s) * 0.5 + 0.5;
+            ctx.globalAlpha = 0.3 + twinkle * 0.7;
+            ctx.fillRect(epiStars[s][0], epiStars[s][1], 1, 1);
+        }
+        ctx.globalAlpha = 1;
+
+        // Nitriti's spirit form - tall ethereal figure, pale blue
+        var centerX = 118;
+        var floatY = Math.sin(Game.epilogueTimer * 0.03) * 3;
+        // Flowing robes
+        ctx.fillStyle = '#4060a0';
+        ctx.fillRect(centerX, 60 + floatY, 20, 40);
+        ctx.fillRect(centerX - 4, 75 + floatY, 28, 30);
+        ctx.fillRect(centerX - 8, 90 + floatY, 36, 20);
+        // Body glow
+        ctx.fillStyle = 'rgba(120,170,240,0.3)';
+        ctx.fillRect(centerX - 12, 50 + floatY, 44, 70);
+        // Face
+        ctx.fillStyle = '#c0d8f0';
+        ctx.fillRect(centerX + 4, 52 + floatY, 12, 12);
+        // Eyes (glowing)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(centerX + 6, 56 + floatY, 2, 2);
+        ctx.fillRect(centerX + 12, 56 + floatY, 2, 2);
+        // Crown/halo
+        ctx.fillStyle = '#8ab8f0';
+        ctx.fillRect(centerX + 2, 48 + floatY, 16, 3);
+        ctx.fillStyle = '#aad0ff';
+        ctx.fillRect(centerX + 6, 45 + floatY, 8, 3);
+        // Spirit trails flowing down
+        ctx.fillStyle = 'rgba(100,150,220,0.2)';
+        for (var t = 0; t < 3; t++) {
+            var tx = centerX + 4 + t * 6 + Math.sin(Game.epilogueTimer * 0.04 + t) * 3;
+            ctx.fillRect(tx, 110 + floatY, 2, 40);
+        }
+    }
+
+    function drawEpilogueDarkness(ctx) {
+        // Ominous scene - dark swirling void with red undertones
+        ctx.fillStyle = '#080408';
+        ctx.fillRect(0, 0, W, 160);
+
+        // Bone moon
+        ctx.fillStyle = '#d0c8b0';
+        ctx.fillRect(188, 15, 20, 20);
+        ctx.fillStyle = '#e0d8c0';
+        ctx.fillRect(190, 17, 16, 16);
+        // Craters
+        ctx.fillStyle = '#b0a890';
+        ctx.fillRect(193, 20, 4, 3);
+        ctx.fillRect(199, 25, 3, 2);
+
+        // Dark tendrils reaching across the sky
+        ctx.fillStyle = 'rgba(60,10,20,0.6)';
+        for (var i = 0; i < 6; i++) {
+            var ty = 30 + i * 18 + Math.sin(Game.epilogueTimer * 0.02 + i * 1.5) * 8;
+            ctx.fillRect(0, ty, W, 4);
+        }
+
+        // Darkened landscape silhouette
+        ctx.fillStyle = '#0a0408';
+        ctx.fillRect(0, 110, W, 50);
+        // Dead trees
+        ctx.fillStyle = '#1a0a10';
+        ctx.fillRect(30, 85, 4, 30);
+        ctx.fillRect(26, 80, 12, 6);
+        ctx.fillRect(90, 90, 4, 25);
+        ctx.fillRect(86, 86, 12, 5);
+        ctx.fillRect(180, 88, 4, 27);
+        ctx.fillRect(176, 83, 12, 6);
+
+        // Red glow on horizon
+        ctx.fillStyle = 'rgba(80,10,10,0.4)';
+        ctx.fillRect(0, 100, W, 20);
+    }
+
+    function drawEpilogueEldspyre(ctx) {
+        // Hopeful scene - dawn breaking, distant mountain with glowing peak
+        ctx.fillStyle = '#0a0a20';
+        ctx.fillRect(0, 0, W, 40);
+        ctx.fillStyle = '#1a1030';
+        ctx.fillRect(0, 40, W, 20);
+        ctx.fillStyle = '#2a1a3a';
+        ctx.fillRect(0, 60, W, 15);
+        ctx.fillStyle = '#4a2a3a';
+        ctx.fillRect(0, 75, W, 10);
+        ctx.fillStyle = '#6a3a2a';
+        ctx.fillRect(0, 85, W, 10);
+        ctx.fillStyle = '#8a5a3a';
+        ctx.fillRect(0, 95, W, 10);
+
+        // Ground
+        ctx.fillStyle = '#1a2a1a';
+        ctx.fillRect(0, 105, W, 55);
+
+        // Distant mountain with glowing peak (The Eldspyre)
+        ctx.fillStyle = '#2a2a3a';
+        // Mountain slopes
+        ctx.fillRect(100, 55, 56, 50);
+        ctx.fillRect(90, 75, 76, 30);
+        ctx.fillRect(80, 95, 96, 10);
+        // Peak
+        ctx.fillStyle = '#3a3a4a';
+        ctx.fillRect(118, 40, 20, 20);
+        ctx.fillRect(122, 30, 12, 12);
+        ctx.fillRect(126, 24, 4, 8);
+
+        // Glowing tip - the Eldspyre
+        var glowPulse = Math.sin(Game.epilogueTimer * 0.06) * 0.3 + 0.7;
+        ctx.fillStyle = 'rgba(255,200,100,' + (glowPulse * 0.6) + ')';
+        ctx.fillRect(122, 18, 12, 12);
+        ctx.fillStyle = 'rgba(255,220,150,' + (glowPulse * 0.8) + ')';
+        ctx.fillRect(124, 20, 8, 8);
+        ctx.fillStyle = 'rgba(255,255,200,' + glowPulse + ')';
+        ctx.fillRect(126, 22, 4, 4);
+
+        // Light rays from the peak
+        ctx.fillStyle = 'rgba(255,200,100,0.1)';
+        ctx.fillRect(110, 0, 36, 30);
+        ctx.fillRect(115, 0, 26, 20);
+
+        // Small stars still visible
+        ctx.fillStyle = '#ffffff';
+        var dawnStars = [[20,8],[55,15],[180,12],[220,8],[35,25],[245,18]];
+        for (var ds = 0; ds < dawnStars.length; ds++) {
+            ctx.globalAlpha = 0.3 + Math.sin(Game.epilogueTimer * 0.04 + ds) * 0.2;
+            ctx.fillRect(dawnStars[ds][0], dawnStars[ds][1], 1, 1);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    var epilogueRenderers = {
+        nitriti: drawEpilogueNitriti,
+        darkness: drawEpilogueDarkness,
+        eldspyre: drawEpilogueEldspyre
+    };
+
+    function renderEpilogue() {
+        var ctx = buf;
+
+        // Dark background
+        ctx.fillStyle = '#050818';
+        ctx.fillRect(0, 0, W, H);
+
+        // Draw pixel art scene based on current dialogue's scene property
+        var scene = Dialogue.getScene();
+        if (scene && epilogueRenderers[scene]) {
+            epilogueRenderers[scene](ctx);
+            // Slight dim overlay for readability
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillRect(0, 0, W, H);
+        }
+
+        // Spirit particles
+        Particles.render(ctx);
+
+        // Render dialogue
+        Dialogue.render(ctx);
     }
 
     // =====================================================================
@@ -3178,6 +3579,9 @@
         Game.playTime = 0;
         Game.titleMenuIndex = 0;
         Game.hasSaveData = false;
+        Game.epilogueTimer = 0;
+        Game.boulders = [];
+        Game.bouldersClearing = false;
 
         Particles.particles = [];
 
@@ -3203,6 +3607,7 @@
             case 'game':       updateGame();      break;
             case 'boss_intro': updateBossIntro(); break;
             case 'boss':       updateBoss();      break;
+            case 'epilogue':   updateEpilogue();  break;
             case 'victory':    updateVictory();   break;
             case 'gameover':   updateGameOver();  break;
             case 'paused':     updatePaused();    break;
@@ -3216,6 +3621,7 @@
             case 'game':       renderGame();      break;
             case 'boss_intro': renderBossIntro(); break;
             case 'boss':       renderBoss();      break;
+            case 'epilogue':   renderEpilogue();  break;
             case 'victory':    renderVictory();   break;
             case 'gameover':   renderGameOver();  break;
             case 'paused':     renderPaused();    break;

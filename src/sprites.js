@@ -517,6 +517,28 @@
         '..bbb..bbb..'
       ], { a: P.gray, A: P.lightGray, s: P.skin, k: P.darkGray, r: P.red, d: P.darkGray, b: P.darkBrown });
 
+      // Svana - Dwarven refugee woman, amber clothes, braided auburn hair
+      makeNPC('npc_svana', [
+        '............',
+        '....hhhh....',
+        '...hhhhhh...',
+        '...hskhsk...',
+        '...hssss.h..',
+        '...hssss.h..',
+        '....cccc....',
+        '...cccccc...',
+        '..aaccccaa..',
+        '..aaccccaa..',
+        '...cccccc...',
+        '...cccccc...',
+        '...dd..dd...',
+        '...dd..dd...',
+        '...dd..dd...',
+        '...dd..dd...',
+        '..bbb..bbb..',
+        '..bbb..bbb..'
+      ], { h: P.darkBrown, s: P.skin, k: P.darkGray, c: '#d0a060', a: P.gray, d: P.darkGray, b: P.brown });
+
       // NPC aliases
       S.cache['npc_elira_voss'] = S.cache['npc_elira'];
       S.cache['npc_brother_soren'] = S.cache['npc_soren'];

@@ -1879,6 +1879,22 @@
         lirielle: { hp: 3, atk: 2, spd: 3, spc: 'Heal',   spcDesc: 'Restore HP' }
     };
 
+    // Helper: word-wrap text to fit maxW pixels at given charWidth
+    function wrapTextToWidth(text, maxW, charW) {
+        var maxChars = Math.floor(maxW / charW);
+        if (text.length <= maxChars) return [text];
+        var words = text.split(' ');
+        var lines = [];
+        var cur = '';
+        for (var i = 0; i < words.length; i++) {
+            var test = cur ? cur + ' ' + words[i] : words[i];
+            if (test.length <= maxChars) { cur = test; }
+            else { if (cur) lines.push(cur); cur = words[i]; }
+        }
+        if (cur) lines.push(cur);
+        return lines;
+    }
+
     function renderSelect() {
         var ctx = buf;
 
@@ -1891,14 +1907,15 @@
         var titleX = centerTextX(titleText, 2);
         Utils.drawText(ctx, titleText, titleX, 8, C.gold, 2);
 
-        // Three panels
-        var panelW = 72;
-        var panelH = 130;
-        var startX = Math.floor((W - panelW * 3 - 8 * 2) / 2);
-        var panelY = 28;
+        // Three panels - sized to avoid text overflow
+        var panelW = 76;
+        var panelGap = 6;
+        var panelH = 120;
+        var startX = Math.floor((W - panelW * 3 - panelGap * 2) / 2);
+        var panelY = 26;
 
         for (var i = 0; i < 3; i++) {
-            var px = startX + i * (panelW + 8);
+            var px = startX + i * (panelW + panelGap);
             var isSelected = (i === Game.selectedChar);
             var charId = Game.characters[i];
             var stats = CHAR_STATS[charId];
@@ -1920,7 +1937,7 @@
             var sprKey = charId + '_down_' + walkFrame;
             var sprCanvas = Sprites.get(sprKey);
             var sprX = px + Math.floor((panelW - 32) / 2);
-            var sprY = panelY + yOff + 6;
+            var sprY = panelY + yOff + 4;
 
             if (sprCanvas) {
                 ctx.imageSmoothingEnabled = false;
@@ -1930,18 +1947,29 @@
                 ctx.fillRect(sprX + 4, sprY + 4, 24, 24);
             }
 
-            // Name
+            // Name - auto-scale to fit within panel
             var name = Game.charNames[i];
-            var nameX = px + Math.floor((panelW - name.length * 6) / 2);
-            Utils.drawText(ctx, name, nameX, panelY + yOff + 58, isSelected ? C.white : C.gray, 1);
+            var nameScale = 1;
+            var nameCharW = 6;
+            if (name.length * nameCharW > panelW - 6) {
+                nameScale = 0.8;
+                nameCharW = 5;
+            }
+            var nameX = px + Math.floor((panelW - name.length * nameCharW) / 2);
+            Utils.drawText(ctx, name, nameX, panelY + yOff + 54, isSelected ? C.white : C.gray, nameScale);
 
-            // Class
+            // Class - word-wrap at small scale to fit inside panel
             var cls = Game.charClasses[i];
-            var clsX = px + Math.floor((panelW - cls.length * 5) / 2);
-            Utils.drawText(ctx, cls, clsX, panelY + yOff + 68, C.lightGray, 0.8);
+            var clsCharW = 4;
+            var clsScale = 0.7;
+            var clsLines = wrapTextToWidth(cls, panelW - 8, clsCharW);
+            for (var cl = 0; cl < clsLines.length; cl++) {
+                var clX = px + Math.floor((panelW - clsLines[cl].length * clsCharW) / 2);
+                Utils.drawText(ctx, clsLines[cl], clX, panelY + yOff + 64 + cl * 8, C.lightGray, clsScale);
+            }
 
-            // Stat bars (only for selected character, or small for all)
-            var statY = panelY + yOff + 80;
+            // Stat bars - positioned after class text
+            var statY = panelY + yOff + 64 + clsLines.length * 8 + 2;
             var statBarW = panelW - 16;
             var barH = 3;
 
@@ -1953,7 +1981,7 @@
             ctx.fillRect(px + 16, statY + 1, Math.floor((statBarW - 12) * stats.hp / 5), barH);
 
             // ATK bar
-            statY += 10;
+            statY += 9;
             Utils.drawText(ctx, 'ATK', px + 4, statY, C.gold, 0.7);
             ctx.fillStyle = C.darkGray;
             ctx.fillRect(px + 20, statY + 1, statBarW - 16, barH);
@@ -1961,18 +1989,22 @@
             ctx.fillRect(px + 20, statY + 1, Math.floor((statBarW - 16) * stats.atk / 5), barH);
 
             // SPD bar
-            statY += 10;
+            statY += 9;
             Utils.drawText(ctx, 'SPD', px + 4, statY, C.teal, 0.7);
             ctx.fillStyle = C.darkGray;
             ctx.fillRect(px + 20, statY + 1, statBarW - 16, barH);
             ctx.fillStyle = C.teal;
             ctx.fillRect(px + 20, statY + 1, Math.floor((statBarW - 16) * stats.spd / 5), barH);
 
-            // Special ability label
-            statY += 12;
-            var spcText = stats.spc + ': ' + stats.spcDesc;
-            var spcX = px + Math.floor((panelW - spcText.length * 4.5) / 2);
-            Utils.drawText(ctx, spcText, Math.max(px + 2, spcX), statY, C.paleBlue, 0.7);
+            // Special ability - label then desc on next line
+            statY += 10;
+            var spcLabel = stats.spc;
+            var spcLabelX = px + Math.floor((panelW - spcLabel.length * 4) / 2);
+            Utils.drawText(ctx, spcLabel, spcLabelX, statY, C.paleBlue, 0.7);
+            var spcDesc = stats.spcDesc;
+            var spcDescCharW = 3.5;
+            var spcDescX = px + Math.floor((panelW - spcDesc.length * spcDescCharW) / 2);
+            Utils.drawText(ctx, spcDesc, Math.max(px + 2, spcDescX), statY + 7, C.darkGray, 0.6);
 
             // Sparkle on selected
             if (isSelected && Game.frame % 15 === 0) {
@@ -1983,49 +2015,38 @@
         Particles.update();
         Particles.render(ctx);
 
-        // Description text at bottom
+        // Description text below panels - compact, max 2 lines
         var desc = Game.charDescs[Game.selectedChar];
-        var words = desc.split(' ');
-        var lines = [];
-        var currentLine = '';
-        for (var w = 0; w < words.length; w++) {
-            if (currentLine.length + words[w].length + 1 <= 38) {
-                currentLine = currentLine ? currentLine + ' ' + words[w] : words[w];
-            } else {
-                lines.push(currentLine);
-                currentLine = words[w];
-            }
-        }
-        if (currentLine) lines.push(currentLine);
+        var descLines = wrapTextToWidth(desc, W - 20, 5);
+        if (descLines.length > 2) descLines.length = 2;
 
-        for (var l = 0; l < lines.length; l++) {
-            var lx = centerTextX(lines[l], 1);
-            Utils.drawText(ctx, lines[l], lx, panelY + panelH + 8 + l * 10, C.white, 1);
+        var descY = panelY + panelH + 4;
+        for (var l = 0; l < descLines.length; l++) {
+            var lx = Math.floor((W - descLines[l].length * 5) / 2);
+            Utils.drawText(ctx, descLines[l], lx, descY + l * 9, C.white, 0.8);
         }
 
-        // Difficulty selector
+        // Bottom controls - single row for difficulty + speed run
+        var ctrlY = H - 28;
         var diffNames = ['EASY', 'NORMAL', 'HARD'];
         var diffColors = [C.lightGreen, C.yellow, C.red];
-        var diffStr = 'DIFFICULTY: ' + diffNames[Game.difficulty];
-        var diffX = centerTextX(diffStr, 1);
-        Utils.drawText(ctx, diffStr, diffX, H - 34, diffColors[Game.difficulty], 1);
-        Utils.drawText(ctx, 'UP/DOWN TO CHANGE', centerTextX('UP/DOWN TO CHANGE', 1), H - 24, C.darkGray, 1);
+        Utils.drawText(ctx, diffNames[Game.difficulty], 10, ctrlY, diffColors[Game.difficulty], 0.8);
+        Utils.drawText(ctx, 'UP/DN', 10, ctrlY + 9, C.darkGray, 0.6);
 
-        // Speed run toggle
-        var srText = 'SPEED RUN: ' + (Game.speedRunEnabled ? 'ON' : 'OFF');
-        Utils.drawText(ctx, srText, W - 80, H - 34, Game.speedRunEnabled ? C.gold : C.darkGray, 1);
-        Utils.drawText(ctx, 'X:TOGGLE', W - 56, H - 24, C.darkGray, 1);
+        var srText = Game.speedRunEnabled ? 'SPEED:ON' : 'SPEED:OFF';
+        Utils.drawText(ctx, srText, W - 52, ctrlY, Game.speedRunEnabled ? C.gold : C.darkGray, 0.8);
+        Utils.drawText(ctx, 'X:TOGGLE', W - 52, ctrlY + 9, C.darkGray, 0.6);
 
-        // "Z to Confirm" blinking with arrow indicators
+        // "Z to Confirm" blinking
         if (Math.floor(Game.frame / 30) % 2 === 0) {
             var confText = 'Z to Confirm';
             var confX = centerTextX(confText, 1);
-            Utils.drawText(ctx, confText, confX, H - 12, C.yellow, 1);
+            Utils.drawText(ctx, confText, confX, H - 10, C.yellow, 1);
         }
         // Arrow key hints
         var arrowBob = Math.sin(Game.frame * 0.1) * 2;
-        Utils.drawText(ctx, '<', 8 + arrowBob, H / 2 + 10, C.gold, 2);
-        Utils.drawText(ctx, '>', W - 18 - arrowBob, H / 2 + 10, C.gold, 2);
+        Utils.drawText(ctx, '<', startX - 10 + arrowBob, panelY + panelH / 2, C.gold, 2);
+        Utils.drawText(ctx, '>', startX + panelW * 3 + panelGap * 2 + 2 - arrowBob, panelY + panelH / 2, C.gold, 2);
     }
 
     // =====================================================================
@@ -3128,57 +3149,175 @@
     }
 
     function drawEpilogueEldspyre(ctx) {
-        // Hopeful scene - dawn breaking, distant mountain with glowing peak
-        ctx.fillStyle = '#0a0a20';
-        ctx.fillRect(0, 0, W, 40);
-        ctx.fillStyle = '#1a1030';
-        ctx.fillRect(0, 40, W, 20);
-        ctx.fillStyle = '#2a1a3a';
-        ctx.fillRect(0, 60, W, 15);
-        ctx.fillStyle = '#4a2a3a';
-        ctx.fillRect(0, 75, W, 10);
-        ctx.fillStyle = '#6a3a2a';
-        ctx.fillRect(0, 85, W, 10);
-        ctx.fillStyle = '#8a5a3a';
-        ctx.fillRect(0, 95, W, 10);
+        var t = Game.epilogueTimer;
 
-        // Ground
-        ctx.fillStyle = '#1a2a1a';
-        ctx.fillRect(0, 105, W, 55);
+        // Night sky gradient - deep blue to purple horizon
+        ctx.fillStyle = '#05051a';
+        ctx.fillRect(0, 0, W, 30);
+        ctx.fillStyle = '#0a0a25';
+        ctx.fillRect(0, 30, W, 20);
+        ctx.fillStyle = '#10102a';
+        ctx.fillRect(0, 50, W, 15);
+        ctx.fillStyle = '#1a1035';
+        ctx.fillRect(0, 65, W, 10);
+        ctx.fillStyle = '#251540';
+        ctx.fillRect(0, 75, W, 8);
+        ctx.fillStyle = '#301a3a';
+        ctx.fillRect(0, 83, W, 7);
 
-        // Distant mountain with glowing peak (The Eldspyre)
-        ctx.fillStyle = '#2a2a3a';
-        // Mountain slopes
-        ctx.fillRect(100, 55, 56, 50);
-        ctx.fillRect(90, 75, 76, 30);
-        ctx.fillRect(80, 95, 96, 10);
-        // Peak
-        ctx.fillStyle = '#3a3a4a';
-        ctx.fillRect(118, 40, 20, 20);
-        ctx.fillRect(122, 30, 12, 12);
-        ctx.fillRect(126, 24, 4, 8);
-
-        // Glowing tip - the Eldspyre
-        var glowPulse = Math.sin(Game.epilogueTimer * 0.06) * 0.3 + 0.7;
-        ctx.fillStyle = 'rgba(255,200,100,' + (glowPulse * 0.6) + ')';
-        ctx.fillRect(122, 18, 12, 12);
-        ctx.fillStyle = 'rgba(255,220,150,' + (glowPulse * 0.8) + ')';
-        ctx.fillRect(124, 20, 8, 8);
-        ctx.fillStyle = 'rgba(255,255,200,' + glowPulse + ')';
-        ctx.fillRect(126, 22, 4, 4);
-
-        // Light rays from the peak
-        ctx.fillStyle = 'rgba(255,200,100,0.1)';
-        ctx.fillRect(110, 0, 36, 30);
-        ctx.fillRect(115, 0, 26, 20);
-
-        // Small stars still visible
-        ctx.fillStyle = '#ffffff';
-        var dawnStars = [[20,8],[55,15],[180,12],[220,8],[35,25],[245,18]];
-        for (var ds = 0; ds < dawnStars.length; ds++) {
-            ctx.globalAlpha = 0.3 + Math.sin(Game.epilogueTimer * 0.04 + ds) * 0.2;
-            ctx.fillRect(dawnStars[ds][0], dawnStars[ds][1], 1, 1);
+        // Animated stars - slowly drifting across the sky
+        var starField = [
+            [30,6,1.2],[55,12,0.8],[80,4,1.0],[110,18,0.6],[140,8,1.1],
+            [170,14,0.9],[200,5,0.7],[230,10,1.3],[15,22,0.5],[65,26,1.0],
+            [95,20,0.8],[125,3,1.2],[155,24,0.6],[185,16,1.1],[215,9,0.9],
+            [245,20,0.7],[40,16,1.0],[100,28,0.5],[160,2,1.3],[190,22,0.8],
+            [10,10,0.6],[50,30,0.9],[120,10,1.1],[175,28,0.7],[210,18,1.0],
+            [70,8,1.2],[135,22,0.5],[225,4,0.9],[20,28,1.1],[150,12,0.6]
+        ];
+        for (var si = 0; si < starField.length; si++) {
+            var sx = (starField[si][0] + t * starField[si][2] * 0.15) % W;
+            var sy = starField[si][1];
+            var sBright = 0.4 + Math.sin(t * 0.05 + si * 1.7) * 0.35;
+            ctx.fillStyle = 'rgba(255,255,255,' + sBright + ')';
+            var sSize = (si % 3 === 0) ? 2 : 1;
+            ctx.fillRect(sx, sy, sSize, sSize);
+            // Twinkle cross for brighter stars
+            if (sSize === 2 && sBright > 0.6) {
+                ctx.fillStyle = 'rgba(255,255,255,' + (sBright * 0.4) + ')';
+                ctx.fillRect(sx - 1, sy + 0.5, 1, 1);
+                ctx.fillRect(sx + 2, sy + 0.5, 1, 1);
+            }
         }
+
+        // Mountain range - layered silhouettes
+        // Far mountains (lighter)
+        ctx.fillStyle = '#1a1a30';
+        // Far left mountain
+        ctx.fillRect(0, 72, 45, 18);
+        ctx.fillRect(5, 65, 35, 7);
+        ctx.fillRect(12, 58, 21, 7);
+        ctx.fillRect(18, 52, 9, 6);
+        // Far center-left
+        ctx.fillRect(35, 70, 50, 20);
+        ctx.fillRect(42, 60, 36, 10);
+        ctx.fillRect(50, 50, 20, 10);
+        ctx.fillRect(56, 44, 8, 6);
+        // Far right
+        ctx.fillRect(180, 68, 76, 22);
+        ctx.fillRect(190, 58, 56, 10);
+        ctx.fillRect(200, 48, 36, 10);
+        ctx.fillRect(210, 40, 16, 8);
+        ctx.fillRect(214, 34, 8, 6);
+
+        // Mid mountains (darker)
+        ctx.fillStyle = '#12122a';
+        ctx.fillRect(60, 75, 70, 15);
+        ctx.fillRect(70, 65, 50, 10);
+        ctx.fillRect(80, 55, 30, 10);
+        ctx.fillRect(88, 48, 14, 7);
+        ctx.fillRect(92, 42, 6, 6);
+
+        // Near mountains (darkest)
+        ctx.fillStyle = '#0a0a20';
+        // The Eldspyre - tallest peak, center
+        ctx.fillRect(100, 78, 60, 12);
+        ctx.fillRect(108, 65, 44, 13);
+        ctx.fillRect(116, 52, 28, 13);
+        ctx.fillRect(122, 40, 16, 12);
+        ctx.fillRect(126, 32, 8, 8);
+        ctx.fillRect(128, 26, 4, 6);
+
+        // Glowing tip of the Eldspyre
+        var glowPulse = Math.sin(t * 0.06) * 0.3 + 0.7;
+        ctx.fillStyle = 'rgba(255,200,100,' + (glowPulse * 0.4) + ')';
+        ctx.fillRect(125, 22, 10, 10);
+        ctx.fillStyle = 'rgba(255,220,150,' + (glowPulse * 0.6) + ')';
+        ctx.fillRect(127, 24, 6, 6);
+        ctx.fillStyle = 'rgba(255,255,200,' + (glowPulse * 0.9) + ')';
+        ctx.fillRect(129, 26, 2, 2);
+
+        // Light rays upward from peak
+        ctx.fillStyle = 'rgba(255,200,100,' + (glowPulse * 0.08) + ')';
+        ctx.fillRect(126, 0, 8, 26);
+        ctx.fillStyle = 'rgba(255,200,100,' + (glowPulse * 0.05) + ')';
+        ctx.fillRect(122, 0, 16, 22);
+
+        // Ground / cliff edge the heroes stand on
+        ctx.fillStyle = '#0c1a0c';
+        ctx.fillRect(0, 90, W, 70);
+        // Grass tufts on the cliff edge
+        ctx.fillStyle = '#142a14';
+        ctx.fillRect(10, 89, 3, 2); ctx.fillRect(35, 88, 4, 3);
+        ctx.fillRect(70, 89, 3, 2); ctx.fillRect(160, 88, 4, 3);
+        ctx.fillRect(200, 89, 3, 2); ctx.fillRect(240, 88, 2, 3);
+
+        // Three hero silhouettes on the cliff edge, looking at mountains
+        // They're drawn as dark pixel art outlines with subtle color hints
+
+        // Left hero (warrior stance - Daxon) at x=85
+        var hx = 85;
+        var hy = 74;
+        ctx.fillStyle = '#080818';
+        // Head
+        ctx.fillRect(hx+2, hy, 4, 4);
+        // Neck
+        ctx.fillRect(hx+3, hy+4, 2, 1);
+        // Shoulders + torso
+        ctx.fillRect(hx, hy+5, 8, 2);
+        ctx.fillRect(hx+1, hy+7, 6, 4);
+        // Legs
+        ctx.fillRect(hx+1, hy+11, 2, 4);
+        ctx.fillRect(hx+5, hy+11, 2, 4);
+        // Sword silhouette on back
+        ctx.fillRect(hx+7, hy+2, 1, 8);
+        ctx.fillRect(hx+6, hy+2, 3, 1);
+        // Blue armor hint
+        ctx.fillStyle = 'rgba(60,80,160,0.3)';
+        ctx.fillRect(hx+2, hy+6, 4, 3);
+
+        // Center hero (cloaked - Luigi) at x=118
+        hx = 118;
+        hy = 73;
+        ctx.fillStyle = '#080818';
+        // Head + hood
+        ctx.fillRect(hx+1, hy, 6, 3);
+        ctx.fillRect(hx+2, hy-1, 4, 1);
+        ctx.fillRect(hx+2, hy+3, 4, 1);
+        // Shoulders
+        ctx.fillRect(hx, hy+4, 8, 2);
+        // Robes
+        ctx.fillRect(hx+1, hy+6, 6, 5);
+        ctx.fillRect(hx, hy+11, 8, 3);
+        ctx.fillRect(hx+1, hy+14, 6, 1);
+        // Purple magic hint
+        ctx.fillStyle = 'rgba(120,60,180,0.3)';
+        ctx.fillRect(hx+2, hy+5, 4, 4);
+
+        // Right hero (nature pose - Lirielle) at x=150
+        hx = 150;
+        hy = 75;
+        ctx.fillStyle = '#080818';
+        // Head + flowing hair
+        ctx.fillRect(hx+2, hy, 4, 4);
+        ctx.fillRect(hx+5, hy+1, 2, 5);
+        // Neck
+        ctx.fillRect(hx+3, hy+4, 2, 1);
+        // Torso
+        ctx.fillRect(hx+1, hy+5, 6, 2);
+        ctx.fillRect(hx+1, hy+7, 5, 3);
+        // Legs
+        ctx.fillRect(hx+1, hy+10, 2, 4);
+        ctx.fillRect(hx+4, hy+10, 2, 4);
+        // Staff
+        ctx.fillRect(hx-1, hy-2, 1, 16);
+        ctx.fillRect(hx-2, hy-2, 3, 1);
+        // Green nature hint
+        ctx.fillStyle = 'rgba(60,160,80,0.3)';
+        ctx.fillRect(hx+2, hy+6, 3, 3);
+        // Staff glow
+        ctx.fillStyle = 'rgba(80,200,100,' + (0.2 + Math.sin(t * 0.04) * 0.1) + ')';
+        ctx.fillRect(hx-2, hy-3, 3, 2);
+
         ctx.globalAlpha = 1;
     }
 

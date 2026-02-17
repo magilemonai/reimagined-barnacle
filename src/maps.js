@@ -141,27 +141,27 @@
         name: 'Ebon Vale - Town Square',
         tiles: [
         //   0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
-            [Ro,  Ro,  Ro,  _, Fl,   _,   P,   P,   P,   P,  Fl,  _,  _,  Ro,  Ro,  Ro ],  // row 0  - rooftops & exit north
-            [WW,  WW,  WW,  _,  _,  Bu,   P,   P,   P,   P,  Bu,  _,  _,  WW,  WW,  WW ],  // row 1  - building fronts
-            [WW,  WF,  WD,  _,  Fl,  _,   P,   P,   P,   P,   _,  Fl, _,  WD,  WF,  WW ],  // row 2  - doors
-            [ _,   _,   _,  _,   _,  _,   P,   _,   _,   P,   _,   _,  _,  _,   _,   _ ],  // row 3
-            [Fl,   _,   _,  _,   _,  _,   P,   _,   _,   P,   _,   _,  _,  _,   _,  Fl ],  // row 4
-            [ _,   _,  Bu,  _,   _,  _,   P,  We,  Sg,   P,   _,   _,  _,  Bu,  _,   _ ],  // row 5  - well & signpost
-            [ _,   _,   _,  _,  Fl,  _,   P,   _,   _,   P,   _,  Fl,  _,  _,   _,   _ ],  // row 6
-            [ _,  Fl,   _,  _,   _,  _,   P,   P,   P,   P,   _,   _,  _,  _,  Fl,   _ ],  // row 7  - center row (start Y)
-            [ _,   _,   _,  _,   _,   _,  P,   _,   _,   P,   _,   _,  _,  _,   _,   _ ],  // row 8
-            [ _,   _,  Bu,  _,   _,  Fl,  P,   _,   _,   P,  Fl,   _,  _,  Bu,  _,   _ ],  // row 9
-            [Fl,   _,   _,  _,   _,   _,  P,   _,   _,   P,   _,   _,  _,  _,   _,  Fl ],  // row 10
-            [ _,   _,   _,  _,  Fl,   _,  P,   _,   _,   P,   _,  Fl,  _,  _,   _,   _ ],  // row 11
-            [ _,  Bu,   _,  _,   _,  Bu,  P,   P,   P,   P,  Bu,   _,  _,  _,  Bu,   _ ],  // row 12
-            [Fl,   _,   _,  _,  Sg,   _,  P,   P,   P,   P,   _,   _,  _,  _,   _,  Fl ],  // row 13 - exit south + market sign
+            [Ro,  Ro,  Ro,  Ro,  Fl,  _,   P,   P,   P,   P,   _,  Fl,  Ro,  Ro,  Ro,  Ro ],  // row 0  - 4-wide rooftops
+            [Ro,  Ro,  Ro,  Ro,  _,  Bu,   P,   P,   P,   P,  Bu,   _,  Ro,  Ro,  Ro,  Ro ],  // row 1  - rooftops lower
+            [WW,  WW,  WW,  WW,  Fl,  _,   P,   _,   _,   P,   _,  Fl,  WW,  WW,  WW,  WW ],  // row 2  - solid wall faces
+            [WW,  WW,  WD,   _,  _,   _,   P,   _,   _,   P,   _,   _,   _,  WD,  WW,  WW ],  // row 3  - doors face south
+            [ _,   _,   _,   _,  _,   _,   P,   _,   _,   P,   _,   _,   _,   _,   _,   _ ],  // row 4
+            [Fl,   _,  Bu,   _,  _,   _,   P,  We,  Sg,   P,   _,   _,   _,  Bu,   _,  Fl ],  // row 5  - well & signpost
+            [ _,   _,   _,   _,  Fl,  _,   P,   _,   _,   P,   _,  Fl,   _,   _,   _,   _ ],  // row 6
+            [ _,  Fl,   _,   _,  _,   _,   P,   P,   P,   P,   _,   _,   _,   _,  Fl,   _ ],  // row 7  - center row (start Y)
+            [ _,   _,   _,   _,  _,   _,   P,   _,   _,   P,   _,   _,   _,   _,   _,   _ ],  // row 8
+            [ _,   _,  Bu,   _,  _,  Fl,   P,   _,   _,   P,  Fl,   _,   _,  Bu,   _,   _ ],  // row 9
+            [Fl,   _,   _,   _,  _,   _,   P,   _,   _,   P,   _,   _,   _,   _,   _,  Fl ],  // row 10
+            [ _,   _,   _,   _,  Fl,  _,   P,   _,   _,   P,   _,  Fl,   _,   _,   _,   _ ],  // row 11
+            [ _,  Bu,   _,   _,  _,  Bu,   P,   P,   P,   P,  Bu,   _,   _,   _,  Bu,   _ ],  // row 12
+            [Fl,   _,   _,   _,  Sg,  _,   P,   P,   P,   P,   _,   _,   _,   _,   _,  Fl ],  // row 13 - exit south + market sign
         ],
         exits: {
             north: { room: 'ebon_vale_north',  spawnX: 7, spawnY: 12 },
             south: { room: 'ebon_vale_market', spawnX: 7, spawnY: 1  },
         },
         npcs: [
-            { id: 'npc_fawks',        sprite: 'npc_fawks',        x: 3,  y: 2,  dialogue: 'fawks_greeting' },
+            { id: 'npc_fawks',        sprite: 'npc_fawks',        x: 2,  y: 4,  dialogue: 'fawks_greeting' },
             { id: 'npc_mayor_helena', sprite: 'npc_mayor_helena', x: 4,  y: 8,  dialogue: 'helena_greeting' },
             { id: 'npc_elira_voss',   sprite: 'npc_elira_voss',   x: 12, y: 8,  dialogue: 'elira_greeting' },
         ],
@@ -185,20 +185,20 @@
         name: 'Ebon Vale - Market District',
         tiles: [
         //   0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
-            [ _,  Bu,  _,   _,   _,  Bu,  P,   P,   P,   P,  Bu,   _,  _,   _,  Bu,  _ ],  // row 0  - exit north
-            [ _,   _,  _,   _,   _,   _,  P,   P,   P,   P,   _,   _,  _,   _,   _,  _ ],  // row 1
-            [ _,  Mk,  _,  Fl,  Mk,  _,  P,   _,   _,   P,   _,  Mk,  Fl, Mk,   _,  _ ],  // row 2  - market stalls row 1
-            [ _,   _,  _,   _,   _,  _,  P,   _,   _,   P,   _,   _,  _,   _,   _,  _ ],  // row 3
-            [ _,  Fl, Mk,   _,   _,  _,  P,  Mk,  Mk,   P,   _,   _,  _,  Mk,  Fl,  _ ],  // row 4  - market stalls row 2
-            [ _,   _,  _,   _,   _,  _,  P,   _,   _,   P,   _,   _,  _,   _,   _,  _ ],  // row 5
-            [ _,  Sg,  _,  Fl,  _,   _,  P,   P,   P,   P,   _,   _,  Fl,  _,  Sg,  _ ],  // row 6  - shop signs
-            [ _,   P,  _,   _,  _,   _,  P,   _,   _,   P,   _,   _,  _,   _,   P,  _ ],  // row 7  - paths to shops
-            [SW,  SW,  P,  SW,   _,  _,   _,   _,   _,   _,   _,  _,  SW,   P,  SW,  SW ],  // row 8  - doors in north walls
-            [SW,  SF,  SF, SW,   _,  Fl,  _,   _,   _,   _,  Fl,  _,  SW,  SF,  SF,  SW ],  // row 9
-            [SW,  SF,  SF, SW,   _,   _,  _,   _,   _,   _,   _,  _,  SW,  SF,  SF,  SW ],  // row 10
-            [SW,  SF,  SF, SW,   _,   _,  _,   _,   _,   _,   _,  _,  SW,  SF,  SF,  SW ],  // row 11
-            [SW,  SW,  SW, SW,   _,   _,  _,  Fl,  Fl,   _,   _,  _,  SW,  SW,  SW,  SW ],  // row 12
-            [ _,   _,   _,  _,   _,   _,  _,   _,   _,   _,   _,  _,   _,   _,   _,  _ ],  // row 13
+            [ _,  Bu,   _,   _,   _,  Bu,  P,   P,   P,   P,  Bu,   _,   _,   _,  Bu,  _ ],  // row 0  - exit north
+            [ _,   _,   _,   _,   _,   _,  P,   P,   P,   P,   _,   _,   _,   _,   _,  _ ],  // row 1
+            [ _,  Mk,   _,  Fl,  Mk,   _,  P,   _,   _,   P,   _,  Mk,  Fl,  Mk,   _,  _ ],  // row 2  - market stalls row 1
+            [ _,   _,   _,   _,   _,   _,  P,   _,   _,   P,   _,   _,   _,   _,   _,  _ ],  // row 3
+            [ _,  Fl,  Mk,   _,   _,   _,  P,  Mk,  Mk,   P,   _,   _,   _,  Mk,  Fl,  _ ],  // row 4  - market stalls row 2
+            [ _,   _,   _,   _,   _,   _,  P,   _,   _,   P,   _,   _,   _,   _,   _,  _ ],  // row 5
+            [ _,  Sg,   _,  Fl,   _,   _,  P,   P,   P,   P,   _,   _,  Fl,   _,  Sg,  _ ],  // row 6  - shop signs
+            [Ro,  Ro,   P,  Ro,   _,   _,  P,   _,   _,   P,   _,   _,  Ro,   P,  Ro,  Ro ],  // row 7  - rooftops with entry gaps
+            [SW,  SW,   P,  SW,   _,   _,   _,   _,   _,   _,   _,   _,  SW,   P,  SW,  SW ],  // row 8  - north wall + doors
+            [SW,  SF,  SF,  SW,   _,  Fl,   _,   _,   _,   _,  Fl,   _,  SW,  SF,  SF,  SW ],  // row 9
+            [SW,  SF,  SF,  SW,   _,   _,   _,   _,   _,   _,   _,   _,  SW,  SF,  SF,  SW ],  // row 10
+            [SW,  SF,  SF,  SW,   _,   _,   _,   _,   _,   _,   _,   _,  SW,  SF,  SF,  SW ],  // row 11
+            [SW,  SW,  SW,  SW,   _,   _,   _,  Fl,  Fl,   _,   _,   _,  SW,  SW,  SW,  SW ],  // row 12 - back walls
+            [ _,   _,   _,   _,   _,   _,   _,   _,   _,   _,   _,   _,   _,   _,   _,  _ ],  // row 13
         ],
         exits: {
             north: { room: 'ebon_vale_square', spawnX: 7, spawnY: 12 },
@@ -228,20 +228,20 @@
         name: 'Ebon Vale - North Gate',
         tiles: [
         //   0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
-            [Tr,  G,  Tr,   G,  Tr,  G,   P,   P,   P,   P,   G,  Tr,  G,  Tr,   G,  Tr ],  // row 0  - exit north (forest side)
-            [Tr,  G,   G,  Tr,   G,   G,  P,   G,   G,   P,   G,   G,  Tr,  G,   G,  Tr ],  // row 1
-            [ G,  Tr,   G,  G,  Bu,   G,  P,   G,   G,   P,   G,  Bu,   G,  G,  Tr,   G ],  // row 2
-            [ G,   G,   G,  G,   G,   G,  P,   G,   G,   P,   G,   G,   G,  G,   G,   G ],  // row 3
-            [ G,   G,  Bu,  G,   G,   G,  P,  Sg,   G,   P,   G,   G,   G,  Bu,  G,   G ],  // row 4  - signpost warning
-            [Fe,  Fe,  Fe, Fe,  Fe,  Fe,  P,   P,   P,   P,  Fe,  Fe,  Fe, Fe,  Fe,  Fe ],  // row 5  - fence line with gate
-            [ _,   _,   _,  _,  Fl,   _,  P,   _,   _,   P,   _,  Fl,  _,  _,   _,   _ ],  // row 6
-            [ _,   _,   _,  _,   _,   _,  P,   _,   _,   P,   _,   _,  _,  _,   _,   _ ],  // row 7
-            [Ro,  Ro,  Ro,  _,   _,   _,  P,   _,   _,   P,   _,   _,  _,  Ro,  Ro,  Ro ],  // row 8  - houses on sides
-            [WW,  WW,  WW,  _,  Fl,   _,  P,   _,   _,   P,   _,  Fl,  _,  WW,  WW,  WW ],  // row 9
-            [WW,  WF,  WW,  _,   _,  Bu,  P,   _,   _,   P,  Bu,   _,  _,  WW,  WF,  WW ],  // row 10
-            [ _,   _,   _,  _,   _,   _,  P,   _,   _,   P,   _,   _,  _,  _,   _,   _ ],  // row 11
-            [ _,  Fl,   _,  _,   _,  Fl,  P,   P,   P,   P,  Fl,   _,  _,  _,  Fl,   _ ],  // row 12
-            [ _,   _,   _,  _,   _,   _,  P,   P,   P,   P,   _,   _,  _,  _,   _,   _ ],  // row 13 - exit south
+            [Tr,   G,  Tr,   G,  Tr,   G,   P,   P,   P,   P,   G,  Tr,   G,  Tr,   G,  Tr ],  // row 0  - forest edge
+            [Tr,   G,   G,  Tr,   G,   G,   P,   G,   G,   P,   G,   G,  Tr,   G,   G,  Tr ],  // row 1
+            [ G,  Tr,   G,   G,  Bu,   G,   P,   G,   G,   P,   G,  Bu,   G,   G,  Tr,   G ],  // row 2
+            [ G,   G,   G,   G,   G,   G,   P,   G,   G,   P,   G,   G,   G,   G,   G,   G ],  // row 3
+            [ G,   G,  Bu,   G,   G,   G,   P,  Sg,   G,   P,   G,   G,   G,  Bu,   G,   G ],  // row 4  - signpost warning
+            [Fe,  Fe,  Fe,  Fe,  Fe,  Fe,   P,   P,   P,   P,  Fe,  Fe,  Fe,  Fe,  Fe,  Fe ],  // row 5  - fence line with gate
+            [ _,   _,   _,   _,  Fl,   _,   P,   _,   _,   P,   _,  Fl,   _,   _,   _,   _ ],  // row 6
+            [Ro,  Ro,  Ro,  Ro,   _,   _,   P,   _,   _,   P,   _,   _,  Ro,  Ro,  Ro,  Ro ],  // row 7  - 4-wide rooftops
+            [Ro,  Ro,  Ro,  Ro,   _,   _,   P,   _,   _,   P,   _,   _,  Ro,  Ro,  Ro,  Ro ],  // row 8  - rooftops lower
+            [WW,  WW,  WW,  WW,  Fl,   _,   P,   _,   _,   P,   _,  Fl,  WW,  WW,  WW,  WW ],  // row 9  - solid wall faces
+            [WW,  WW,  WD,   _,   _,  Bu,   P,   _,   _,   P,  Bu,   _,   _,  WD,  WW,  WW ],  // row 10 - doors face south
+            [ _,   _,   _,   _,   _,   _,   P,   _,   _,   P,   _,   _,   _,   _,   _,   _ ],  // row 11
+            [ _,  Fl,   _,   _,   _,  Fl,   P,   P,   P,   P,  Fl,   _,   _,   _,  Fl,   _ ],  // row 12
+            [ _,   _,   _,   _,   _,   _,   P,   P,   P,   P,   _,   _,   _,   _,   _,   _ ],  // row 13 - exit south
         ],
         exits: {
             north: { room: 'ebon_forest_entry', spawnX: 7, spawnY: 12 },
@@ -268,20 +268,20 @@
         name: 'Ebon Forest - Edge of Darkness',
         tiles: [
         //   0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
-            [Tr,  Tr,  G,  Tr,  Tr,   G,  P,   P,   P,   P,   G,  Tr,  Tr,  G,  Tr,  Tr ],  // row 0  - exit north
-            [Tr,  G,  Tr,   G,   G,   G,  P,   G,   G,   P,   G,   G,   G,  Tr,  G,  Tr ],  // row 1
-            [ G,  Tr,  G,  Tr,   G,   G,  P,   G,  Tr,   G,   G,   G,  Tr,  G,  Tr,   G ],  // row 2
-            [Tr,  G,   G,   G,  Bu,   G,  P,   P,   G,   G,  Tr,   G,   G,  G,   G,  Tr ],  // row 3
-            [ G,  Tr,  Tr,   G,   G,   G,  G,   P,   G,   G,   G,  Bu,   G, Tr,  Tr,   G ],  // row 4
-            [Tr,  G,   G,  Tr,   G,   G,  G,   P,   P,   G,   G,   G,  Tr,  G,   G,  Tr ],  // row 5
-            [ G,  Tr,   G,  G,   G,  Tr,  G,   G,   P,   P,   G,  Tr,  G,   G,  Tr,   G ],  // row 6
-            [Tr,  G,  Tr,   G,   G,   G,  G,   G,   G,   P,   G,   G,  G,  Tr,   G,  Tr ],  // row 7
-            [ G,   G,   G,  Tr,   G,   G, Tr,   G,   G,   P,   P,   G, Tr,   G,   G,   G ],  // row 8
-            [Tr,  Tr,   G,   G,  Bu,   G,  G,   G,   G,   G,   P,   G,  G,  Bu,  Tr,  Tr ],  // row 9
-            [ G,   G,  Tr,   G,   G,  Tr,  G,   G,   G,   G,   P,   G, Tr,   G,   G,   G ],  // row 10
-            [Tr,   G,   G,  Tr,   G,  Sg,  P,   P,   P,   P,   P,   G,  G,  Tr,   G,  Tr ],  // row 11 - warning sign
-            [ G,  Tr,   G,   G,   G,   G,  P,   G,   G,   P,   G,   G,   G,  G,  Tr,   G ],  // row 12
-            [Tr,   G,  Tr,   G,  Tr,   G,  P,   P,   P,   P,   G,  Tr,   G, Tr,   G,  Tr ],  // row 13 - exit south
+            [Tr,  Tr,   G,  Tr,  Tr,   G,   P,   P,   P,   P,   G,  Tr,  Tr,   G,  Tr,  Tr ],  // row 0  - exit north
+            [Tr,   G,  Tr,   G,  Mu,   G,   P,   G,   G,   P,   G,   G,   G,  Tr,   G,  Tr ],  // row 1  - mushrooms
+            [ G,  Tr,   G,  Tr,   G,   G,   P,   G,  Tr,   G,   G,  Mu,  Tr,   G,  Tr,   G ],  // row 2
+            [Tr,   G,   G,   G,  Bu,   G,   P,   P,   G,   G,  Tr,   G,   G,   G,   G,  Tr ],  // row 3
+            [ G,  Tr,  Tr,   G,   G,   G,   G,   P,   G,   G,   G,  Bu,   G,  Tr,  Tr,   G ],  // row 4
+            [Tr,   G,   G,  Tr,  Mu,   G,   G,   P,   P,   G,   G,   G,  Tr,   G,   G,  Tr ],  // row 5  - mushrooms
+            [ G,  Tr,   G,   G,   G,  Tr,   G,   G,   P,   P,   G,  Tr,   G,   G,  Tr,   G ],  // row 6
+            [Tr,   G,  Tr,   G,   G,   G,   G,   G,   G,   P,   G,   G,   G,  Tr,   G,  Tr ],  // row 7
+            [ G,   G,   G,  Tr,   G,   G,  Tr,   G,   G,   P,   P,   G,  Tr,   G,   G,   G ],  // row 8
+            [Tr,  Tr,   G,   G,  Bu,   G,   G,   G,  Mu,   G,   P,   G,   G,  Bu,  Tr,  Tr ],  // row 9  - mushrooms
+            [ G,   G,  Tr,   G,   G,  Tr,   G,   G,   G,   G,   P,   G,  Tr,   G,   G,   G ],  // row 10
+            [Tr,   G,   G,  Tr,   G,  Sg,   P,   P,   P,   P,   P,   G,   G,  Tr,   G,  Tr ],  // row 11 - warning sign
+            [ G,  Tr,   G,   G,  Mu,   G,   P,   G,   G,   P,   G,   G,   G,   G,  Tr,   G ],  // row 12 - mushrooms
+            [Tr,   G,  Tr,   G,  Tr,   G,   P,   P,   P,   P,   G,  Tr,   G,  Tr,   G,  Tr ],  // row 13 - exit south
         ],
         exits: {
             north: { room: 'ebon_forest_deep',  spawnX: 7, spawnY: 12 },
@@ -315,20 +315,20 @@
         name: "Ebon Forest - Que'Rubra's Grove",
         tiles: [
         //   0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
-            [Tr,  Tr,  G,  Tr,   G,  Tr,  P,   P,   P,   P,  Tr,   G,  W,   W,   G,  Tr ],  // row 0  - exit north
-            [Tr,  G,  Tr,   G,  Tr,   G,  P,   G,   G,   P,   G,  Tr,  W,   G,  Tr,   G ],  // row 1
-            [ G,  Tr,   G,   G,   G,   G,  P,   G,   G,   P,   G,   G,  W,   G,   G,  Tr ],  // row 2
-            [Tr,   G,   G,  Tr,   G,   G,  P,   P,   P,   P,   G,   G,  W,  Tr,   G,   G ],  // row 3
-            [ G,  Tr,   G,   G,   G,   G,  G,   G,   G,   G,   G,   G,  W,   G,  Tr,   G ],  // row 4
-            [Tr,   G,   G,   G,  Bu,  G,   G,   G,   G,   G,   G,   G, Br,   G,   G,  Tr ],  // row 5  - bridge
-            [ G,  Tr,   G,   G,   G,  G,   G,   G,   G,   G,  Bu,   G,  W,   G,  Tr,   G ],  // row 6
-            [Tr,   G,   G,  Bu,  G,   G,   G,  Fl,  Fl,   G,   G,   G,  W,   G,   G,  Tr ],  // row 7  - clearing center
-            [ G,  Tr,   G,   G,  G,   G,  Fl,   G,   G,  Fl,   G,   G,  W,  Tr,   G,   G ],  // row 8
-            [Tr,   G,  Tr,   G,  G,   G,   G,   G,   G,   G,   G,   G,  W,   G,  Tr,   G ],  // row 9
-            [ G,   G,   G,  Tr,  G,  Bu,   G,   G,   G,   G,  Bu,   G,  W,   G,   G,  Tr ],  // row 10
-            [Tr,  Tr,   G,   G,  G,   G,   P,   P,   P,   P,   G,   G,  W,  Tr,   G,   G ],  // row 11
-            [ G,   G,  Tr,   G, Tr,   G,   P,   G,   G,   P,   G,  Tr,  W,   G,  Tr,   G ],  // row 12
-            [Tr,   G,  Tr,  Tr,  G,  Tr,   P,   P,   P,   P,  Tr,   G,  W,   W,   G,  Tr ],  // row 13 - exit south
+            [Tr,  Tr,   G,  Tr,   G,  Tr,   P,   P,   P,   P,  Tr,   G,   W,   W,   G,  Tr ],  // row 0  - exit north
+            [Tr,   G,  Tr,   G,  Tr,   G,   P,   G,   G,   P,   G,  Tr,   W,   G,  Tr,   G ],  // row 1
+            [ G,  Tr,   G,  Mu,   G,   G,   P,   G,   G,   P,   G,   G,   W,   G,   G,  Tr ],  // row 2  - mushrooms
+            [Tr,   G,   G,  Tr,   G,   G,   P,   P,   P,   P,   G,   G,   W,  Tr,   G,   G ],  // row 3
+            [ G,  Tr,   G,   G,  Mu,   G,   G,   G,   G,   G,   G,   G,   W,   G,  Tr,   G ],  // row 4  - mushrooms
+            [Tr,   G,   G,   G,  Bu,   G,   G,  Mu,   G,   G,   G,   G,  Br,   G,   G,  Tr ],  // row 5  - bridge + mushroom
+            [ G,  Tr,   G,   G,   G,   G,   G,   G,   G,   G,  Bu,   G,   W,   G,  Tr,   G ],  // row 6
+            [Tr,   G,   G,  Bu,   G,   G,  Fl,  Fl,  Fl,  Fl,   G,   G,   W,   G,   G,  Tr ],  // row 7  - flower-ringed clearing
+            [ G,  Tr,   G,   G,   G,  Fl,   G,   G,   G,   G,  Fl,   G,   W,  Tr,   G,   G ],  // row 8
+            [Tr,   G,  Tr,   G,   G,   G,  Fl,   G,   G,  Fl,   G,   G,   W,   G,  Tr,   G ],  // row 9
+            [ G,   G,   G,  Tr,  Mu,  Bu,   G,   G,   G,   G,  Bu,   G,   W,   G,   G,  Tr ],  // row 10 - mushrooms
+            [Tr,  Tr,   G,   G,   G,   G,   P,   P,   P,   P,   G,   G,   W,  Tr,   G,   G ],  // row 11
+            [ G,   G,  Tr,   G,  Tr,   G,   P,   G,   G,   P,   G,  Tr,   W,   G,  Tr,   G ],  // row 12
+            [Tr,   G,  Tr,  Tr,   G,  Tr,   P,   P,   P,   P,  Tr,   G,   W,   W,   G,  Tr ],  // row 13 - exit south
         ],
         exits: {
             north: { room: 'temple_entrance',    spawnX: 7, spawnY: 12 },

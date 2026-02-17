@@ -430,27 +430,27 @@
         '...aa..aa...'
       ], { h: P.brown, s: P.skin, k: P.darkGray, m: P.darkSkin, a: P.gray, u: P.blue, U: P.lightBlue, d: P.darkGray });
 
-      // Brother Soren - Monk: hooded brown robe, shadowed face, golden eyes
+      // Brother Soren - Tabaxi Monk: cat-person with pointed ears, fur, tail, monk robes
       makeNPC('npc_soren', [
-        '............',
-        '....rrrr....',
-        '...rrrrrr...',   // hood
-        '...rrrrrrr..',
-        '...rkskrr...',   // shadowed face under hood (k=gold eyes)
-        '...rssmrr...',
-        '..rrbbbbrr..',   // robe shoulders
-        '..rrbbbbrr..',
-        '..rrbBBbrr..',   // rope belt detail (B=dark)
-        '...rbbbbr...',
-        '...bbbbbb...',   // robe body
-        '...bbbbbb...',
-        '...bbbbbb...',
-        '..bbbbbbbb..',   // robe widens at hem
-        '..bbbbbbbb..',
-        '...bbbbbb...',
-        '....dd.dd...',   // sandals peek out
-        '....dd.dd...'
-      ], { r: P.brown, k: P.darkYellow, s: P.skin, m: P.darkSkin, b: P.brown, B: P.darkBrown, d: P.darkBrown });
+        '...f..f.....',   // pointed cat ears (f=tawny fur)
+        '..ffffff....',   // fur-covered head
+        '..fgYYgf....',   // feline face: gold slit eyes (Y), gray muzzle (g)
+        '..ffggff....',   // snout and whiskers
+        '...fmmf.....',   // chin/neck fur (m=darker fur)
+        '..rrrrrr....',   // brown monk robe shoulders
+        '..rrbbrr....',   // robe front with darker panel
+        '..rrbBbr....',   // rope belt (B=dark)
+        '..rrbbrrT...',   // tail starts here (T=tail tip)
+        '...rbbr.T...',   // robe body + tail curving
+        '...rbbr..T..',   // tail extends
+        '...rrrr..T..',
+        '..rrrrrr.T..',   // robe widens at hem
+        '..rrrrrr....',
+        '...rrrr.....',
+        '...ff.ff....',   // furry paw-feet
+        '...ff.ff....',
+        '...ff.ff....'
+      ], { f: '#c08050', g: '#a08070', Y: P.gold, m: '#906040', r: P.brown, b: '#8b6940', B: P.darkBrown, T: '#c08050' });
 
       // Braxon - Blacksmith: stocky, leather apron, bald with thick arms
       makeNPC('npc_braxon', [
@@ -518,27 +518,27 @@
         '..bbb..bbb..'
       ], { h: P.darkBrown, a: P.gray, A: P.lightGray, s: P.skin, k: P.darkGray, r: P.red, d: P.darkGray, b: P.darkBrown });
 
-      // Svana - Dwarven refugee: auburn braids, amber dress with gray shawl
+      // Svana - Dwarven refugee: stocky and short, thick auburn braids, wide build, armored vest
       makeNPC('npc_svana', [
         '............',
-        '....hhhh....',
-        '...hhhhhh...',   // auburn hair
-        '...hskskh...',   // face
-        '...hssssh...',
-        '..hhssmshh..',   // braids hang by cheeks (h on sides)
-        '..aaccccaa..',   // gray shawl (a) over amber dress (c)
-        '..aaccccaa..',
-        '..aaccccaa..',
-        '...cccccc...',   // dress body
-        '...cccccc...',
-        '...cccccc...',
-        '..cccccccc..',   // skirt widens
+        '...hhhhhh...',   // wide auburn hair
+        '..hhhhhhhh..',   // big dwarven hair (wide head)
+        '..hhskskhh..',   // broad face with bright eyes
+        '..hhsssshh..',   // rosy cheeks
+        '.hhbssmsbhh.',   // long braids (h) frame face, braided beard (b)
+        '.hhaaaaaa.h.',   // braids hang by shoulders, armored vest (a=gray)
+        '..aaaGGaaa..',   // wide stocky torso, gold buckle detail (G)
+        '..aaaaaaaa..',   // broad armored midsection
+        '..aaccccaa..',   // amber tunic below armor (c)
+        '..cccccccc..',   // wide dwarven frame
         '..cccccccc..',
-        '..cccccccc..',
-        '...cccccc...',
-        '....dd.dd...',   // shoes
-        '....dd.dd...'
-      ], { h: P.darkBrown, s: P.skin, k: P.darkGray, m: P.darkSkin, c: '#d0a060', a: P.gray, d: P.darkGray });
+        '..cccccccc..',   // short stout legs start close to torso
+        '..dddddddd..',   // very short thick legs (dwarven proportions)
+        '..dddddddd..',
+        '..dddddddd..',
+        '..bbb..bbb..',   // big heavy boots
+        '..bbb..bbb..'
+      ], { h: '#8b4513', s: P.skin, k: '#4080c0', m: P.darkSkin, a: P.gray, G: P.gold, c: '#d0a060', d: P.darkGray, b: P.darkBrown });
 
       // NPC aliases
       S.cache['npc_elira_voss'] = S.cache['npc_elira'];

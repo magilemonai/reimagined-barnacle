@@ -190,9 +190,9 @@
             [ _,   _,  _,   _,   _,  _,  P,   _,   _,   P,   _,   _,  _,   _,   _,  _ ],  // row 3
             [ _,  Fl, Mk,   _,   _,  _,  P,  Mk,  Mk,   P,   _,   _,  _,  Mk,  Fl,  _ ],  // row 4  - market stalls row 2
             [ _,   _,  _,   _,   _,  _,  P,   _,   _,   P,   _,   _,  _,   _,   _,  _ ],  // row 5
-            [ _,   _,  _,  Fl,  _,   _,  P,   P,   P,   P,   _,   _,  Fl,  _,   _,  _ ],  // row 6
-            [ _,   _,  _,   _,  _,   _,  P,   _,   _,   P,   _,   _,  _,   _,   _,  _ ],  // row 7
-            [SW,  SW,  SW, SW,   _,  _,   _,   _,   _,   _,   _,  _,  SW,  SW,  SW,  SW ],  // row 8  - blacksmith (L) / temple (R) walls
+            [ _,  Sg,  _,  Fl,  _,   _,  P,   P,   P,   P,   _,   _,  Fl,  _,  Sg,  _ ],  // row 6  - shop signs
+            [ _,   P,  _,   _,  _,   _,  P,   _,   _,   P,   _,   _,  _,   _,   P,  _ ],  // row 7  - paths to shops
+            [SW,  SW,  P,  SW,   _,  _,   _,   _,   _,   _,   _,  _,  SW,   P,  SW,  SW ],  // row 8  - doors in north walls
             [SW,  SF,  SF, SW,   _,  Fl,  _,   _,   _,   _,  Fl,  _,  SW,  SF,  SF,  SW ],  // row 9
             [SW,  SF,  SF, SW,   _,   _,  _,   _,   _,   _,   _,  _,  SW,  SF,  SF,  SW ],  // row 10
             [SW,  SF,  SF, SW,   _,   _,  _,   _,   _,   _,   _,  _,  SW,  SF,  SF,  SW ],  // row 11
@@ -203,12 +203,16 @@
             north: { room: 'ebon_vale_square', spawnX: 7, spawnY: 12 },
         },
         npcs: [
-            { id: 'npc_braxon',        sprite: 'npc_braxon',        x: 2,  y: 9,  dialogue: 'braxon_greeting' },
-            { id: 'npc_brother_soren', sprite: 'npc_brother_soren', x: 14, y: 9,  dialogue: 'soren_greeting' },
-            { id: 'npc_rorik',         sprite: 'npc_rorik',         x: 12, y: 11, dialogue: 'rorik_market_greeting' },
+            { id: 'npc_braxon',        sprite: 'npc_braxon',        x: 1,  y: 10, dialogue: 'braxon_greeting' },
+            { id: 'npc_brother_soren', sprite: 'npc_brother_soren', x: 14, y: 10, dialogue: 'soren_greeting' },
+            { id: 'npc_rorik',         sprite: 'npc_rorik',         x: 8,  y: 3,  dialogue: 'rorik_market_greeting' },
         ],
         enemies: [],
         items: [],
+        signs: [
+            { x: 1, y: 6, text: "Braxon's Forge - Bring goblin teeth to trade!" },
+            { x: 14, y: 6, text: "Brother Soren's Chapel - Healing and blessings" }
+        ],
         onEnter: null,
     };
 
@@ -274,7 +278,7 @@
             [ G,   G,   G,  Tr,   G,   G, Tr,   G,   G,   P,   P,   G, Tr,   G,   G,   G ],  // row 8
             [Tr,  Tr,   G,   G,  Bu,   G,  G,   G,   G,   G,   P,   G,  G,  Bu,  Tr,  Tr ],  // row 9
             [ G,   G,  Tr,   G,   G,  Tr,  G,   G,   G,   G,   P,   G, Tr,   G,   G,   G ],  // row 10
-            [Tr,   G,   G,  Tr,   G,   G,  P,   P,   P,   P,   P,   G,  G,  Tr,   G,  Tr ],  // row 11
+            [Tr,   G,   G,  Tr,   G,  Sg,  P,   P,   P,   P,   P,   G,  G,  Tr,   G,  Tr ],  // row 11 - warning sign
             [ G,  Tr,   G,   G,   G,   G,  P,   G,   G,   P,   G,   G,   G,  G,  Tr,   G ],  // row 12
             [Tr,   G,  Tr,   G,  Tr,   G,  P,   P,   P,   P,   G,  Tr,   G, Tr,   G,  Tr ],  // row 13 - exit south
         ],
@@ -293,7 +297,7 @@
             { type: 'item_potion', x: 4, y: 9, id: 'forest_entry_potion' },
         ],
         signs: [
-            { x: 7, y: 4, text: 'Beware! Goblins infest the path ahead.' }
+            { x: 5, y: 11, text: 'Beware! Goblins infest the path ahead.' }
         ],
         onEnter: null,
     };

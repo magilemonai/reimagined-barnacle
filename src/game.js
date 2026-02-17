@@ -1923,7 +1923,6 @@
     function updateIntro() {
         if (!Dialogue.isActive() && Game.cutsceneTimer === 0) {
             Dialogue.start('intro_cutscene', function () {
-                // After intro dialogue, start game
                 startGame();
             });
             Game.cutsceneTimer = 1;
@@ -1934,7 +1933,225 @@
         if (Input.pressed['z']) {
             Dialogue.advance();
         }
+        // X to skip seen dialogue
+        if (Input.pressed['x'] && Dialogue._canSkip) {
+            Dialogue.skipAll();
+        }
     }
+
+    // Pixel art cutscene scene renderers
+    function drawCutsceneTown(ctx) {
+        // Night sky gradient
+        ctx.fillStyle = '#0a0a1a';
+        ctx.fillRect(0, 0, W, 100);
+        // Stars
+        ctx.fillStyle = '#ffffff';
+        var stars = [[20,8],[55,15],[90,5],[140,12],[180,20],[220,8],[35,30],[110,25],[200,35],[160,42],[70,38],[245,18]];
+        for (var i = 0; i < stars.length; i++) {
+            ctx.fillRect(stars[i][0], stars[i][1], 1, 1);
+        }
+        // Moon
+        ctx.fillStyle = '#e8e0c0';
+        ctx.fillRect(200, 10, 12, 12);
+        ctx.fillStyle = '#0a0a1a';
+        ctx.fillRect(204, 8, 12, 12);
+        // Ground
+        ctx.fillStyle = '#1a3a1a';
+        ctx.fillRect(0, 100, W, 60);
+        // Road
+        ctx.fillStyle = '#4a3a2a';
+        ctx.fillRect(100, 100, 56, 60);
+        // Buildings - row of houses
+        // House 1 (left)
+        ctx.fillStyle = '#3a2a1a';
+        ctx.fillRect(16, 68, 40, 32);
+        ctx.fillStyle = '#5a3020';
+        ctx.fillRect(16, 58, 40, 12); // roof
+        ctx.fillStyle = '#e8a830';
+        ctx.fillRect(28, 80, 6, 6); // window glow
+        ctx.fillRect(40, 80, 6, 6);
+        // House 2
+        ctx.fillStyle = '#3a2a1a';
+        ctx.fillRect(64, 72, 32, 28);
+        ctx.fillStyle = '#5a3020';
+        ctx.fillRect(64, 64, 32, 10);
+        ctx.fillStyle = '#e8a830';
+        ctx.fillRect(72, 82, 6, 6);
+        // Inn (center) - "The Dancing Pig"
+        ctx.fillStyle = '#4a3020';
+        ctx.fillRect(108, 58, 44, 42);
+        ctx.fillStyle = '#6a4030';
+        ctx.fillRect(108, 48, 44, 12);
+        ctx.fillStyle = '#e8a830';
+        ctx.fillRect(118, 70, 8, 8);
+        ctx.fillRect(134, 70, 8, 8);
+        ctx.fillStyle = '#5a3a1a';
+        ctx.fillRect(124, 84, 12, 16); // door
+        // House 3
+        ctx.fillStyle = '#3a2a1a';
+        ctx.fillRect(160, 72, 36, 28);
+        ctx.fillStyle = '#5a3020';
+        ctx.fillRect(160, 64, 36, 10);
+        ctx.fillStyle = '#e8a830';
+        ctx.fillRect(170, 82, 6, 6);
+        ctx.fillRect(182, 82, 6, 6);
+        // House 4 (right)
+        ctx.fillStyle = '#3a2a1a';
+        ctx.fillRect(204, 68, 36, 32);
+        ctx.fillStyle = '#5a3020';
+        ctx.fillRect(204, 58, 36, 12);
+        ctx.fillStyle = '#e8a830';
+        ctx.fillRect(214, 80, 6, 6);
+        // Dark fog wisps at edges
+        ctx.fillStyle = 'rgba(30,10,40,0.5)';
+        ctx.fillRect(0, 90, 16, 70);
+        ctx.fillRect(240, 90, 16, 70);
+    }
+
+    function drawCutsceneForest(ctx) {
+        // Dark forest canopy
+        ctx.fillStyle = '#0a1a0a';
+        ctx.fillRect(0, 0, W, 160);
+        // Ground
+        ctx.fillStyle = '#1a2a0a';
+        ctx.fillRect(0, 110, W, 50);
+        // Path
+        ctx.fillStyle = '#3a3020';
+        ctx.fillRect(80, 110, 40, 50);
+        ctx.fillRect(60, 130, 80, 30);
+        // Tree trunks
+        ctx.fillStyle = '#2a1a0a';
+        var trunks = [10, 40, 70, 140, 175, 210, 240];
+        for (var t = 0; t < trunks.length; t++) {
+            ctx.fillRect(trunks[t], 50, 8, 70);
+        }
+        // Tree canopy (dark green circles)
+        ctx.fillStyle = '#0a3a0a';
+        var canopy = [[6,30,20],[36,40,16],[66,35,18],[136,38,18],[171,30,20],[206,40,16],[236,35,18]];
+        for (var c = 0; c < canopy.length; c++) {
+            ctx.fillRect(canopy[c][0], canopy[c][1], canopy[c][2], canopy[c][2]);
+        }
+        ctx.fillStyle = '#0a4a0a';
+        for (var c2 = 0; c2 < canopy.length; c2++) {
+            ctx.fillRect(canopy[c2][0]+2, canopy[c2][1]+2, canopy[c2][2]-4, canopy[c2][2]-4);
+        }
+        // Goblin eyes (pairs of red dots)
+        ctx.fillStyle = '#ff2020';
+        ctx.fillRect(25, 90, 2, 2); ctx.fillRect(31, 90, 2, 2);
+        ctx.fillRect(155, 85, 2, 2); ctx.fillRect(161, 85, 2, 2);
+        ctx.fillRect(195, 95, 2, 2); ctx.fillRect(201, 95, 2, 2);
+        // Fog
+        ctx.fillStyle = 'rgba(20,30,20,0.4)';
+        ctx.fillRect(0, 100, W, 20);
+    }
+
+    function drawCutsceneTemple(ctx) {
+        // Dark interior
+        ctx.fillStyle = '#0a0a10';
+        ctx.fillRect(0, 0, W, 160);
+        // Stone floor
+        ctx.fillStyle = '#2a2a30';
+        ctx.fillRect(0, 110, W, 50);
+        // Floor tile grid
+        ctx.strokeStyle = '#1a1a20';
+        ctx.lineWidth = 1;
+        for (var fx = 0; fx < 16; fx++) {
+            for (var fy = 0; fy < 3; fy++) {
+                ctx.strokeRect(fx * 16 + 0.5, 110 + fy * 16 + 0.5, 15, 15);
+            }
+        }
+        // Temple pillars
+        ctx.fillStyle = '#3a3a44';
+        ctx.fillRect(40, 20, 12, 100);
+        ctx.fillRect(100, 20, 12, 100);
+        ctx.fillRect(148, 20, 12, 100);
+        ctx.fillRect(208, 20, 12, 100);
+        // Pillar caps
+        ctx.fillStyle = '#4a4a54';
+        ctx.fillRect(37, 16, 18, 6);
+        ctx.fillRect(97, 16, 18, 6);
+        ctx.fillRect(145, 16, 18, 6);
+        ctx.fillRect(205, 16, 18, 6);
+        // Dark altar at center
+        ctx.fillStyle = '#1a0a1a';
+        ctx.fillRect(112, 60, 32, 24);
+        ctx.fillStyle = '#2a1a2a';
+        ctx.fillRect(114, 62, 28, 20);
+        // Purple glow on altar
+        ctx.fillStyle = 'rgba(120,40,160,0.4)';
+        ctx.fillRect(108, 56, 40, 32);
+        // Shadow tendrils
+        ctx.fillStyle = 'rgba(60,20,80,0.5)';
+        ctx.fillRect(120, 40, 4, 20);
+        ctx.fillRect(132, 35, 4, 25);
+        ctx.fillRect(126, 84, 4, 30);
+        // Candle flames
+        ctx.fillStyle = '#e8a830';
+        ctx.fillRect(108, 56, 3, 3);
+        ctx.fillRect(145, 56, 3, 3);
+    }
+
+    function drawCutsceneHeroes(ctx) {
+        // Dawn sky
+        ctx.fillStyle = '#1a0a2a';
+        ctx.fillRect(0, 0, W, 40);
+        ctx.fillStyle = '#2a1a3a';
+        ctx.fillRect(0, 40, W, 30);
+        ctx.fillStyle = '#4a2a3a';
+        ctx.fillRect(0, 70, W, 20);
+        ctx.fillStyle = '#6a3a2a';
+        ctx.fillRect(0, 90, W, 10);
+        // Ground
+        ctx.fillStyle = '#1a3a1a';
+        ctx.fillRect(0, 100, W, 60);
+        // Road
+        ctx.fillStyle = '#4a3a2a';
+        ctx.fillRect(0, 115, W, 20);
+        // Three heroes silhouettes walking right
+        var heroColors = ['#4060c0', '#c04040', '#40a040'];
+        var heroX = [80, 120, 160];
+        for (var h = 0; h < 3; h++) {
+            // Body
+            ctx.fillStyle = heroColors[h];
+            ctx.fillRect(heroX[h], 96, 10, 16);
+            // Head
+            ctx.fillStyle = '#e0c0a0';
+            ctx.fillRect(heroX[h] + 1, 88, 8, 8);
+            // Legs
+            ctx.fillStyle = heroColors[h];
+            ctx.fillRect(heroX[h], 112, 4, 6);
+            ctx.fillRect(heroX[h] + 6, 112, 4, 6);
+        }
+        // Warrior sword
+        ctx.fillStyle = '#c0c0d0';
+        ctx.fillRect(92, 92, 2, 12);
+        ctx.fillStyle = '#a08040';
+        ctx.fillRect(91, 103, 4, 2);
+        // Mage staff
+        ctx.fillStyle = '#6a4a2a';
+        ctx.fillRect(130, 86, 2, 20);
+        ctx.fillStyle = '#60a0e0';
+        ctx.fillRect(129, 83, 4, 4);
+        // Rogue dagger
+        ctx.fillStyle = '#c0c0d0';
+        ctx.fillRect(170, 100, 6, 2);
+        // Dawn glow behind heroes
+        ctx.fillStyle = 'rgba(200,120,60,0.15)';
+        ctx.fillRect(60, 70, 160, 50);
+        // Distant town silhouette
+        ctx.fillStyle = '#1a1a2a';
+        ctx.fillRect(10, 94, 30, 16);
+        ctx.fillRect(15, 88, 20, 8);
+        ctx.fillRect(220, 96, 26, 14);
+        ctx.fillRect(224, 90, 18, 8);
+    }
+
+    var cutsceneRenderers = {
+        town: drawCutsceneTown,
+        forest: drawCutsceneForest,
+        temple: drawCutsceneTemple,
+        heroes: drawCutsceneHeroes
+    };
 
     function renderIntro() {
         var ctx = buf;
@@ -1942,6 +2159,15 @@
         // Black background
         ctx.fillStyle = C.black;
         ctx.fillRect(0, 0, W, H);
+
+        // Draw pixel art scene based on current dialogue's scene property
+        var scene = Dialogue.getScene();
+        if (scene && cutsceneRenderers[scene]) {
+            cutsceneRenderers[scene](ctx);
+            // Dim overlay so text is readable
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillRect(0, 0, W, H);
+        }
 
         // Render dialogue
         Dialogue.render(ctx);
@@ -2019,6 +2245,9 @@
             Dialogue.update();
             if (Input.pressed['z']) {
                 Dialogue.advance();
+            }
+            if (Input.pressed['x'] && Dialogue._canSkip) {
+                Dialogue.skipAll();
             }
             return;
         }
@@ -2235,6 +2464,9 @@
         if (Input.pressed['z']) {
             Dialogue.advance();
         }
+        if (Input.pressed['x'] && Dialogue._canSkip) {
+            Dialogue.skipAll();
+        }
     }
 
     function renderBossIntro() {
@@ -2263,6 +2495,9 @@
             Dialogue.update();
             if (Input.pressed['z']) {
                 Dialogue.advance();
+            }
+            if (Input.pressed['x'] && Dialogue._canSkip) {
+                Dialogue.skipAll();
             }
             return;
         }
@@ -2591,6 +2826,9 @@
             Dialogue.update();
             if (Input.pressed['z']) {
                 Dialogue.advance();
+            }
+            if (Input.pressed['x'] && Dialogue._canSkip) {
+                Dialogue.skipAll();
             }
             return;
         }

@@ -24,19 +24,10 @@
     // -----------------------------------------------------------------
 
     intro_cutscene: [
-      { speaker: 'System', text: 'The realm of Valisar trembles...' },
-      { speaker: 'System', text: 'In the town of Ebon Vale,' },
-      { speaker: 'System', text: 'darkness gathers.' },
-      { speaker: 'System', text: 'Goblins raid from the Ebon Forest.' },
-      { speaker: 'System', text: 'Their queen, Bargnot, defiles' },
-      { speaker: 'System', text: 'an ancient temple.' },
-      { speaker: 'System', text: 'She seeks to summon the spirit' },
-      { speaker: 'System', text: 'Smaldge...' },
-      { speaker: 'System', text: '...and usher in the Ascendant' },
-      { speaker: 'System', text: 'Shadow.' },
-      { speaker: 'System', text: 'Three heroes answer the call.' },
-      { speaker: 'System', text: 'The fate of Valisar rests in' },
-      { speaker: 'System', text: 'their hands.' }
+      { speaker: '', text: 'The realm of Valisar trembles... In the town of Ebon Vale, darkness gathers.', scene: 'town' },
+      { speaker: '', text: 'Goblins raid from the Ebon Forest. Their queen, Bargnot, defiles an ancient temple.', scene: 'forest' },
+      { speaker: '', text: 'She seeks to summon the spirit Smaldge... and usher in the Ascendant Shadow.', scene: 'temple' },
+      { speaker: '', text: 'Three heroes answer the call. The fate of Valisar rests in their hands.', scene: 'heroes' }
     ],
 
     // -----------------------------------------------------------------
@@ -44,36 +35,20 @@
     // -----------------------------------------------------------------
 
     fawks_greeting: [
-      { speaker: 'Fawks', text: 'Welcome to The Dancing Pig!' },
-      { speaker: 'Fawks', text: 'You look like adventurers.' },
-      { speaker: 'Fawks', text: 'Goblins have been raiding' },
-      { speaker: 'Fawks', text: 'from the north forest.' },
-      { speaker: 'Fawks', text: 'Please, be careful out there.' }
+      { speaker: 'Fawks', text: 'Welcome to The Dancing Pig! You look like adventurers.' },
+      { speaker: 'Fawks', text: 'Goblins have been raiding from the north forest. Please, be careful out there.' }
     ],
 
     helena_greeting: [
-      { speaker: 'Helena', text: 'Ah, you must be the ones' },
-      { speaker: 'Helena', text: 'Braxon mentioned.' },
-      { speaker: 'Helena', text: 'Our town is in danger.' },
-      { speaker: 'Helena', text: 'Goblins from the Ebon Forest' },
-      { speaker: 'Helena', text: 'grow bolder each day.' },
-      { speaker: 'Helena', text: 'Their queen... Bargnot...' },
-      { speaker: 'Helena', text: 'she must be stopped.' },
-      { speaker: 'Helena', text: 'Find her lair in the old' },
-      { speaker: 'Helena', text: 'Temple of Nitriti.' }
+      { speaker: 'Helena', text: 'Ah, you must be the ones Braxon mentioned. Our town is in danger.' },
+      { speaker: 'Helena', text: 'Goblins from the Ebon Forest grow bolder each day. Their queen, Bargnot... she must be stopped.' },
+      { speaker: 'Helena', text: 'Find her lair in the old Temple of Nitriti, north through the forest.' }
     ],
 
     elira_greeting: [
-      { speaker: 'Elira', text: 'I am Captain Voss of the' },
-      { speaker: 'Elira', text: 'town guard.' },
-      { speaker: 'Elira', text: 'We have captured some goblin' },
-      { speaker: 'Elira', text: 'scouts...' },
-      { speaker: 'Elira', text: 'But their main force hides' },
-      { speaker: 'Elira', text: 'in the forest temple.' },
-      { speaker: 'Elira', text: 'I do not trust spirits,' },
-      { speaker: 'Elira', text: 'but I trust steel.' },
-      { speaker: 'Elira', text: 'Give that goblin queen' },
-      { speaker: 'Elira', text: 'what she deserves.' }
+      { speaker: 'Elira', text: 'I am Captain Voss of the town guard. We have captured some goblin scouts...' },
+      { speaker: 'Elira', text: 'But their main force hides in the forest temple. I do not trust spirits, but I trust steel.' },
+      { speaker: 'Elira', text: 'Give that goblin queen what she deserves.' }
     ],
 
     // -----------------------------------------------------------------
@@ -81,58 +56,31 @@
     // -----------------------------------------------------------------
 
     braxon_greeting: [
-      { speaker: 'Braxon', text: 'Well met, adventurer!' },
-      { speaker: 'Braxon', text: 'I am Braxon, the town' },
-      { speaker: 'Braxon', text: 'blacksmith.' },
-      { speaker: 'Braxon', text: 'If my boy Daxon is with you,' },
-      { speaker: 'Braxon', text: 'keep him safe.' },
-      { speaker: 'Braxon', text: 'Take this advice - goblin' },
-      { speaker: 'Braxon', text: 'armor is weak at the joints.' }
+      { speaker: 'Braxon', text: 'Well met, adventurer! I am Braxon, the town blacksmith.' },
+      { speaker: 'Braxon', text: 'If my boy Daxon is with you, keep him safe.' },
+      { speaker: 'Braxon', text: 'Goblin armor is weak at the joints. Bring me their teeth and I can forge you something useful.' }
     ],
 
     soren_greeting: [
-      { speaker: 'Soren', text: 'Blessings of the spirits' },
-      { speaker: 'Soren', text: 'upon you.' },
-      { speaker: 'Soren', text: 'I tend to the dwarven' },
-      { speaker: 'Soren', text: 'refugees here.' },
-      { speaker: 'Soren', text: 'They fled from the goblins' },
-      { speaker: 'Soren', text: 'in the mountains.' },
-      { speaker: 'Soren', text: 'The Temple of Nitriti' },
-      { speaker: 'Soren', text: 'was once sacred...' },
-      { speaker: 'Soren', text: 'Now Bargnot defiles it' },
-      { speaker: 'Soren', text: 'with dark rituals.' }
+      { speaker: 'Soren', text: 'Blessings of the spirits upon you. I tend to the dwarven refugees here.' },
+      { speaker: 'Soren', text: 'They fled from the goblins in the mountains. The Temple of Nitriti was once sacred...' },
+      { speaker: 'Soren', text: 'Now Bargnot defiles it with dark rituals. Return to me when you need healing.' }
     ],
 
     rorik_greeting: [
-      { speaker: 'Rorik', text: 'Aye, name\'s Rorik Flamebeard.' },
-      { speaker: 'Rorik', text: 'Lost me kin to those' },
-      { speaker: 'Rorik', text: 'blasted goblins.' },
-      { speaker: 'Rorik', text: 'If you\'re heading to that' },
-      { speaker: 'Rorik', text: 'temple...' },
-      { speaker: 'Rorik', text: 'Watch for traps.' },
-      { speaker: 'Rorik', text: 'Bargnot is cunning.' },
-      { speaker: 'Rorik', text: 'May the forge-fire guide' },
-      { speaker: 'Rorik', text: 'your blade.' }
+      { speaker: 'Rorik', text: 'Aye, name\'s Rorik Flamebeard. Lost me kin to those blasted goblins.' },
+      { speaker: 'Rorik', text: 'If you\'re heading to that temple, watch for traps. Bargnot is cunning.' },
+      { speaker: 'Rorik', text: 'May the forge-fire guide your blade.' }
     ],
 
     rorik_market_greeting: [
-      { speaker: 'Rorik', text: 'Aye, name\'s Rorik Flamebeard.' },
-      { speaker: 'Rorik', text: 'I\'ve set up shop here in' },
-      { speaker: 'Rorik', text: 'the market.' },
-      { speaker: 'Rorik', text: 'Those goblins took everything' },
-      { speaker: 'Rorik', text: 'from my people...' },
-      { speaker: 'Rorik', text: 'If you can stop Bargnot,' },
-      { speaker: 'Rorik', text: 'you\'ll have my eternal' },
-      { speaker: 'Rorik', text: 'gratitude.' }
+      { speaker: 'Rorik', text: 'Aye, name\'s Rorik Flamebeard. I\'ve set up shop here in the market.' },
+      { speaker: 'Rorik', text: 'Those goblins took everything from my people... If you can stop Bargnot, you\'ll have my eternal gratitude.' }
     ],
 
     rorik_rescue: [
-      { speaker: 'Rorik', text: 'You... you saved me!' },
-      { speaker: 'Rorik', text: 'That monster was going to' },
-      { speaker: 'Rorik', text: 'sacrifice me to Smaldge!' },
-      { speaker: 'Rorik', text: 'I owe you my life.' },
-      { speaker: 'Rorik', text: 'Thank the forge-spirits' },
-      { speaker: 'Rorik', text: 'you came when you did.' }
+      { speaker: 'Rorik', text: 'You... you saved me! That monster was going to sacrifice me to Smaldge!' },
+      { speaker: 'Rorik', text: 'I owe you my life. Thank the forge-spirits you came when you did.' }
     ],
 
     // -----------------------------------------------------------------
@@ -140,10 +88,7 @@
     // -----------------------------------------------------------------
 
     sign_warning: [
-      { speaker: 'Sign', text: 'EBON FOREST - NORTH' },
-      { speaker: 'Sign', text: 'WARNING: Goblin activity' },
-      { speaker: 'Sign', text: 'reported!' },
-      { speaker: 'Sign', text: 'Travel at your own risk.' }
+      { speaker: 'Sign', text: 'EBON FOREST - NORTH. WARNING: Goblin activity reported! Travel at your own risk.' }
     ],
 
     // -----------------------------------------------------------------
@@ -151,27 +96,10 @@
     // -----------------------------------------------------------------
 
     querubra_greeting: [
-      { speaker: 'Que\'Rubra', text: '...' },
-      { speaker: 'Que\'Rubra', text: 'I feel your footsteps,' },
-      { speaker: 'Que\'Rubra', text: 'small ones.' },
-      { speaker: 'Que\'Rubra', text: 'I am Que\'Rubra.' },
-      { speaker: 'Que\'Rubra', text: 'This grove is my domain.' },
-      { speaker: 'Que\'Rubra', text: 'The goblin queen defiles' },
-      { speaker: 'Que\'Rubra', text: 'Nitriti\'s temple.' },
-      { speaker: 'Que\'Rubra', text: 'She seeks to bind the spirit' },
-      { speaker: 'Que\'Rubra', text: 'Smaldge...' },
-      { speaker: 'Que\'Rubra', text: '...and sacrifice the captured' },
-      { speaker: 'Que\'Rubra', text: 'dwarf.' },
-      { speaker: 'Que\'Rubra', text: 'You must stop her ritual.' },
-      { speaker: 'Que\'Rubra', text: 'In the temple, find the' },
-      { speaker: 'Que\'Rubra', text: 'three relics.' },
-      { speaker: 'Que\'Rubra', text: 'Crown, Cape, and Scepter...' },
-      { speaker: 'Que\'Rubra', text: 'Place them on the shadow' },
-      { speaker: 'Que\'Rubra', text: 'statue.' },
-      { speaker: 'Que\'Rubra', text: 'Only then will the inner' },
-      { speaker: 'Que\'Rubra', text: 'sanctum open.' },
-      { speaker: 'Que\'Rubra', text: 'Go now. May Nitriti watch' },
-      { speaker: 'Que\'Rubra', text: 'over you.' }
+      { speaker: 'Que\'Rubra', text: '... I feel your footsteps, small ones. I am Que\'Rubra. This grove is my domain.' },
+      { speaker: 'Que\'Rubra', text: 'The goblin queen defiles Nitriti\'s temple. She seeks to bind the spirit Smaldge and sacrifice the captured dwarf.' },
+      { speaker: 'Que\'Rubra', text: 'In the temple, find the three relics: Crown, Cape, and Scepter. Place them on the shadow statue.' },
+      { speaker: 'Que\'Rubra', text: 'Only then will the inner sanctum open. Go now. May Nitriti watch over you.' }
     ],
 
     // -----------------------------------------------------------------
@@ -179,41 +107,30 @@
     // -----------------------------------------------------------------
 
     temple_inscription: [
-      { speaker: 'Inscription', text: 'Temple of Nitriti,' },
-      { speaker: 'Inscription', text: 'Spirit of Night.' },
-      { speaker: 'Inscription', text: 'She who guards the veil' },
-      { speaker: 'Inscription', text: 'between worlds.' },
-      { speaker: 'Inscription', text: 'Three offerings open' },
-      { speaker: 'Inscription', text: 'the inner path.' }
+      { speaker: 'Inscription', text: 'Temple of Nitriti, Spirit of Night. She who guards the veil between worlds.' },
+      { speaker: 'Inscription', text: 'Three offerings open the inner path.' }
     ],
 
     statue_incomplete: [
-      { speaker: 'Statue', text: 'A dark statue looms' },
-      { speaker: 'Statue', text: 'before you.' },
-      { speaker: 'Statue', text: 'It is missing something...' },
-      { speaker: 'Statue', text: 'Three empty holders:' },
-      { speaker: 'Statue', text: 'crown, cape, scepter.' }
+      { speaker: 'Statue', text: 'A dark statue looms before you. It is missing something...' },
+      { speaker: 'Statue', text: 'Three empty holders: crown, cape, scepter.' }
     ],
 
     statue_complete: [
-      { speaker: 'Statue', text: 'You place the final relic.' },
-      { speaker: 'Statue', text: 'The statue\'s eyes glow' },
-      { speaker: 'Statue', text: 'with dark energy.' },
-      { speaker: 'Statue', text: 'A rumbling sound echoes' },
-      { speaker: 'Statue', text: 'through the temple...' },
-      { speaker: 'Statue', text: 'The path forward is open!' }
+      { speaker: 'Statue', text: 'You place the final relic. The statue\'s eyes glow with dark energy.' },
+      { speaker: 'Statue', text: 'A rumbling sound echoes through the temple... The path forward is open!' }
     ],
 
     puzzle_crown: [
-      { speaker: 'System', text: 'You found the Shadow Crown!' }
+      { speaker: '', text: 'You found the Shadow Crown!' }
     ],
 
     puzzle_cape: [
-      { speaker: 'System', text: 'You found the Shadow Cape!' }
+      { speaker: '', text: 'You found the Shadow Cape!' }
     ],
 
     puzzle_scepter: [
-      { speaker: 'System', text: 'You found the Shadow Scepter!' }
+      { speaker: '', text: 'You found the Shadow Scepter!' }
     ],
 
     // -----------------------------------------------------------------
@@ -221,38 +138,23 @@
     // -----------------------------------------------------------------
 
     boss_intro: [
-      { speaker: 'Bargnot', text: 'WHO DARES ENTER MY DOMAIN?!' },
-      { speaker: 'Bargnot', text: 'You are too late,' },
-      { speaker: 'Bargnot', text: 'little heroes.' },
-      { speaker: 'Bargnot', text: 'The dwarf\'s blood will' },
-      { speaker: 'Bargnot', text: 'feed Smaldge!' },
-      { speaker: 'Bargnot', text: 'And the Ascendant Shadow' },
-      { speaker: 'Bargnot', text: 'shall rise!' },
-      { speaker: 'Bargnot', text: 'COME THEN!' },
-      { speaker: 'Bargnot', text: 'FACE YOUR QUEEN!' }
+      { speaker: 'Bargnot', text: 'WHO DARES ENTER MY DOMAIN?! You are too late, little heroes.' },
+      { speaker: 'Bargnot', text: 'The dwarf\'s blood will feed Smaldge! And the Ascendant Shadow shall rise!' },
+      { speaker: 'Bargnot', text: 'COME THEN! FACE YOUR QUEEN!' }
     ],
 
     boss_phase2: [
-      { speaker: 'Bargnot', text: 'ENOUGH!' },
-      { speaker: 'Bargnot', text: 'You think you can defeat' },
-      { speaker: 'Bargnot', text: 'ME?!' },
-      { speaker: 'Bargnot', text: 'I am Queen Bargnot' },
-      { speaker: 'Bargnot', text: 'the Undying!' },
-      { speaker: 'Bargnot', text: 'FEEL MY WRATH!' }
+      { speaker: 'Bargnot', text: 'ENOUGH! You think you can defeat ME?!' },
+      { speaker: 'Bargnot', text: 'I am Queen Bargnot the Undying! FEEL MY WRATH!' }
     ],
 
     boss_phase3: [
-      { speaker: 'Bargnot', text: 'No... NO!' },
-      { speaker: 'Bargnot', text: 'SMALDGE, GIVE ME POWER!' },
-      { speaker: 'Bargnot', text: 'YESSS...' },
-      { speaker: 'Bargnot', text: 'I feel the shadow flowing!' },
-      { speaker: 'Bargnot', text: 'NOW YOU WILL PERISH!' }
+      { speaker: 'Bargnot', text: 'No... NO! SMALDGE, GIVE ME POWER!' },
+      { speaker: 'Bargnot', text: 'YESSS... I feel the shadow flowing! NOW YOU WILL PERISH!' }
     ],
 
     boss_defeat: [
-      { speaker: 'Bargnot', text: 'Im... impossible...' },
-      { speaker: 'Bargnot', text: 'The shadow... promised me...' },
-      { speaker: 'Bargnot', text: 'This... is not... the end...' }
+      { speaker: 'Bargnot', text: 'Im... impossible... The shadow... promised me... This... is not... the end...' }
     ],
 
     // -----------------------------------------------------------------
@@ -260,49 +162,21 @@
     // -----------------------------------------------------------------
 
     victory_rorik: [
-      { speaker: 'Rorik', text: 'You... you saved me!' },
-      { speaker: 'Rorik', text: 'I thought I was done for.' },
-      { speaker: 'Rorik', text: 'That goblin queen was' },
-      { speaker: 'Rorik', text: 'going to...' },
-      { speaker: 'Rorik', text: 'Thank the forge-spirits' },
-      { speaker: 'Rorik', text: 'you came.' }
+      { speaker: 'Rorik', text: 'You... you saved me! I thought I was done for.' },
+      { speaker: 'Rorik', text: 'Thank the forge-spirits you came when you did.' }
     ],
 
     ending_nitriti: [
-      { speaker: 'Nitriti', text: 'Heroes of Ebon Vale...' },
-      { speaker: 'Nitriti', text: 'I am Nitriti,' },
-      { speaker: 'Nitriti', text: 'Spirit of Night.' },
-      { speaker: 'Nitriti', text: 'You have cleansed my temple.' },
-      { speaker: 'Nitriti', text: 'But dark forces still stir...' },
-      { speaker: 'Nitriti', text: 'The Bonemoon prophecy' },
-      { speaker: 'Nitriti', text: 'approaches.' },
-      { speaker: 'Nitriti', text: 'Eternal darkness threatens' },
-      { speaker: 'Nitriti', text: 'Valisar.' },
-      { speaker: 'Nitriti', text: 'Seek the Eldspyre...' },
-      { speaker: 'Nitriti', text: 'the source of all magic.' },
-      { speaker: 'Nitriti', text: 'Your journey has only' },
-      { speaker: 'Nitriti', text: 'just begun.' }
+      { speaker: 'Nitriti', text: 'Heroes of Ebon Vale... I am Nitriti, Spirit of Night. You have cleansed my temple.' },
+      { speaker: 'Nitriti', text: 'But dark forces still stir. The Bonemoon prophecy approaches. Eternal darkness threatens Valisar.' },
+      { speaker: 'Nitriti', text: 'Seek the Eldspyre, the source of all magic. Your journey has only just begun.' }
     ],
 
     ending_final: [
-      { speaker: 'System', text: 'With Queen Bargnot defeated,' },
-      { speaker: 'System', text: 'peace returns to Ebon Vale...' },
-      { speaker: 'System', text: 'But the Bonemoon prophecy' },
-      { speaker: 'System', text: 'looms.' },
-      { speaker: 'System', text: 'An infinite sea of darkness' },
-      { speaker: 'System', text: 'awaits...' },
-      { speaker: 'System', text: 'Never again shall Valisar' },
-      { speaker: 'System', text: 'see the stars...' },
-      { speaker: 'System', text: 'Only the chilling white' },
-      { speaker: 'System', text: 'of bone.' },
-      { speaker: 'System', text: 'The heroes must grow stronger.' },
-      { speaker: 'System', text: 'For the true darkness has' },
-      { speaker: 'System', text: 'yet to come.' },
-      { speaker: 'System', text: 'VALISAR: SHADOWS OF THE' },
-      { speaker: 'System', text: 'ELDSPYRE' },
-      { speaker: 'System', text: 'Thank you for playing!' },
-      { speaker: 'System', text: 'Based on the Valisar' },
-      { speaker: 'System', text: 'campaign world.' }
+      { speaker: '', text: 'With Queen Bargnot defeated, peace returns to Ebon Vale... But the Bonemoon prophecy looms.' },
+      { speaker: '', text: 'An infinite sea of darkness awaits. Never again shall Valisar see the stars...' },
+      { speaker: '', text: 'The heroes must grow stronger. For the true darkness has yet to come.' },
+      { speaker: '', text: 'VALISAR: SHADOWS OF THE ELDSPYRE. Thank you for playing!' }
     ],
 
     // -----------------------------------------------------------------
@@ -310,55 +184,15 @@
     // -----------------------------------------------------------------
 
     pickup_eldertech: [
-      { speaker: 'System', text: 'You found an Eldertech Sphere!' },
-      { speaker: 'System', text: 'An ancient artifact of' },
-      { speaker: 'System', text: 'mysterious power.' }
+      { speaker: '', text: 'You found an Eldertech Sphere! An ancient artifact of mysterious power.' }
     ],
 
     pickup_potion: [
-      { speaker: 'System', text: 'You found a healing potion!' },
-      { speaker: 'System', text: 'Your health has been restored.' }
+      { speaker: '', text: 'You found a healing potion! Your health has been restored.' }
     ],
 
     pickup_silencestone: [
-      { speaker: 'System', text: 'You found the Silence Stone!' },
-      { speaker: 'System', text: 'A black opal of incredible' },
-      { speaker: 'System', text: 'power.' },
-      { speaker: 'System', text: 'Nitriti\'s blessing flows' },
-      { speaker: 'System', text: 'through it.' }
-    ],
-
-    // -----------------------------------------------------------------
-    // Return-visit dialogue variants (shorter, new info)
-    // -----------------------------------------------------------------
-
-    fawks_return: [
-      { speaker: 'Fawks', text: 'Back so soon?' },
-      { speaker: 'Fawks', text: 'Rest by the fire if you' },
-      { speaker: 'Fawks', text: 'need to.' },
-      { speaker: 'Fawks', text: 'The goblins grow restless.' }
-    ],
-
-    helena_return: [
-      { speaker: 'Helena', text: 'Any progress?' },
-      { speaker: 'Helena', text: 'I heard sounds from the' },
-      { speaker: 'Helena', text: 'forest last night...' },
-      { speaker: 'Helena', text: 'Please hurry.' }
-    ],
-
-    elira_return: [
-      { speaker: 'Elira', text: 'Good, you still draw breath.' },
-      { speaker: 'Elira', text: 'My scouts report the temple' },
-      { speaker: 'Elira', text: 'grows darker.' },
-      { speaker: 'Elira', text: 'Be on your guard.' }
-    ],
-
-    soren_return: [
-      { speaker: 'Soren', text: 'The stars speak of a' },
-      { speaker: 'Soren', text: 'coming storm.' },
-      { speaker: 'Soren', text: 'Find the three sacred items' },
-      { speaker: 'Soren', text: 'in the temple to unlock' },
-      { speaker: 'Soren', text: 'the path to Bargnot.' }
+      { speaker: '', text: 'You found the Silence Stone! A black opal of incredible power. Nitriti\'s blessing flows through it.' }
     ],
 
     // -----------------------------------------------------------------
@@ -366,24 +200,15 @@
     // -----------------------------------------------------------------
 
     sign_market: [
-      { speaker: 'Sign', text: 'EBON VALE MARKET' },
-      { speaker: 'Sign', text: 'Trade goods and supplies.' },
-      { speaker: 'Sign', text: '"All are welcome at' },
-      { speaker: 'Sign', text: 'The Dancing Pig!"' }
+      { speaker: 'Sign', text: 'EBON VALE MARKET - Trade goods and supplies. "All are welcome at The Dancing Pig!"' }
     ],
 
     sign_square: [
-      { speaker: 'Sign', text: 'EBON VALE TOWN SQUARE' },
-      { speaker: 'Sign', text: 'Founded in the Age of' },
-      { speaker: 'Sign', text: 'Starfall by the Valisar' },
-      { speaker: 'Sign', text: 'settlers.' }
+      { speaker: 'Sign', text: 'EBON VALE TOWN SQUARE - Founded in the Age of Starfall by the Valisar settlers.' }
     ],
 
     sign_temple: [
-      { speaker: 'Inscription', text: 'Here lies the Temple of' },
-      { speaker: 'Inscription', text: 'Nitriti, Spirit of Silence.' },
-      { speaker: 'Inscription', text: 'Let those who enter' },
-      { speaker: 'Inscription', text: 'speak only truth.' }
+      { speaker: 'Inscription', text: 'Here lies the Temple of Nitriti, Spirit of Silence. Let those who enter speak only truth.' }
     ],
 
     // -----------------------------------------------------------------
@@ -391,10 +216,7 @@
     // -----------------------------------------------------------------
 
     statue_interaction: [
-      { speaker: 'Statue', text: 'A weathered stone statue.' },
-      { speaker: 'Statue', text: 'The face has been defaced' },
-      { speaker: 'Statue', text: 'by goblin claws.' },
-      { speaker: 'Statue', text: 'It once depicted Nitriti.' }
+      { speaker: 'Statue', text: 'A weathered stone statue. The face has been defaced by goblin claws. It once depicted Nitriti.' }
     ],
 
     // -----------------------------------------------------------------
@@ -402,57 +224,33 @@
     // -----------------------------------------------------------------
 
     fawks_return: [
-      { speaker: 'Fawks', text: 'Back again? Need a drink?' },
-      { speaker: 'Fawks', text: 'The goblins raided our' },
-      { speaker: 'Fawks', text: 'storehouse last week.' },
-      { speaker: 'Fawks', text: 'Collect their teeth for' },
-      { speaker: 'Fawks', text: 'Braxon. He buys them.' }
+      { speaker: 'Fawks', text: 'Back again? Need a drink? The goblins raided our storehouse last week.' },
+      { speaker: 'Fawks', text: 'Collect their teeth for Braxon. He buys them.' }
     ],
 
     helena_return: [
-      { speaker: 'Helena', text: 'Any progress against' },
-      { speaker: 'Helena', text: 'the goblins?' },
-      { speaker: 'Helena', text: 'Visit Brother Soren if' },
-      { speaker: 'Helena', text: 'you need healing.' },
-      { speaker: 'Helena', text: 'His blessing is powerful.' }
+      { speaker: 'Helena', text: 'Any progress against the goblins? Visit Brother Soren if you need healing.' }
     ],
 
     elira_return: [
-      { speaker: 'Elira', text: 'Still standing? Good.' },
-      { speaker: 'Elira', text: 'My scouts report archers' },
-      { speaker: 'Elira', text: 'in the deeper forest.' },
-      { speaker: 'Elira', text: 'Watch for their arrows.' }
+      { speaker: 'Elira', text: 'Still standing? Good. My scouts report archers in the deeper forest. Watch for their arrows.' }
     ],
 
     braxon_return: [
-      { speaker: 'Braxon', text: 'Got goblin teeth?' },
-      { speaker: 'Braxon', text: 'I can forge useful things' },
-      { speaker: 'Braxon', text: 'from their remains.' },
-      { speaker: 'Braxon', text: 'Bring me teeth and I will' },
-      { speaker: 'Braxon', text: 'trade with you.' }
+      { speaker: 'Braxon', text: 'Got goblin teeth? I can forge useful things from their remains. Bring me teeth and I will trade.' }
     ],
 
     soren_return: [
-      { speaker: 'Soren', text: 'Rest here, child.' },
-      { speaker: 'Soren', text: 'I sense your weariness.' },
-      { speaker: 'Soren', text: 'Let me restore your' },
-      { speaker: 'Soren', text: 'strength once more.' }
+      { speaker: 'Soren', text: 'Rest here, child. I sense your weariness. Let me restore your strength once more.' }
     ],
 
     rorik_market_return: [
-      { speaker: 'Rorik', text: 'Back from the fight?' },
-      { speaker: 'Rorik', text: 'I heard explosions from' },
-      { speaker: 'Rorik', text: 'the forest...' },
-      { speaker: 'Rorik', text: 'Forge-spirits protect you.' }
+      { speaker: 'Rorik', text: 'Back from the fight? I heard explosions from the forest... Forge-spirits protect you.' }
     ],
 
     querubra_return: [
-      { speaker: 'Que\'Rubra', text: 'The forest trembles...' },
-      { speaker: 'Que\'Rubra', text: 'Bargnot\'s power grows.' },
-      { speaker: 'Que\'Rubra', text: 'Have you collected the' },
-      { speaker: 'Que\'Rubra', text: 'three relics yet?' },
-      { speaker: 'Que\'Rubra', text: 'Crown, Cape, Scepter...' },
-      { speaker: 'Que\'Rubra', text: 'Place them on the statue.' }
+      { speaker: 'Que\'Rubra', text: 'The forest trembles... Bargnot\'s power grows. Have you collected the three relics yet?' },
+      { speaker: 'Que\'Rubra', text: 'Crown, Cape, Scepter... Place them on the statue.' }
     ]
   };
 
@@ -503,58 +301,58 @@
   // DIALOGUE SYSTEM  (window.Dialogue)
   // =======================================================================
 
+  /** Max visible text rows in the dialogue box */
+  var MAX_VISIBLE_ROWS = 2;
+
+  /** Row height in pixels */
+  var ROW_HEIGHT = 10;
+
+  /** Narrator color for empty-speaker lines */
+  var NARRATOR_COLOR = '#c8c8d8';
+
+  /** Set of dialogue IDs the player has fully read */
+  var _seenDialogues = {};
+
   window.Dialogue = {
-    /** Whether a dialogue sequence is currently being displayed */
     active: false,
-
-    /** Array of {speaker, text} line objects for the current conversation */
     lines: [],
-
-    /** Index of the currently displayed line in `lines` */
     currentLine: 0,
-
-    /** Number of characters revealed so far (typewriter effect) */
     displayedChars: 0,
-
-    /** Frame counter used to time the typewriter reveal */
     charTimer: 0,
-
-    /** Frames between each character reveal */
     CHAR_SPEED: 2,
-
-    /** Frame counter for the advance-indicator blink */
     _blinkTimer: 0,
-
-    /** Slide-in animation progress (0 = hidden, 1 = fully visible) */
     _slideProgress: 0,
-
-    /** Fast-forward: holding Z speeds up text reveal */
-    _fastForward: false,
-
-    /** Optional callback invoked when the dialogue sequence ends */
     _onComplete: null,
+    _dialogueId: null,
+
+    /** Pre-computed wrapped rows for the current line's full text */
+    _fullRows: [],
+
+    /** Which page of rows we're currently showing (for long text) */
+    _rowPage: 0,
 
     // ------------------------------------------------------------------
-    // start(dialogueId, onComplete)
+    // start(dialogueId, onComplete, inlineText)
     // ------------------------------------------------------------------
 
-    /**
-     * Begin a dialogue sequence.
-     *
-     * @param {string}   dialogueId  - Key into window.DialogueData.
-     * @param {Function} [onComplete] - Optional callback fired when the
-     *                                  player closes the final line.
-     */
     start: function (dialogueId, onComplete, inlineText) {
       var data;
       if (inlineText) {
-        // Support inline text strings for signs and dynamic messages
         data = [{ speaker: 'Sign', text: inlineText }];
+        this._dialogueId = null;
       } else {
         data = DialogueData[dialogueId];
         if (!data || data.length === 0) {
           console.warn('Dialogue not found: ' + dialogueId);
           return;
+        }
+        this._dialogueId = dialogueId;
+
+        // If we've seen this dialogue before, allow instant skip
+        if (_seenDialogues[dialogueId]) {
+          this._canSkip = true;
+        } else {
+          this._canSkip = false;
         }
       }
 
@@ -564,38 +362,90 @@
       this.charTimer = 0;
       this._blinkTimer = 0;
       this._slideProgress = 0;
+      this._rowPage = 0;
       this._onComplete = onComplete || null;
       this.active = true;
+      this._computeRows();
+    },
+
+    // ------------------------------------------------------------------
+    // _computeRows() - pre-wrap the current line's full text
+    // ------------------------------------------------------------------
+
+    _computeRows: function () {
+      var line = this.lines[this.currentLine];
+      if (!line) { this._fullRows = []; return; }
+
+      var hasPortrait = line.speaker && line.speaker.length > 0;
+      var maxChars = hasPortrait
+        ? Math.floor((BOX_W - BOX_PAD * 2) / 6)
+        : Math.floor((BOX_W - BOX_PAD * 2) / 6);
+      this._fullRows = this._wordWrap(line.text, maxChars);
+      this._rowPage = 0;
+    },
+
+    /** Total chars in the visible rows of the current page */
+    _charsOnCurrentPage: function () {
+      var startRow = this._rowPage * MAX_VISIBLE_ROWS;
+      var endRow = Math.min(startRow + MAX_VISIBLE_ROWS, this._fullRows.length);
+      var count = 0;
+      for (var r = startRow; r < endRow; r++) {
+        count += this._fullRows[r].length;
+        if (r < endRow - 1) count++; // account for the space between rows
+      }
+      return count;
+    },
+
+    /** How many chars come before the current page */
+    _charsBeforeCurrentPage: function () {
+      var startRow = this._rowPage * MAX_VISIBLE_ROWS;
+      var count = 0;
+      for (var r = 0; r < startRow; r++) {
+        count += this._fullRows[r].length;
+        if (r < startRow - 1) count++;
+      }
+      return count;
+    },
+
+    _totalPages: function () {
+      return Math.ceil(this._fullRows.length / MAX_VISIBLE_ROWS);
     },
 
     // ------------------------------------------------------------------
     // advance()
     // ------------------------------------------------------------------
 
-    /**
-     * Called when the player presses the confirm key (Z).
-     *
-     * - If the typewriter is still revealing text, instantly show the
-     *   full line.
-     * - If the full line is already visible, move to the next line
-     *   (or close the dialogue if this was the last line).
-     */
     advance: function () {
       if (!this.active) return;
 
       var line = this.lines[this.currentLine];
-      if (!line) {
-        this.close();
+      if (!line) { this.close(); return; }
+
+      // Calculate how many chars total up to end of current page
+      var pageStart = this._rowPage * MAX_VISIBLE_ROWS;
+      var pageEnd = Math.min(pageStart + MAX_VISIBLE_ROWS, this._fullRows.length);
+      var charsToEndOfPage = 0;
+      for (var r = 0; r < pageEnd; r++) {
+        charsToEndOfPage += this._fullRows[r].length;
+        if (r < pageEnd - 1) charsToEndOfPage++;
+      }
+
+      // Still typing on current page -> reveal the rest of this page
+      if (this.displayedChars < charsToEndOfPage) {
+        this.displayedChars = charsToEndOfPage;
         return;
       }
 
-      // Still typing -> reveal the rest instantly
-      if (this.displayedChars < line.text.length) {
-        this.displayedChars = line.text.length;
+      // Page fully visible -> check if more pages exist for this line
+      if (this._rowPage < this._totalPages() - 1) {
+        this._rowPage++;
+        // Don't reset displayedChars - it tracks cumulative progress
+        this._blinkTimer = 0;
+        if (window.GameAudio) window.GameAudio.play('select');
         return;
       }
 
-      // Full text visible -> next line or close
+      // All pages done -> next line or close
       this.currentLine++;
       if (this.currentLine >= this.lines.length) {
         this.close();
@@ -603,25 +453,27 @@
         this.displayedChars = 0;
         this.charTimer = 0;
         this._blinkTimer = 0;
-        // Play a short blip for the new line
-        if (window.GameAudio) {
-          window.GameAudio.play('select');
-        }
+        this._computeRows();
+        if (window.GameAudio) window.GameAudio.play('select');
       }
+    },
+
+    // ------------------------------------------------------------------
+    // skipAll() - skip entire dialogue (for seen dialogues)
+    // ------------------------------------------------------------------
+
+    skipAll: function () {
+      if (!this.active) return;
+      this.close();
     },
 
     // ------------------------------------------------------------------
     // update()
     // ------------------------------------------------------------------
 
-    /**
-     * Tick the typewriter effect forward by one frame.
-     * Should be called once per game frame while dialogue is active.
-     */
     update: function () {
       if (!this.active) return;
 
-      // Slide-in animation
       if (this._slideProgress < 1) {
         this._slideProgress = Math.min(1, this._slideProgress + 0.12);
       }
@@ -641,15 +493,12 @@
         if (this.charTimer >= speed) {
           this.charTimer = 0;
           this.displayedChars++;
-
-          // Play a tiny blip for each revealed character (throttled)
           if (this.displayedChars % 2 === 0 && window.GameAudio) {
             window.GameAudio.play('dialogue');
           }
         }
       }
 
-      // Blink timer for the advance indicator
       this._blinkTimer++;
     },
 
@@ -657,19 +506,14 @@
     // render(ctx)
     // ------------------------------------------------------------------
 
-    /**
-     * Draw the dialogue box onto the provided canvas context.
-     *
-     * @param {CanvasRenderingContext2D} ctx - The 256x224 buffer context.
-     */
     render: function (ctx) {
       if (!this.active) return;
 
       var line = this.lines[this.currentLine];
       if (!line) return;
 
-      // Slide-in: box slides up from bottom
       var slideOffset = Math.floor((1 - this._slideProgress) * BOX_H);
+      var hasPortrait = line.speaker && line.speaker.length > 0;
 
       // --- Semi-transparent background ---
       ctx.fillStyle = BOX_BG;
@@ -680,57 +524,93 @@
       ctx.lineWidth = 1;
       ctx.strokeRect(BOX_X + 0.5, BOX_Y + slideOffset + 0.5, BOX_W - 1, BOX_H - 1);
 
-      // --- Speaker portrait indicator (colored square with initial) ---
-      var nameColor = SPEAKER_COLORS[line.speaker] || DEFAULT_SPEAKER_COLOR;
-      var portraitX = BOX_X + 4;
-      var portraitY = BOX_Y + slideOffset + 4;
-      var portraitSize = 14;
+      var nameColor, textStartY;
 
-      // Portrait background
-      ctx.fillStyle = nameColor;
-      ctx.globalAlpha = 0.3;
-      ctx.fillRect(portraitX, portraitY, portraitSize, portraitSize);
-      ctx.globalAlpha = 1;
-      ctx.strokeStyle = nameColor;
-      ctx.strokeRect(portraitX + 0.5, portraitY + 0.5, portraitSize - 1, portraitSize - 1);
+      if (hasPortrait) {
+        // --- Speaker portrait indicator ---
+        nameColor = SPEAKER_COLORS[line.speaker] || DEFAULT_SPEAKER_COLOR;
+        var portraitX = BOX_X + 4;
+        var portraitY = BOX_Y + slideOffset + 4;
+        var portraitSize = 14;
 
-      // Speaker initial
-      var initial = line.speaker.charAt(0);
-      window.Utils.drawText(ctx, initial, portraitX + 4, portraitY + 3, nameColor, 1);
+        ctx.fillStyle = nameColor;
+        ctx.globalAlpha = 0.3;
+        ctx.fillRect(portraitX, portraitY, portraitSize, portraitSize);
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = nameColor;
+        ctx.strokeRect(portraitX + 0.5, portraitY + 0.5, portraitSize - 1, portraitSize - 1);
 
-      // --- Speaker name (offset for portrait) ---
-      window.Utils.drawText(ctx, line.speaker, NAME_X + 16, NAME_Y + slideOffset, nameColor, 1);
+        var initial = line.speaker.charAt(0);
+        window.Utils.drawText(ctx, initial, portraitX + 4, portraitY + 3, nameColor, 1);
 
-      // Line progress indicator (small dots)
+        // --- Speaker name ---
+        window.Utils.drawText(ctx, line.speaker, NAME_X + 16, NAME_Y + slideOffset, nameColor, 1);
+
+        textStartY = TEXT_Y + slideOffset;
+      } else {
+        // Narrator mode: no portrait, center text vertically in box
+        nameColor = NARRATOR_COLOR;
+        textStartY = BOX_Y + slideOffset + 14;
+      }
+
+      // Line progress dots
       var totalLines = this.lines.length;
       if (totalLines > 1) {
         var dotBaseX = BOX_X + BOX_W - 8 - totalLines * 4;
         for (var d = 0; d < totalLines; d++) {
-          ctx.fillStyle = (d <= this.currentLine) ? nameColor : '#333';
+          ctx.fillStyle = (d <= this.currentLine) ? (hasPortrait ? nameColor : NARRATOR_COLOR) : '#333';
           ctx.fillRect(dotBaseX + d * 4, BOX_Y + slideOffset + 4, 2, 2);
         }
       }
 
-      // --- Dialogue text (typewriter) ---
-      var visibleText = line.text.substring(0, this.displayedChars);
+      // --- Dialogue text (typewriter, 2 rows per page) ---
+      var pageStart = this._rowPage * MAX_VISIBLE_ROWS;
+      var pageEnd = Math.min(pageStart + MAX_VISIBLE_ROWS, this._fullRows.length);
 
-      // Word-wrap into rows that fit BOX_W - 2*BOX_PAD (~40 chars)
-      var maxChars = Math.floor((BOX_W - BOX_PAD * 2) / 6);
-      var rows = this._wordWrap(visibleText, maxChars);
+      // Calculate chars consumed before current page
+      var charsBefore = 0;
+      for (var rb = 0; rb < pageStart; rb++) {
+        charsBefore += this._fullRows[rb].length;
+        if (rb < pageStart - 1) charsBefore++;
+      }
 
-      for (var r = 0; r < rows.length; r++) {
+      var charsLeft = Math.max(0, this.displayedChars - charsBefore);
+
+      for (var r = pageStart; r < pageEnd; r++) {
+        var rowText = this._fullRows[r];
+        var visibleLen = Math.min(rowText.length, charsLeft);
+        var visibleRow = rowText.substring(0, visibleLen);
+        charsLeft = Math.max(0, charsLeft - rowText.length - 1);
+
         window.Utils.drawText(
           ctx,
-          rows[r],
+          visibleRow,
           TEXT_X,
-          TEXT_Y + slideOffset + r * 10,
+          textStartY + (r - pageStart) * ROW_HEIGHT,
           '#f0f0f0',
           1
         );
       }
 
+      // Page indicator for multi-page lines
+      if (this._totalPages() > 1) {
+        var pageText = (this._rowPage + 1) + '/' + this._totalPages();
+        window.Utils.drawText(ctx, pageText, BOX_X + BOX_W - 30, BOX_Y + slideOffset + BOX_H - 12, '#888', 1);
+      }
+
+      // --- Skip hint for seen dialogues ---
+      if (this._canSkip) {
+        window.Utils.drawText(ctx, '[X] SKIP', BOX_X + BOX_W - 50, BOX_Y + slideOffset + 4, '#888', 1);
+      }
+
       // --- Blinking advance indicator ---
-      if (this.displayedChars >= line.text.length) {
+      var charsToEndOfPage = 0;
+      for (var rp = 0; rp < pageEnd; rp++) {
+        charsToEndOfPage += this._fullRows[rp].length;
+        if (rp < pageEnd - 1) charsToEndOfPage++;
+      }
+
+      if (this.displayedChars >= charsToEndOfPage) {
         var show = (this._blinkTimer % (INDICATOR_BLINK_RATE * 2)) < INDICATOR_BLINK_RATE;
         if (show) {
           var indX = BOX_X + BOX_W - 16;
@@ -750,9 +630,6 @@
     // isActive()
     // ------------------------------------------------------------------
 
-    /**
-     * @returns {boolean} Whether dialogue is currently showing.
-     */
     isActive: function () {
       return this.active;
     },
@@ -761,17 +638,22 @@
     // close()
     // ------------------------------------------------------------------
 
-    /**
-     * Close the dialogue and reset state. Fires onComplete callback
-     * if one was provided.
-     */
     close: function () {
+      // Mark this dialogue as seen
+      if (this._dialogueId) {
+        _seenDialogues[this._dialogueId] = true;
+      }
+
       this.active = false;
       this.lines = [];
       this.currentLine = 0;
       this.displayedChars = 0;
       this.charTimer = 0;
       this._blinkTimer = 0;
+      this._fullRows = [];
+      this._rowPage = 0;
+      this._dialogueId = null;
+      this._canSkip = false;
 
       var cb = this._onComplete;
       this._onComplete = null;
@@ -781,18 +663,17 @@
     },
 
     // ------------------------------------------------------------------
+    // hasSeen(dialogueId)
+    // ------------------------------------------------------------------
+
+    hasSeen: function (dialogueId) {
+      return !!_seenDialogues[dialogueId];
+    },
+
+    // ------------------------------------------------------------------
     // _wordWrap(text, maxChars)
     // ------------------------------------------------------------------
 
-    /**
-     * Simple word-wrap helper. Breaks `text` into an array of strings,
-     * each no longer than `maxChars` characters, splitting on spaces
-     * when possible.
-     *
-     * @param {string} text
-     * @param {number} maxChars
-     * @returns {string[]}
-     */
     _wordWrap: function (text, maxChars) {
       if (text.length <= maxChars) {
         return [text];
@@ -818,6 +699,13 @@
       }
 
       return rows;
+    },
+
+    /** Get the current line's scene property (for intro cutscene art) */
+    getScene: function () {
+      if (!this.active) return null;
+      var line = this.lines[this.currentLine];
+      return (line && line.scene) ? line.scene : null;
     }
   };
 

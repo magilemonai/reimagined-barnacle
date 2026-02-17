@@ -361,6 +361,7 @@
             this.staggerCount = 0;
             this.staggerTimer = 0;
             this.staggered = false;
+        }
 
         /**
          * @returns {boolean} true when the enemy should be removed from the list
@@ -685,6 +686,8 @@
             this.actionQueue          = []; // sequence of actions
             this.phaseTransition      = false;
             this.phaseTransitionTimer = 0;
+            this._chargeWindup        = 0; // set per-charge for telegraph timing
+            this._summonedPhase2      = false; // track if we already summoned minions
         }
 
         /* ----- main update ------------------------------------------ */
@@ -761,6 +764,8 @@
 
             if (phase === 2) {
                 Dialogue.start('boss_phase2');
+                // Signal game.js to spawn minions
+                this._requestMinions = true;
             } else if (phase === 3) {
                 Dialogue.start('boss_phase3');
             }
@@ -790,6 +795,11 @@
 
             this.state = Utils.choice(actions);
 
+            // Set charge telegraph timing
+            if (this.state === 'charge') {
+                this._chargeWindup = this.stateTimer - 18; // 18 frames of wind-up
+            }
+
             // If close to player, prefer melee
             if (dist < 30 && this.attackCooldown <= 0) {
                 this.state = 'attack';
@@ -808,15 +818,37 @@
                     break;
 
                 case 'charge':
-                    // Fast dash toward player
-                    this.x += Math.cos(angle) * this.speed * 3;
-                    this.y += Math.sin(angle) * this.speed * 3;
-                    this.dir = this.angleToDir(angle);
-                    if (this.stateTimer % 3 === 0) {
-                        Particles.burst(
-                            this.x + this.w / 2, this.y + this.h / 2, 2,
-                            (this.phase === 3) ? C.purple : C.red
-                        );
+                    // Telegraph: first 20 frames of charge are wind-up
+                    if (this.stateTimer > this._chargeWindup) {
+                        // Wind-up: boss pauses, particles gather inward
+                        this.flash = 2;
+                        if (this.stateTimer % 4 === 0) {
+                            var gatherAngle = Math.random() * Math.PI * 2;
+                            var gatherDist = 20 + Math.random() * 15;
+                            Particles.add(
+                                this.x + this.w / 2 + Math.cos(gatherAngle) * gatherDist,
+                                this.y + this.h / 2 + Math.sin(gatherAngle) * gatherDist,
+                                {
+                                    vx: -Math.cos(gatherAngle) * 1.5,
+                                    vy: -Math.sin(gatherAngle) * 1.5,
+                                    life: 12,
+                                    color: (this.phase === 3) ? C.purple : C.red,
+                                    size: 2,
+                                    gravity: 0
+                                }
+                            );
+                        }
+                    } else {
+                        // Actual charge: fast dash
+                        this.x += Math.cos(angle) * this.speed * 3;
+                        this.y += Math.sin(angle) * this.speed * 3;
+                        this.dir = this.angleToDir(angle);
+                        if (this.stateTimer % 3 === 0) {
+                            Particles.burst(
+                                this.x + this.w / 2, this.y + this.h / 2, 2,
+                                (this.phase === 3) ? C.purple : C.red
+                            );
+                        }
                     }
                     break;
 
@@ -977,15 +1009,43 @@
             // Boss HP bar
             this.renderHPBar(ctx);
 
-            // Render projectiles
+            // Render projectiles with spinning and trailing
             for (var i = 0; i < this.projectiles.length; i++) {
                 var p = this.projectiles[i];
+                var px = Math.floor(p.x);
+                var py = Math.floor(p.y);
+                var spin = (120 - p.life) * 0.3; // rotation angle
+
+                // Trailing particle
+                if (p.life % 3 === 0) {
+                    Particles.add(px, py, {
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        life: 8,
+                        color: p.color,
+                        size: 1,
+                        gravity: 0
+                    });
+                }
+
+                // Outer glow
+                ctx.globalAlpha = 0.2;
                 ctx.fillStyle = p.color;
-                ctx.fillRect(Math.floor(p.x - p.w / 2), Math.floor(p.y - p.h / 2), p.w, p.h);
-                // Glow
-                ctx.globalAlpha = 0.3;
-                ctx.fillRect(Math.floor(p.x - p.w / 2 - 1), Math.floor(p.y - p.h / 2 - 1), p.w + 2, p.h + 2);
+                ctx.fillRect(px - p.w / 2 - 2, py - p.h / 2 - 2, p.w + 4, p.h + 4);
                 ctx.globalAlpha = 1;
+
+                // Spinning diamond shape
+                ctx.save();
+                ctx.translate(px, py);
+                ctx.rotate(spin);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                // Bright center
+                ctx.fillStyle = C.white;
+                ctx.globalAlpha = 0.6;
+                ctx.fillRect(-1, -1, 2, 2);
+                ctx.globalAlpha = 1;
+                ctx.restore();
             }
         }
 
@@ -1148,6 +1208,7 @@
                     boss.takeDamage(atkDmg, player.x + player.w / 2, player.y + player.h / 2);
                     player.attackDealt = true;
                     player.hitstop = 3;
+                }
             }
         }
 

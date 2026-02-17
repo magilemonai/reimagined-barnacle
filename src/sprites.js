@@ -87,6 +87,7 @@ mt('grass_light',function(x){fill(x,P.lightGreen);dots(x,P.green,12);});
 mt('grass_dark',function(x){fill(x,P.green);dots(x,P.darkGreen,12);});
 mt('path',function(x){fill(x,P.tan);dots(x,P.lightBrown,10);});
 mt('water',function(x){fill(x,P.blue);dots(x,P.lightBlue,8);dots(x,P.white,3);});
+mt('water_1',function(x){fill(x,P.blue);dots(x,P.lightBlue,10);x.fillStyle=P.white;x.fillRect(rn(1,12),rn(1,12),2,1);x.fillRect(rn(1,12),rn(1,12),1,2);x.fillRect(rn(1,12),rn(1,12),2,1);});
 mt('tree',function(x){fill(x,P.lightGreen);dots(x,P.green,8);x.fillStyle=P.brown;x.fillRect(6,10,4,6);circ(x,8,7,6,P.darkGreen);circ(x,7,6,4,P.green);});
 mt('bush',function(x){fill(x,P.lightGreen);circ(x,8,10,6,P.darkGreen);circ(x,7,9,5,P.green);});
 mt('flowers',function(x){fill(x,P.lightGreen);dots(x,P.green,8);var fc=[P.red,P.yellow,P.pink,P.lightPurple,P.white];for(var i=0;i<7;i++){x.fillStyle=fc[i%5];x.fillRect(rn(1,14),rn(1,14),2,2);}});

@@ -39,7 +39,7 @@
     // =====================================================================
 
     var Game = {
-        state: 'title', // title, select, intro, game, boss_intro, boss, victory, gameover
+        state: 'title', // title, select, intro, game, boss_intro, boss, victory, gameover, paused
 
         // Character selection
         selectedChar: 0,
@@ -123,7 +123,14 @@
         // Safe room for respawn
         lastSafeRoom: 'ebon_vale_square',
         lastSafeX: 7,
-        lastSafeY: 7
+        lastSafeY: 7,
+
+        // Pause menu
+        pausedFromState: null,
+        playTime: 0, // frames of gameplay
+
+        // Save system
+        hasSaveData: false
     };
 
     window.Game = Game;
@@ -218,12 +225,17 @@
 
     function renderMap(ctx, room) {
         if (!room || !room.tiles) return;
+        var waterFrame = Math.floor(Game.frame / 30) % 2; // alternate every 30 frames
         for (var row = 0; row < ROWS; row++) {
             for (var col = 0; col < COLS; col++) {
                 var tileId = Maps.getTile(room, col, row);
                 var tileProp = window.TileProps[tileId];
                 if (tileProp) {
                     var spriteKey = tileProp.name;
+                    // Animated water tiles
+                    if (tileId === window.T.WATER && waterFrame === 1) {
+                        spriteKey = 'tile_water_1';
+                    }
                     safeDraw(ctx, spriteKey, col * TILE, row * TILE);
                 }
             }
@@ -302,6 +314,9 @@
         Game.transition.targetRoom = targetRoom;
         Game.transition.spawnX = spawnX;
         Game.transition.spawnY = spawnY;
+
+        // Auto-save on room transitions
+        saveGame();
     }
 
     function updateTransition() {
@@ -714,6 +729,29 @@
     }
 
     // =====================================================================
+    // WEATHER / AMBIENT PARTICLES
+    // =====================================================================
+
+    function updateWeather() {
+        if (!Game.currentRoom) return;
+        var roomId = Game.currentRoom.id;
+
+        // Forest: falling leaves
+        if (roomId && roomId.indexOf('ebon_forest') === 0) {
+            if (Game.frame % 20 === 0) {
+                Particles.add(Utils.randInt(-10, W + 10), -5, {
+                    vx: 0.3 + Math.random() * 0.4,
+                    vy: 0.4 + Math.random() * 0.3,
+                    life: 120 + Utils.randInt(0, 60),
+                    color: Utils.choice([C.green, C.darkGreen, C.brown, C.lightBrown]),
+                    size: 2,
+                    gravity: 0.005
+                });
+            }
+        }
+    }
+
+    // =====================================================================
     // TEMPLE LIGHTING SYSTEM
     // =====================================================================
 
@@ -1120,7 +1158,14 @@
     // TITLE SCREEN
     // =====================================================================
 
+    // Title screen menu selection (0 = New Game or Continue, 1 = secondary option)
+    Game.titleMenuIndex = 0;
+    Game.hasSaveData = false;
+
     function updateTitle() {
+        // Check for save data
+        Game.hasSaveData = hasSaveData();
+
         // Generate sparkle particles on title screen
         if (Game.frame % 8 === 0) {
             Particles.add(Utils.randInt(20, W - 20), H - 10, {
@@ -1135,12 +1180,32 @@
 
         Particles.update();
 
+        // Menu navigation if save exists
+        if (Game.hasSaveData) {
+            if (Input.pressed['ArrowUp'] || Input.pressed['ArrowDown']) {
+                Game.titleMenuIndex = 1 - Game.titleMenuIndex;
+                Audio.play('select');
+            }
+        }
+
         if (Input.pressed['Enter']) {
+            if (Game.hasSaveData && Game.titleMenuIndex === 0) {
+                // Continue from save
+                if (loadGame()) {
+                    Audio.play('select');
+                    if (Music) Music.stop();
+                    Particles.particles = [];
+                    return;
+                }
+            }
+            // New Game (or continue failed, fall through to new game)
             Game.state = 'select';
             Audio.play('select');
             if (Music) Music.stop();
-            // Clear particles for clean transition
             Particles.particles = [];
+            if (Game.hasSaveData && Game.titleMenuIndex === 0) {
+                // Shouldn't reach here, but just in case
+            }
         }
     }
 
@@ -1187,11 +1252,33 @@
         var subX = centerTextX(subText, 1);
         Utils.drawText(ctx, subText, subX, 58, C.paleBlue, 1);
 
-        // "Press ENTER to Start" - blinking
-        if (Math.floor(Game.frame / 30) % 2 === 0) {
-            var startText = 'Press ENTER to Start';
-            var stX = centerTextX(startText, 1);
-            Utils.drawText(ctx, startText, stX, H - 38, C.white, 1);
+        // Menu options
+        if (Game.hasSaveData) {
+            // Two options: Continue and New Game
+            var contOpt = 'Continue';
+            var newOpt = 'New Game';
+            var contX = centerTextX(contOpt, 1);
+            var newX = centerTextX(newOpt, 1);
+            var menuY = H - 46;
+
+            // Selection arrow
+            var arrowBob = Math.sin(Game.frame * 0.15) * 2;
+            if (Game.titleMenuIndex === 0) {
+                Utils.drawText(ctx, '>', contX - 10 + arrowBob, menuY, C.yellow, 1);
+                Utils.drawText(ctx, contOpt, contX, menuY, C.white, 1);
+                Utils.drawText(ctx, newOpt, newX, menuY + 12, C.gray, 1);
+            } else {
+                Utils.drawText(ctx, contOpt, contX, menuY, C.gray, 1);
+                Utils.drawText(ctx, '>', newX - 10 + arrowBob, menuY + 12, C.yellow, 1);
+                Utils.drawText(ctx, newOpt, newX, menuY + 12, C.white, 1);
+            }
+        } else {
+            // No save: just "Press ENTER to Start" blinking
+            if (Math.floor(Game.frame / 30) % 2 === 0) {
+                var startText = 'Press ENTER to Start';
+                var stX = centerTextX(startText, 1);
+                Utils.drawText(ctx, startText, stX, H - 38, C.white, 1);
+            }
         }
 
         // Particles (sparkles floating up)
@@ -1385,6 +1472,17 @@
     // =====================================================================
 
     function updateGame() {
+        // Track play time
+        Game.playTime++;
+
+        // Pause check
+        if (Input.pressed['p'] || Input.pressed['Escape']) {
+            Game.pausedFromState = 'game';
+            Game.state = 'paused';
+            Audio.play('select');
+            return;
+        }
+
         // If dialogue is active: only update dialogue
         if (Dialogue.isActive()) {
             Dialogue.update();
@@ -1461,6 +1559,9 @@
 
         // Update floating texts
         updateFloatingTexts();
+
+        // Update weather/ambient particles
+        updateWeather();
 
         // Update particles
         Particles.update();
@@ -1586,6 +1687,17 @@
     // =====================================================================
 
     function updateBoss() {
+        // Track play time
+        Game.playTime++;
+
+        // Pause check
+        if (Input.pressed['p'] || Input.pressed['Escape']) {
+            Game.pausedFromState = 'boss';
+            Game.state = 'paused';
+            Audio.play('select');
+            return;
+        }
+
         // If dialogue is active: only update dialogue
         if (Dialogue.isActive()) {
             Dialogue.update();
@@ -1666,15 +1778,43 @@
             Game.boss._wasHurt = false;
         }
 
+        // Boss Phase 2: spawn minion goblins
+        if (Game.boss && Game.boss._requestMinions && !Game.boss.dead) {
+            Game.boss._requestMinions = false;
+            // Spawn 2 goblins at opposite corners
+            Game.enemies.push(new Entities.Enemy('goblin', 2, 10));
+            Game.enemies.push(new Entities.Enemy('goblin', 13, 10));
+            Particles.burst(2 * TILE + 8, 10 * TILE + 8, 8, C.green);
+            Particles.burst(13 * TILE + 8, 10 * TILE + 8, 8, C.green);
+        }
+
         // Check boss defeated
         if (Game.boss && Game.boss.dead) {
             Game.bossDeathTimer++;
 
+            // Cascading explosion spectacle
             if (Game.bossDeathTimer === 1) {
-                Game.shake = 5;
+                Game.shake = 10;
                 Audio.play('explosion');
                 Particles.burst(Game.boss.x + 8, Game.boss.y + 8, 30, C.red);
                 Particles.burst(Game.boss.x + 8, Game.boss.y + 8, 20, C.darkPurple);
+            }
+            if (Game.bossDeathTimer === 15) {
+                Game.shake = 6;
+                Audio.play('explosion');
+                Particles.burst(Game.boss.x - 10, Game.boss.y + 12, 20, C.gold);
+            }
+            if (Game.bossDeathTimer === 30) {
+                Game.shake = 8;
+                Audio.play('explosion');
+                Particles.burst(Game.boss.x + 20, Game.boss.y - 5, 25, C.red);
+                Particles.burst(Game.boss.x + 12, Game.boss.y + 12, 15, C.purple);
+            }
+            if (Game.bossDeathTimer === 45) {
+                // Final big burst
+                Game.shake = 12;
+                Particles.burst(Game.boss.x + 8, Game.boss.y + 8, 40, C.gold);
+                Particles.burst(Game.boss.x + 8, Game.boss.y + 8, 30, C.white);
             }
 
             if (Game.bossDeathTimer === 60) {
@@ -1951,10 +2091,179 @@
     }
 
     // =====================================================================
+    // SAVE SYSTEM (localStorage)
+    // =====================================================================
+
+    var SAVE_KEY = 'valisar_save';
+
+    function saveGame() {
+        if (!Game.player || !Game.currentRoom) return;
+        try {
+            var data = {
+                characterId: Game.player.characterId,
+                selectedChar: Game.selectedChar,
+                hp: Game.player.hp,
+                maxHp: Game.player.maxHp,
+                roomId: Game.currentRoom.id,
+                playerX: Game.player.x,
+                playerY: Game.player.y,
+                flags: Game.flags,
+                clearedRooms: Game.clearedRooms,
+                collectedItems: Game.collectedItems,
+                visitedRooms: Game.visitedRooms,
+                enemiesDefeated: Game.enemiesDefeated,
+                playTime: Game.playTime,
+                lastSafeRoom: Game.lastSafeRoom,
+                lastSafeX: Game.lastSafeX,
+                lastSafeY: Game.lastSafeY
+            };
+            localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+        } catch (e) {
+            // Silently fail if localStorage unavailable
+        }
+    }
+
+    function loadGame() {
+        try {
+            var raw = localStorage.getItem(SAVE_KEY);
+            if (!raw) return false;
+            var data = JSON.parse(raw);
+            if (!data || !data.characterId || !data.roomId) return false;
+
+            // Restore character selection
+            Game.selectedChar = data.selectedChar || 0;
+
+            // Create player
+            Game.player = new Entities.Player(
+                data.characterId,
+                data.playerX || 7 * TILE,
+                data.playerY || 7 * TILE
+            );
+            Game.player.hp = data.hp;
+            Game.player.maxHp = data.maxHp;
+
+            // Restore flags
+            Game.flags = data.flags || Game.flags;
+            Game.clearedRooms = data.clearedRooms || {};
+            Game.collectedItems = data.collectedItems || {};
+            Game.visitedRooms = data.visitedRooms || {};
+            Game.enemiesDefeated = data.enemiesDefeated || 0;
+            Game.playTime = data.playTime || 0;
+            Game.lastSafeRoom = data.lastSafeRoom || 'ebon_vale_square';
+            Game.lastSafeX = data.lastSafeX || 7;
+            Game.lastSafeY = data.lastSafeY || 7;
+
+            // Load the room
+            loadRoom(data.roomId);
+            Game.state = 'game';
+
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function hasSaveData() {
+        try {
+            var raw = localStorage.getItem(SAVE_KEY);
+            return !!raw;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function deleteSave() {
+        try {
+            localStorage.removeItem(SAVE_KEY);
+        } catch (e) {}
+    }
+
+    // =====================================================================
+    // PAUSE MENU
+    // =====================================================================
+
+    function updatePaused() {
+        if (Input.pressed['p'] || Input.pressed['Escape']) {
+            // Unpause
+            Game.state = Game.pausedFromState || 'game';
+            Game.pausedFromState = null;
+            Audio.play('select');
+        }
+    }
+
+    function renderPaused() {
+        var ctx = buf;
+
+        // Render the game scene underneath (frozen)
+        if (Game.pausedFromState === 'boss') {
+            renderBoss();
+        } else {
+            renderGame();
+        }
+
+        // Semi-transparent overlay
+        ctx.fillStyle = 'rgba(0,0,15,0.7)';
+        ctx.fillRect(0, 0, W, H);
+
+        // "PAUSED" title
+        var pauseText = 'PAUSED';
+        var ptX = centerTextX(pauseText, 2);
+        Utils.drawText(ctx, pauseText, ptX, 30, C.gold, 2);
+
+        // Character info
+        if (Game.player) {
+            var charName = Game.charNames[Game.selectedChar] || '';
+            var charClass = Game.charClasses[Game.selectedChar] || '';
+            Utils.drawText(ctx, charName, centerTextX(charName, 1), 60, C.white, 1);
+            Utils.drawText(ctx, charClass, centerTextX(charClass, 1), 72, C.lightGray, 1);
+
+            // HP display
+            var hpText = 'HP: ' + Game.player.hp + '/' + Game.player.maxHp;
+            Utils.drawText(ctx, hpText, centerTextX(hpText, 1), 90, C.red, 1);
+        }
+
+        // Current room
+        if (Game.currentRoom) {
+            var roomText = Game.currentRoom.name || '';
+            Utils.drawText(ctx, roomText, centerTextX(roomText, 1), 108, C.paleBlue, 1);
+        }
+
+        // Stats
+        var statsY = 126;
+        var defeatedText = 'Enemies Defeated: ' + (Game.enemiesDefeated || 0);
+        Utils.drawText(ctx, defeatedText, centerTextX(defeatedText, 1), statsY, C.lightGray, 1);
+
+        var roomsText = 'Rooms Explored: ' + Object.keys(Game.visitedRooms || {}).length + '/8';
+        Utils.drawText(ctx, roomsText, centerTextX(roomsText, 1), statsY + 12, C.lightGray, 1);
+
+        // Collected items
+        var itemsY = statsY + 30;
+        if (Game.flags.puzzleCrown) safeDraw(ctx, 'item_crown', W/2 - 24, itemsY);
+        if (Game.flags.puzzleCape)  safeDraw(ctx, 'item_cape',  W/2 - 8, itemsY);
+        if (Game.flags.puzzleScepter) safeDraw(ctx, 'item_scepter', W/2 + 8, itemsY);
+
+        // Play time
+        var totalSeconds = Math.floor((Game.playTime || 0) / 60);
+        var minutes = Math.floor(totalSeconds / 60);
+        var seconds = totalSeconds % 60;
+        var timeText = 'Time: ' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+        Utils.drawText(ctx, timeText, centerTextX(timeText, 1), statsY + 50, C.lightGray, 1);
+
+        // Resume hint (blinking)
+        if (Math.floor(Game.frame / 30) % 2 === 0) {
+            var resumeText = 'Press P or ESC to Resume';
+            Utils.drawText(ctx, resumeText, centerTextX(resumeText, 1), H - 18, C.yellow, 1);
+        }
+    }
+
+    // =====================================================================
     // FULL GAME RESET
     // =====================================================================
 
     function fullReset() {
+        // Clear save data on full reset (after victory or explicit restart)
+        deleteSave();
+
         Game.state = 'title';
         Game.selectedChar = 0;
         Game.player = null;
@@ -1995,6 +2304,10 @@
         Game.lastSafeRoom = 'ebon_vale_square';
         Game.lastSafeX = 7;
         Game.lastSafeY = 7;
+        Game.pausedFromState = null;
+        Game.playTime = 0;
+        Game.titleMenuIndex = 0;
+        Game.hasSaveData = false;
 
         Particles.particles = [];
 
@@ -2022,6 +2335,7 @@
             case 'boss':       updateBoss();      break;
             case 'victory':    updateVictory();   break;
             case 'gameover':   updateGameOver();  break;
+            case 'paused':     updatePaused();    break;
         }
 
         // Render based on current state
@@ -2034,6 +2348,7 @@
             case 'boss':       renderBoss();      break;
             case 'victory':    renderVictory();   break;
             case 'gameover':   renderGameOver();  break;
+            case 'paused':     renderPaused();    break;
         }
 
         // Blit offscreen buffer to display canvas (with screenshake)

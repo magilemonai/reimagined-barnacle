@@ -20,10 +20,15 @@ python3 -m http.server 8000
 | Z | Attack / Confirm dialogue |
 | X | Special ability |
 | Enter | Start / Menu |
+| P | Pause |
+| Tab | Toggle minimap |
+| M | Toggle music |
 
 ### Game Flow
 
 Title screen -> Character select -> Intro cutscene -> Gameplay -> Boss fight -> Victory
+
+The game auto-saves progress on room transitions. A "Continue" option appears on the title screen when a save exists.
 
 ---
 
@@ -42,7 +47,7 @@ The party (Daxon Lamn, Luigi Bonemoon, Lirielle) starts in **Ebon Vale**, invest
 
 ## Architecture
 
-Pure client-side JavaScript. No frameworks, no bundler, no npm. Six source files loaded in dependency order via `<script>` tags in `index.html`.
+Pure client-side JavaScript. No frameworks, no bundler, no npm. Seven source files loaded in dependency order via `<script>` tags in `index.html`.
 
 ### File Map
 
@@ -50,13 +55,16 @@ Pure client-side JavaScript. No frameworks, no bundler, no npm. Six source files
 index.html              - HTML shell, loads all scripts in order
 style.css               - Dark theme, pixelated canvas, purple glow aesthetic
 src/
-  engine.js    (769 lines)  - Canvas, input, audio, particles, bitmap font, utils
-  sprites.js   (129 lines)  - Procedural pixel art sprite generation (minified)
-  maps.js      (542 lines)  - 8 room layouts, tile system, Maps API
-  dialogue.js  (644 lines)  - Typewriter dialogue system + all NPC conversation data
-  entities.js  (1177 lines) - Player, Enemy, NPC, Boss, Projectile, combat resolution
-  game.js      (1737 lines) - Main game loop, state machine, HUD, transitions
+  engine.js    (845 lines)   - Canvas, input, audio SFX, particles, bitmap font, utils
+  sprites.js   (1301 lines)  - Procedural pixel art sprite generation (directional characters, NPCs, enemies, tiles)
+  maps.js      (557 lines)   - 8 room layouts, tile system, sub-tile collision, Maps API
+  dialogue.js  (760 lines)   - Typewriter dialogue system, NPC conversations, speaker portraits
+  entities.js  (1396 lines)  - Player, Enemy, NPC, Boss, Projectile, combat resolution
+  music.js     (611 lines)   - Procedural chiptune music system (6 themes, multi-track sequencer)
+  game.js      (2507 lines)  - Main game loop, state machine, HUD, minimap, save system, transitions
 ```
+
+**Total: ~8,100 lines of JavaScript**
 
 ### Load Order and Dependencies
 
@@ -66,6 +74,7 @@ sprites.js   -> window.Sprites  (depends on: C)
 maps.js      -> window.{T, TileProps, Maps}
 dialogue.js  -> window.{DialogueData, Dialogue}  (depends on: Utils, GameAudio, C)
 entities.js  -> window.Entities  (depends on: C, Input, Sprites, Maps, Particles, Audio, Utils, Dialogue)
+music.js     -> window.Music  (depends on: nothing, uses own AudioContext)
 game.js      -> window.Game  (depends on: everything above)
 ```
 
@@ -73,10 +82,13 @@ game.js      -> window.Game  (depends on: everything above)
 
 - **Resolution**: 256x224 internal (SNES), scaled 3x to 768x672 display
 - **Rendering**: Offscreen canvas buffer -> display canvas with nearest-neighbor scaling
-- **Sprites**: All procedurally generated at init time using Canvas 2D API, cached as offscreen canvases
-- **Audio**: Web Audio API with procedurally generated sound effects (10 sounds: sword, hit, hurt, pickup, select, dialogue, bosshit, death, victory, explosion)
+- **Sprites**: All procedurally generated at init time using Canvas 2D API, cached as offscreen canvases. Characters have directional sprites (down/up/right + canvas flip for left) with 2-frame walk animation.
+- **Audio**: Web Audio API with procedurally generated sound effects (16 sounds) and 6 chiptune music themes
+- **Music**: Pattern-based sequencer using OscillatorNode + GainNode chains. Multi-track compositions (3-5 tracks per theme) with crossfading between themes on room transitions.
 - **Font**: Custom 5x7 bitmap font (A-Z, 0-9, punctuation)
-- **Tiles**: 16x16px, 16 columns x 14 rows per room (28 tile types)
+- **Tiles**: 16x16px, 16 columns x 14 rows per room (28+ tile types with sub-tile collision hitboxes)
+- **Collision**: Sub-tile hitbox system - tiles like pillars and statues have tightened collision rectangles smaller than the full 16x16 tile
+- **Persistence**: localStorage save system - saves room, HP, items, cleared rooms, puzzle flags on room transitions
 - **Frame rate**: requestAnimationFrame (targets 60fps)
 
 ---
@@ -85,11 +97,11 @@ game.js      -> window.Game  (depends on: everything above)
 
 ### Three Playable Characters
 
-| Character | Class | HP | Special (X key) |
-|-----------|-------|----|-----------------|
-| Daxon Lamn | Eldritch Knight Fighter | 8 half-hearts | Shield (1.5s invincibility) |
-| Luigi Bonemoon | Warlock | 6 half-hearts | Brog familiar (homing projectile) |
-| Lirielle | Circle of Stars Druid | 6 half-hearts | Heal (restores 2 half-hearts) |
+| Character | Class | HP | Speed | Special (X key) |
+|-----------|-------|----|-------|-----------------|
+| Daxon Lamn | Eldritch Knight Fighter | 8 half-hearts | 2.0 | Shield (1.5s invincibility) |
+| Luigi Bonemoon | Warlock | 6 half-hearts | 2.2 | Brog familiar (homing projectile) |
+| Lirielle | Circle of Stars Druid | 6 half-hearts | 2.0 | Heal (restores 2 half-hearts) |
 
 ### 8 Rooms
 
@@ -104,80 +116,88 @@ game.js      -> window.Game  (depends on: everything above)
 | 7 | `temple_puzzle` | Antechamber of Shadows | 6 goblins (2 per alcove) | None |
 | 8 | `temple_boss` | Inner Sanctum | Queen Bargnot (boss) | Rorik (bound at altar) |
 
-Room connectivity: `market <-> square <-> north <-> forest_entry <-> forest_deep <-> temple_entrance <-> temple_puzzle <-> temple_boss`
+Room connectivity (linear north): `market <-> square <-> north <-> forest_entry <-> forest_deep <-> temple_entrance <-> temple_puzzle <-> temple_boss`
 
 ### Enemy Types
 
 | Enemy | HP | Damage | Speed | Behavior |
 |-------|----|--------|-------|----------|
-| Goblin | 3 | 1 | 0.6 | Patrol + chase within 80px, melee attack |
-| Spinecleaver | 6 | 2 | 0.5 | Same AI, tankier, harder hitting |
+| Goblin | 3 | 1 | 0.6 | Patrol + chase within 80px, melee attack. Retreats at low HP (30% chance to flee for 2s). Staggers after 3 consecutive hits. |
+| Spinecleaver | 6 | 2 | 0.5 | Same base AI, tankier. Has shield bash attack (20% chance in melee range, wider hitbox + more knockback). |
+
+Both enemy types telegraph attacks with a 6-frame white flash before striking.
 
 ### Boss: Queen Bargnot (3 Phases)
 
-- **Phase 1** (100%-50% HP): Chase + single projectiles. 40 HP total.
-- **Phase 2** (50%-25%): Adds charge attacks, more projectiles, speed increase. Dialogue trigger.
-- **Phase 3** (below 25%): Barrage attack (4-spread projectiles), shadow particles, purple aura, 3 damage per hit.
+- **Phase 1** (100%-50% HP): Chase + single projectiles. 40 HP total. Speed 1.0.
+- **Phase 2** (50%-25%): Adds charge attacks with 3-phase structure (30-frame telegraph -> 16-frame dash at 2x speed -> 12-frame exhaustion/vulnerability window). Speed +0.15. Dialogue trigger.
+- **Phase 3** (below 25%): Barrage attack (3-spread projectiles every 12 frames), shadow particles, purple aura, 2 damage per hit. Speed +0.15.
+
+### Combat System
+
+- **Hitstop**: 3-frame freeze on hit for both attacker and target
+- **Knockback**: Collision-aware (checks map tiles, falls back to per-axis movement). Velocity decay at 0.7x per frame.
+- **Screen shake**: 4 frames on player damage, 5 frames on boss hit, 8 frames on boss phase transition, 2 frames on enemy kill
+- **Stagger**: 3 rapid hits on an enemy triggers 30-frame stun state
+- **Invincibility frames**: Player gets brief invincibility after taking damage
+
+### Music System
+
+6 procedural chiptune themes with rich multi-track compositions:
+- **Title "Valisar's Call"** (72 BPM): Atmospheric pad with hero's call motif (E-G-C), crystalline accents
+- **Town "Ebon Vale"** (112 BPM): Warm waltz feel, bouncy bass, question-and-answer melody
+- **Forest "Whispers in Shadow"** (84 BPM): Chromatic creeping bass, eerie melody with dark motif (C-Eb-D-C), descending drones
+- **Temple "Temple of Nitriti"** (60 BPM): Grinding chromatic bass descent, tritone motifs, cathedral drips, heartbeat pulse
+- **Boss "Queen Bargnot"** (152 BPM): Driving bass with chromatic turnaround, fierce angular melody, kick-snare percussion
+- **Victory "Dawn Returns"** (104 BPM): Fanfare melody, warm harmony pad, bright sparkle accents
+
+Themes crossfade on room transitions. Toggle with M key.
 
 ### Puzzle Mechanic
 
 In `temple_puzzle`, three items (Crown, Cape, Scepter) are hidden in alcoves guarded by goblins. Collect all three, then interact with the central Ascendant Shadow statue to unlock the north passage to the boss room.
+
+### UI Features
+
+- **Minimap**: Vertical column in top-right corner showing all 8 rooms. Color-coded (green=town, dark green=forest, gray=temple, red=boss). Current room highlighted, visited rooms shown, unvisited dimmed. Toggle with Tab.
+- **HUD**: Heart-based HP display, puzzle item indicators, special ability cooldown bar
+- **Pause menu**: P key - shows room name, character stats, collected items
+- **Save system**: Auto-saves on room transition. Continue option on title screen.
+- **Diamond wipe**: Crystal-themed expanding diamond transition between rooms
+- **Dialogue**: Typewriter text reveal with speaker portraits, slide-up animation, hold Z to speed up text
+- **NPC idle**: Subtle breathing/bobbing animation for town NPCs
 
 ### Game States
 
 ```
 title -> select -> intro -> game -> boss_intro -> boss -> victory
                                  -> gameover (respawn to last safe room)
+                                 -> pause (P key, resume with P or Escape)
 ```
 
 ---
 
-## Known Issues and Improvement Areas
+## Known Issues
 
-### Bugs / Polish
+- **Heart drop conflict**: Enemy.die() has 30% heart drop chance, game.js checkDeadEnemies() has separate 40% check - drops can double-fire
+- **Boss double damage**: Boss melee + contact damage can both trigger on same frame
+- **Audio constructor shadow**: `window.Audio` shadows native `Audio` constructor; `window.GameAudio` exists as safe alias
+- **Sprite aliases are runtime copies**: `npc_elira_voss`, `npc_brother_soren`, `npc_mayor_helena` are set as `S.cache[alias] = S.cache[original]` after NPC sprites are created
+- **Enemy type normalization**: `goblin_lackey` from maps is normalized to `goblin` in game.js `loadRoom()` - bypassing this normalization would break enemy stats
 
-- **No `tile_dark` sprite**: The dark/void tile (ID 27) may not have a sprite defined - verify it renders correctly at temple room edges
-- **Sprite aliases are runtime copies**: `npc_elira_voss`, `npc_brother_soren`, `npc_mayor_helena` are set as `S.cache[alias] = S.cache[original]` after the NPC sprites are created. If sprite init order changes, these could break.
-- **`item_` prefix mismatch**: Maps define item types as `item_potion`, `item_crown`, etc. Verify game.js pickup logic matches these exact keys. Sprites use the same prefix.
-- **Player sprite rendering**: Player render uses `characterId + '_' + dir + '_' + frame` keys (e.g. `daxon_down_0`). Left-facing uses the `right` sprite with canvas flip. Verify the flip works correctly in the `Sprites.draw()` method.
-- **Enemy type normalization**: `goblin_lackey` from maps is normalized to `goblin` in game.js `loadRoom()`. If any code path bypasses this normalization, enemies won't get correct stats.
-- **Heart drop from enemies**: 30% chance in `entities.js` Enemy.die(), but game.js also has a 40% check. One of these may be redundant or conflicting.
-- **Boss melee + contact damage**: Both trigger independently, so the boss can double-hit the player on the same frame from both its melee hitbox and body collision. May want to add a check to prevent this.
-- **No pause functionality**: The `p` key is tracked by Input but no pause state exists yet.
-- **Audio initialization**: `window.Audio` shadows the native `Audio` constructor. Code also exposes `window.GameAudio` as a safe alias. If any code tries to use `new Audio()` for HTML5 audio, it will break.
+---
 
-### Visual / UX Improvements
+## Future Improvements
 
-- **Character sprites are 16x24** (taller than a tile) but the select screen draws them at 2x. The proportions may look odd - consider adjusting the select screen layout.
-- **No walking animation for left/right**: Sprites only define `down`, `up`, `right` directions with a canvas flip for left. The flip may cause rendering artifacts if sprites aren't perfectly symmetric.
-- **Room transition**: Fade to/from black works, but there's no room name display duration tuning. Currently 90 frames with fade-out.
-- **No minimap or area indicator**: Players may get lost navigating 8 rooms.
-- **HUD is minimal**: Hearts + puzzle items + cooldown bar. Could add an area name, enemy count, or minimap.
-- **Title screen**: Has sparkle particles and a crystal diamond shape, but no actual game logo sprite or title art.
-- **Victory screen**: Scrolling credits text, but fairly plain.
-- **No screen shake tuning**: Boss screenshake is 3 frames, player damage is 2. These may need adjusting for feel.
+See **PLAN.md** for a comprehensive, prioritized improvement plan covering:
 
-### Gameplay Improvements
-
-- **Combat feels**: Attack hitboxes, knockback distances, and invincibility frame durations may need tuning after playtesting.
-- **Enemy AI is simple**: Patrol + chase + melee. Could add projectile enemies, different movement patterns, or fleeing behavior.
-- **Boss projectile speed**: 1.5 px/frame may be too slow or fast - needs playtesting.
-- **Difficulty curve**: Jump from 0 enemies in town to 3 goblins in forest entry may be too sudden. Could add a tutorial encounter.
-- **No item shop or equipment**: The blacksmith (Braxon) and market exist narratively but have no gameplay function.
-- **Puzzle items only accessible after killing zone enemies**: This design may confuse players since there's no visual indicator.
-- **No save system**: Game resets on page refresh. Could add localStorage save.
-- **Only 8 rooms**: The campaign has more content that could be expanded into additional areas.
-- **No background music**: Only sound effects. Adding procedural chiptune music would greatly improve atmosphere.
-
-### Content Expansion Ideas (from campaign docs)
-
-- **More NPCs**: The worldbuilding doc has dozens of named NPCs not yet included (Lord Regent Aldric Vane, The Warden, Zek the Fence, etc.)
-- **Side quests**: Session notes mention several side activities that could become optional objectives
-- **Second arc**: The campaign notes tease a continuation with the Bonemoon prophecy
-- **More enemy types**: The docs mention various goblin variants, undead, and other creatures
-- **Environmental hazards**: Water, traps, crumbling floors from the temple
-- **Dialogue choices**: Currently all dialogue is linear. Could add branching conversations.
-- **Multiple endings**: Based on which character was chosen or NPCs talked to
+1. **Visual atmosphere** - Temple lighting/darkness overlay, forest weather effects, animated water, boss projectile upgrades
+2. **Combat & gameplay depth** - Floating damage numbers, blacksmith shop system, Soren's blessing, bug fixes
+3. **UI/UX polish** - Enhanced HUD with enemy counter, improved character select, game over screen, area name banners
+4. **Content expansion** - Progress-aware NPC dialogue, sign interactions, environmental details, boss Phase 2 minion summons
+5. **Audio & sound design** - Footstep sounds, ambient forest/temple sounds, room transition whoosh, puzzle solve fanfare
+6. **Polish & feel** - Title/victory screen enhancements, input buffering, gamepad support, particle effect helpers
+7. **Advanced features** - Difficulty selection, speed run timer, bestiary/journal, new enemy types, environmental hazards, dialogue choices
 
 ---
 
@@ -185,7 +205,7 @@ title -> select -> intro -> game -> boss_intro -> boss -> victory
 
 ### How It Was Built
 
-The game was built by breaking the work into 6 parallel agents, each responsible for one source file. This avoided the problem of trying to write 5000+ lines in a single pass. The files were then assembled and integration bugs were fixed.
+The game was built by breaking the work into parallel agents, each responsible for one source file. This avoided the problem of trying to write 8000+ lines in a single pass. The files were then assembled and integration bugs were fixed. Subsequent improvements were made iteratively: music system, combat feel, boss rebalance, sprite system, and UI features.
 
 ### Integration Fixes Applied
 
@@ -197,7 +217,7 @@ The game was built by breaking the work into 6 parallel agents, each responsible
 6. **Missing sprite aliases**: Maps reference `npc_elira_voss`, `npc_brother_soren`, `npc_mayor_helena` but sprites only had `npc_elira`, `npc_soren`, `npc_helena`. Added aliases in sprites.js.
 7. **Missing dialogue entries**: `rorik_market_greeting` and `rorik_rescue` referenced by maps but not defined. Added to dialogue.js.
 8. **Double boss_defeat dialogue**: Both entities.js and game.js triggered `boss_defeat` dialogue. Removed the one in entities.js since game.js has the proper callback chain.
-
-### Branch
-
-All work is on branch `claude/snes-zelda-adventure-game-7o7sG`.
+9. **Left sprite rendering**: Player.render() built `daxon_left_0` key which doesn't exist - fixed to use `right` sprite key with canvas flip for left direction.
+10. **Minimap layout**: MINIMAP_ROOMS was a 4-column grid but game progression is linear north - fixed to single vertical column.
+11. **Collision trapping**: Pillar/statue hitboxes were too large, knockback didn't check map collision - tightened hitboxes, added collision-aware knockback with pushOutOfSolids rescue.
+12. **Boss charge balance**: 18-frame telegraph was too short, 3x speed too fast - restructured into 3-phase charge (30-frame telegraph, 2x speed dash, 12-frame exhaustion window).

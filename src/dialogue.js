@@ -326,6 +326,75 @@
       { speaker: 'System', text: 'power.' },
       { speaker: 'System', text: 'Nitriti\'s blessing flows' },
       { speaker: 'System', text: 'through it.' }
+    ],
+
+    // -----------------------------------------------------------------
+    // Return-visit dialogue variants (shorter, new info)
+    // -----------------------------------------------------------------
+
+    fawks_return: [
+      { speaker: 'Fawks', text: 'Back so soon?' },
+      { speaker: 'Fawks', text: 'Rest by the fire if you' },
+      { speaker: 'Fawks', text: 'need to.' },
+      { speaker: 'Fawks', text: 'The goblins grow restless.' }
+    ],
+
+    helena_return: [
+      { speaker: 'Helena', text: 'Any progress?' },
+      { speaker: 'Helena', text: 'I heard sounds from the' },
+      { speaker: 'Helena', text: 'forest last night...' },
+      { speaker: 'Helena', text: 'Please hurry.' }
+    ],
+
+    elira_return: [
+      { speaker: 'Elira', text: 'Good, you still draw breath.' },
+      { speaker: 'Elira', text: 'My scouts report the temple' },
+      { speaker: 'Elira', text: 'grows darker.' },
+      { speaker: 'Elira', text: 'Be on your guard.' }
+    ],
+
+    soren_return: [
+      { speaker: 'Soren', text: 'The stars speak of a' },
+      { speaker: 'Soren', text: 'coming storm.' },
+      { speaker: 'Soren', text: 'Find the three sacred items' },
+      { speaker: 'Soren', text: 'in the temple to unlock' },
+      { speaker: 'Soren', text: 'the path to Bargnot.' }
+    ],
+
+    // -----------------------------------------------------------------
+    // Sign interactions
+    // -----------------------------------------------------------------
+
+    sign_market: [
+      { speaker: 'Sign', text: 'EBON VALE MARKET' },
+      { speaker: 'Sign', text: 'Trade goods and supplies.' },
+      { speaker: 'Sign', text: '"All are welcome at' },
+      { speaker: 'Sign', text: 'The Dancing Pig!"' }
+    ],
+
+    sign_square: [
+      { speaker: 'Sign', text: 'EBON VALE TOWN SQUARE' },
+      { speaker: 'Sign', text: 'Founded in the Age of' },
+      { speaker: 'Sign', text: 'Starfall by the Valisar' },
+      { speaker: 'Sign', text: 'settlers.' }
+    ],
+
+    sign_temple: [
+      { speaker: 'Inscription', text: 'Here lies the Temple of' },
+      { speaker: 'Inscription', text: 'Nitriti, Spirit of Silence.' },
+      { speaker: 'Inscription', text: 'Let those who enter' },
+      { speaker: 'Inscription', text: 'speak only truth.' }
+    ],
+
+    // -----------------------------------------------------------------
+    // Statue interactions
+    // -----------------------------------------------------------------
+
+    statue_interaction: [
+      { speaker: 'Statue', text: 'A weathered stone statue.' },
+      { speaker: 'Statue', text: 'The face has been defaced' },
+      { speaker: 'Statue', text: 'by goblin claws.' },
+      { speaker: 'Statue', text: 'It once depicted Nitriti.' }
     ]
   };
 
@@ -398,6 +467,12 @@
     /** Frame counter for the advance-indicator blink */
     _blinkTimer: 0,
 
+    /** Slide-in animation progress (0 = hidden, 1 = fully visible) */
+    _slideProgress: 0,
+
+    /** Fast-forward: holding Z speeds up text reveal */
+    _fastForward: false,
+
     /** Optional callback invoked when the dialogue sequence ends */
     _onComplete: null,
 
@@ -424,6 +499,7 @@
       this.displayedChars = 0;
       this.charTimer = 0;
       this._blinkTimer = 0;
+      this._slideProgress = 0;
       this._onComplete = onComplete || null;
       this.active = true;
     },
@@ -481,13 +557,24 @@
     update: function () {
       if (!this.active) return;
 
+      // Slide-in animation
+      if (this._slideProgress < 1) {
+        this._slideProgress = Math.min(1, this._slideProgress + 0.12);
+      }
+
       var line = this.lines[this.currentLine];
       if (!line) return;
+
+      // Fast-forward: holding Z doubles text speed
+      var speed = this.CHAR_SPEED;
+      if (window.Input && window.Input.keys && window.Input.keys['z']) {
+        speed = 1;
+      }
 
       // Typewriter reveal
       if (this.displayedChars < line.text.length) {
         this.charTimer++;
-        if (this.charTimer >= this.CHAR_SPEED) {
+        if (this.charTimer >= speed) {
           this.charTimer = 0;
           this.displayedChars++;
 
@@ -517,18 +604,48 @@
       var line = this.lines[this.currentLine];
       if (!line) return;
 
+      // Slide-in: box slides up from bottom
+      var slideOffset = Math.floor((1 - this._slideProgress) * BOX_H);
+
       // --- Semi-transparent background ---
       ctx.fillStyle = BOX_BG;
-      ctx.fillRect(BOX_X, BOX_Y, BOX_W, BOX_H);
+      ctx.fillRect(BOX_X, BOX_Y + slideOffset, BOX_W, BOX_H);
 
       // --- 1px border ---
       ctx.strokeStyle = BORDER_COLOR;
       ctx.lineWidth = 1;
-      ctx.strokeRect(BOX_X + 0.5, BOX_Y + 0.5, BOX_W - 1, BOX_H - 1);
+      ctx.strokeRect(BOX_X + 0.5, BOX_Y + slideOffset + 0.5, BOX_W - 1, BOX_H - 1);
 
-      // --- Speaker name ---
+      // --- Speaker portrait indicator (colored square with initial) ---
       var nameColor = SPEAKER_COLORS[line.speaker] || DEFAULT_SPEAKER_COLOR;
-      window.Utils.drawText(ctx, line.speaker, NAME_X, NAME_Y, nameColor, 1);
+      var portraitX = BOX_X + 4;
+      var portraitY = BOX_Y + slideOffset + 4;
+      var portraitSize = 14;
+
+      // Portrait background
+      ctx.fillStyle = nameColor;
+      ctx.globalAlpha = 0.3;
+      ctx.fillRect(portraitX, portraitY, portraitSize, portraitSize);
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = nameColor;
+      ctx.strokeRect(portraitX + 0.5, portraitY + 0.5, portraitSize - 1, portraitSize - 1);
+
+      // Speaker initial
+      var initial = line.speaker.charAt(0);
+      window.Utils.drawText(ctx, initial, portraitX + 4, portraitY + 3, nameColor, 1);
+
+      // --- Speaker name (offset for portrait) ---
+      window.Utils.drawText(ctx, line.speaker, NAME_X + 16, NAME_Y + slideOffset, nameColor, 1);
+
+      // Line progress indicator (small dots)
+      var totalLines = this.lines.length;
+      if (totalLines > 1) {
+        var dotBaseX = BOX_X + BOX_W - 8 - totalLines * 4;
+        for (var d = 0; d < totalLines; d++) {
+          ctx.fillStyle = (d <= this.currentLine) ? nameColor : '#333';
+          ctx.fillRect(dotBaseX + d * 4, BOX_Y + slideOffset + 4, 2, 2);
+        }
+      }
 
       // --- Dialogue text (typewriter) ---
       var visibleText = line.text.substring(0, this.displayedChars);
@@ -542,8 +659,8 @@
           ctx,
           rows[r],
           TEXT_X,
-          TEXT_Y + r * 10,
-          '#f0f0f0', // C.white
+          TEXT_Y + slideOffset + r * 10,
+          '#f0f0f0',
           1
         );
       }
@@ -552,9 +669,8 @@
       if (this.displayedChars >= line.text.length) {
         var show = (this._blinkTimer % (INDICATOR_BLINK_RATE * 2)) < INDICATOR_BLINK_RATE;
         if (show) {
-          // Draw a small downward triangle as the "more" indicator
           var indX = BOX_X + BOX_W - 16;
-          var indY = BOX_Y + BOX_H - 12;
+          var indY = BOX_Y + slideOffset + BOX_H - 12;
           ctx.fillStyle = '#f0f0f0';
           ctx.beginPath();
           ctx.moveTo(indX, indY);

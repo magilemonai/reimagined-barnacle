@@ -315,6 +315,8 @@
         Game.transition.spawnX = spawnX;
         Game.transition.spawnY = spawnY;
 
+        Audio.play('whoosh');
+
         // Auto-save on room transitions
         saveGame();
     }
@@ -342,20 +344,42 @@
         if (!Game.transition.active) return;
 
         var half = Math.floor(Game.transition.maxTime / 2);
-        var alpha;
+        var progress; // 0 = fully open, 1 = fully closed
 
         if (Game.transition.timer > half) {
-            // Fading to black
-            alpha = 1 - (Game.transition.timer - half) / half;
+            // Closing: diamonds shrink to cover screen
+            progress = 1 - (Game.transition.timer - half) / half;
         } else {
-            // Fading from black
-            alpha = Game.transition.timer / half;
+            // Opening: diamonds grow to reveal screen
+            progress = Game.transition.timer / half;
         }
 
+        // Diamond wipe: draw a grid of diamond-shaped masks
+        var diamondSize = 20; // size of each diamond cell
+        var cols = Math.ceil(W / diamondSize) + 1;
+        var rows = Math.ceil(H / diamondSize) + 1;
+
         ctx.fillStyle = C.black;
-        ctx.globalAlpha = alpha;
-        ctx.fillRect(0, 0, W, H);
-        ctx.globalAlpha = 1;
+        ctx.beginPath();
+
+        for (var row = -1; row < rows; row++) {
+            for (var col = -1; col < cols; col++) {
+                var cx = col * diamondSize + diamondSize / 2;
+                var cy = row * diamondSize + diamondSize / 2;
+                var r = progress * diamondSize * 0.75;
+
+                if (r > 0.5) {
+                    // Draw a diamond (rotated square)
+                    ctx.moveTo(cx, cy - r);
+                    ctx.lineTo(cx + r, cy);
+                    ctx.lineTo(cx, cy + r);
+                    ctx.lineTo(cx - r, cy);
+                    ctx.closePath();
+                }
+            }
+        }
+
+        ctx.fill();
     }
 
     // =====================================================================
@@ -577,6 +601,7 @@
                 if (enemy._dropItem) {
                     spawnHeartDrop(enemy._dropItem.x, enemy._dropItem.y);
                 }
+                Game.enemiesDefeated++;
                 Game.enemies.splice(i, 1);
             }
         }
@@ -1235,6 +1260,13 @@
         ctx.fillStyle = C.paleBlue;
         drawDiamond(ctx, cx, cy, 8, 12);
 
+        // Pulsing glow around crystal
+        var glowAlpha = 0.15 + Math.sin(Game.frame * 0.05) * 0.08;
+        ctx.globalAlpha = glowAlpha;
+        ctx.fillStyle = C.teal;
+        drawDiamond(ctx, cx, cy, 30, 40);
+        ctx.globalAlpha = 1;
+
         // White sparkle pixels on crystal
         var sparkleOffset = Math.sin(Game.frame * 0.1) * 2;
         ctx.fillStyle = C.white;
@@ -1242,9 +1274,10 @@
         ctx.fillRect(cx + 4, cy + sparkleOffset, 2, 2);
         ctx.fillRect(cx - 5, cy + 2 - sparkleOffset, 2, 2);
 
-        // Title: "VALISAR" in gold, size 3
+        // Title: "VALISAR" in gold, size 3 with shadow
         var titleText = 'VALISAR';
         var titleX = centerTextX(titleText, 3);
+        Utils.drawText(ctx, titleText, titleX + 1, 31, C.darkBrown, 3);
         Utils.drawText(ctx, titleText, titleX, 30, C.gold, 3);
 
         // Subtitle
@@ -1284,10 +1317,12 @@
         // Particles (sparkles floating up)
         Particles.render(ctx);
 
-        // Credits at very bottom
+        // Credits and controls hint at bottom
         var credText = 'Based on the Valisar Campaign World';
         var crX = centerTextX(credText, 1);
         Utils.drawText(ctx, credText, crX, H - 14, C.gray, 1);
+        var ctrlText = 'Arrows:Move  Z:Attack  X:Special  P:Pause';
+        Utils.drawText(ctx, ctrlText, centerTextX(ctrlText, 0.7), H - 6, C.darkGray, 0.7);
     }
 
     function drawDiamond(ctx, cx, cy, halfW, halfH) {
@@ -1321,6 +1356,13 @@
         }
     }
 
+    // Character stats for select screen display
+    var CHAR_STATS = {
+        daxon:    { hp: 4, atk: 4, spd: 3, spc: 'Shield', spcDesc: 'Invincibility' },
+        luigi:    { hp: 3, atk: 3, spd: 3, spc: 'Brog',   spcDesc: 'Homing bolt' },
+        lirielle: { hp: 3, atk: 2, spd: 3, spc: 'Heal',   spcDesc: 'Restore HP' }
+    };
+
     function renderSelect() {
         var ctx = buf;
 
@@ -1331,39 +1373,43 @@
         // Title
         var titleText = 'Choose Your Hero';
         var titleX = centerTextX(titleText, 2);
-        Utils.drawText(ctx, titleText, titleX, 12, C.gold, 2);
+        Utils.drawText(ctx, titleText, titleX, 8, C.gold, 2);
 
         // Three panels
-        var panelW = 70;
-        var panelH = 120;
-        var startX = Math.floor((W - panelW * 3 - 10 * 2) / 2);
-        var panelY = 36;
+        var panelW = 72;
+        var panelH = 130;
+        var startX = Math.floor((W - panelW * 3 - 8 * 2) / 2);
+        var panelY = 28;
 
         for (var i = 0; i < 3; i++) {
-            var px = startX + i * (panelW + 10);
+            var px = startX + i * (panelW + 8);
             var isSelected = (i === Game.selectedChar);
+            var charId = Game.characters[i];
+            var stats = CHAR_STATS[charId];
 
-            // Panel border
+            // Selected panel slides up slightly
+            var yOff = isSelected ? -2 : 0;
+
+            // Panel border (selected glows)
             ctx.strokeStyle = isSelected ? C.gold : C.darkGray;
             ctx.lineWidth = isSelected ? 2 : 1;
-            ctx.strokeRect(px + 0.5, panelY + 0.5, panelW - 1, panelH - 1);
+            ctx.strokeRect(px + 0.5, panelY + yOff + 0.5, panelW - 1, panelH - 1);
 
             // Panel background
-            ctx.fillStyle = isSelected ? 'rgba(232,184,48,0.08)' : 'rgba(20,20,30,0.6)';
-            ctx.fillRect(px + 1, panelY + 1, panelW - 2, panelH - 2);
+            ctx.fillStyle = isSelected ? 'rgba(232,184,48,0.1)' : 'rgba(20,20,30,0.6)';
+            ctx.fillRect(px + 1, panelY + yOff + 1, panelW - 2, panelH - 2);
 
-            // Character sprite at 2x size (center of panel)
-            var sprKey = Game.characters[i] + '_down_0';
+            // Animated character sprite (walking cycle for selected)
+            var walkFrame = isSelected ? (Math.floor(Game.frame / 12) % 2) : 0;
+            var sprKey = charId + '_down_' + walkFrame;
             var sprCanvas = Sprites.get(sprKey);
             var sprX = px + Math.floor((panelW - 32) / 2);
-            var sprY = panelY + 10;
+            var sprY = panelY + yOff + 6;
 
             if (sprCanvas) {
-                // Draw the sprite canvas at 2x scale
                 ctx.imageSmoothingEnabled = false;
                 ctx.drawImage(sprCanvas, sprX, sprY, sprCanvas.width * 2, sprCanvas.height * 2);
             } else {
-                // Fallback character representation
                 ctx.fillStyle = i === 0 ? C.blue : (i === 1 ? C.purple : C.lightGreen);
                 ctx.fillRect(sprX + 4, sprY + 4, 24, 24);
             }
@@ -1371,12 +1417,46 @@
             // Name
             var name = Game.charNames[i];
             var nameX = px + Math.floor((panelW - name.length * 6) / 2);
-            Utils.drawText(ctx, name, nameX, panelY + 80, C.white, 1);
+            Utils.drawText(ctx, name, nameX, panelY + yOff + 58, isSelected ? C.white : C.gray, 1);
 
             // Class
             var cls = Game.charClasses[i];
-            var clsX = px + Math.floor((panelW - cls.length * 6) / 2);
-            Utils.drawText(ctx, cls, clsX, panelY + 92, C.lightGray, 1);
+            var clsX = px + Math.floor((panelW - cls.length * 5) / 2);
+            Utils.drawText(ctx, cls, clsX, panelY + yOff + 68, C.lightGray, 0.8);
+
+            // Stat bars (only for selected character, or small for all)
+            var statY = panelY + yOff + 80;
+            var statBarW = panelW - 16;
+            var barH = 3;
+
+            // HP bar
+            Utils.drawText(ctx, 'HP', px + 4, statY, C.lightRed, 0.7);
+            ctx.fillStyle = C.darkGray;
+            ctx.fillRect(px + 16, statY + 1, statBarW - 12, barH);
+            ctx.fillStyle = C.red;
+            ctx.fillRect(px + 16, statY + 1, Math.floor((statBarW - 12) * stats.hp / 5), barH);
+
+            // ATK bar
+            statY += 10;
+            Utils.drawText(ctx, 'ATK', px + 4, statY, C.gold, 0.7);
+            ctx.fillStyle = C.darkGray;
+            ctx.fillRect(px + 20, statY + 1, statBarW - 16, barH);
+            ctx.fillStyle = C.gold;
+            ctx.fillRect(px + 20, statY + 1, Math.floor((statBarW - 16) * stats.atk / 5), barH);
+
+            // SPD bar
+            statY += 10;
+            Utils.drawText(ctx, 'SPD', px + 4, statY, C.teal, 0.7);
+            ctx.fillStyle = C.darkGray;
+            ctx.fillRect(px + 20, statY + 1, statBarW - 16, barH);
+            ctx.fillStyle = C.teal;
+            ctx.fillRect(px + 20, statY + 1, Math.floor((statBarW - 16) * stats.spd / 5), barH);
+
+            // Special ability label
+            statY += 12;
+            var spcText = stats.spc + ': ' + stats.spcDesc;
+            var spcX = px + Math.floor((panelW - spcText.length * 4.5) / 2);
+            Utils.drawText(ctx, spcText, Math.max(px + 2, spcX), statY, C.paleBlue, 0.7);
 
             // Sparkle on selected
             if (isSelected && Game.frame % 15 === 0) {
@@ -1389,7 +1469,6 @@
 
         // Description text at bottom
         var desc = Game.charDescs[Game.selectedChar];
-        // Word wrap the description
         var words = desc.split(' ');
         var lines = [];
         var currentLine = '';
@@ -1405,15 +1484,19 @@
 
         for (var l = 0; l < lines.length; l++) {
             var lx = centerTextX(lines[l], 1);
-            Utils.drawText(ctx, lines[l], lx, panelY + panelH + 12 + l * 10, C.white, 1);
+            Utils.drawText(ctx, lines[l], lx, panelY + panelH + 8 + l * 10, C.white, 1);
         }
 
-        // "Z to Confirm" blinking
+        // "Z to Confirm" blinking with arrow indicators
         if (Math.floor(Game.frame / 30) % 2 === 0) {
             var confText = 'Z to Confirm';
             var confX = centerTextX(confText, 1);
-            Utils.drawText(ctx, confText, confX, H - 14, C.yellow, 1);
+            Utils.drawText(ctx, confText, confX, H - 12, C.yellow, 1);
         }
+        // Arrow key hints
+        var arrowBob = Math.sin(Game.frame * 0.1) * 2;
+        Utils.drawText(ctx, '<', 8 + arrowBob, H / 2 + 10, C.gold, 2);
+        Utils.drawText(ctx, '>', W - 18 - arrowBob, H / 2 + 10, C.gold, 2);
     }
 
     // =====================================================================
@@ -2036,9 +2119,10 @@
         Particles.render(ctx);
 
         if (Game.victoryDialogueDone) {
-            // "THE END" in large gold text
+            // "THE END" in large gold text with shadow
             var endText = 'THE END';
             var endX = centerTextX(endText, 3);
+            Utils.drawText(ctx, endText, endX + 1, 31, C.darkBrown, 3);
             Utils.drawText(ctx, endText, endX, 30, C.gold, 3);
 
             // "...for now"
@@ -2046,11 +2130,23 @@
             var fnX = centerTextX(forNow, 1);
             Utils.drawText(ctx, forNow, fnX, 58, C.lightGray, 1);
 
-            // Credits scrolling
+            // Play stats
+            var totalSeconds = Math.floor((Game.playTime || 0) / 60);
+            var minutes = Math.floor(totalSeconds / 60);
+            var seconds = totalSeconds % 60;
+
+            // Credits scrolling (with stats)
             var creditsLines = [
                 'VALISAR: SHADOWS OF THE ELDSPYRE',
                 '',
                 'Based on the Valisar Campaign',
+                '',
+                'Hero: ' + (Game.charNames[Game.selectedChar] || ''),
+                'Class: ' + (Game.charClasses[Game.selectedChar] || ''),
+                '',
+                'Enemies Defeated: ' + (Game.enemiesDefeated || 0),
+                'Rooms Explored: ' + Object.keys(Game.visitedRooms || {}).length + '/8',
+                'Time: ' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds,
                 '',
                 'Heroes of Ebon Vale:',
                 'Daxon Lamn - Eldritch Knight',
@@ -2061,6 +2157,8 @@
                 '',
                 'World created for the',
                 'Valisar D&D Campaign',
+                '',
+                'Thank you for playing!',
                 '',
                 'Press ENTER to play again'
             ];

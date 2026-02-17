@@ -127,6 +127,10 @@
                 if (this.frameTimer >= 10) {
                     this.frame = 1 - this.frame;
                     this.frameTimer = 0;
+                    // Play footstep sound on each step
+                    if (this.frame === 0) {
+                        Audio.play('footstep');
+                    }
                 }
             } else {
                 this.frame = 0;
@@ -524,6 +528,7 @@
                 this.staggered = true;
                 this.staggerTimer = 40; // stun duration
                 Particles.burst(this.x + this.w / 2, this.y - 4, 6, C.yellow);
+                Audio.play('stagger');
             }
 
             var angle = Math.atan2(this.y - fromY, this.x - fromX);
@@ -630,6 +635,7 @@
             this.h          = 14;
             this.dialogueId = data.dialogue;
             this.interacted = false;
+            this._idleTimer = Math.random() * 100; // offset so NPCs don't all bob in sync
         }
 
         /** Check if player can interact (close enough and pressed Z) */
@@ -639,13 +645,39 @@
         }
 
         interact() {
-            Dialogue.start(this.dialogueId);
-            this.interacted = true;
+            // Use return-visit dialogue if already interacted
+            if (this.interacted) {
+                var returnId = this.dialogueId.replace('_greeting', '_return')
+                    .replace('_market_greeting', '_return');
+                if (returnId !== this.dialogueId && window.DialogueData && window.DialogueData[returnId]) {
+                    Dialogue.start(returnId);
+                } else {
+                    Dialogue.start(this.dialogueId);
+                }
+            } else {
+                Dialogue.start(this.dialogueId);
+                this.interacted = true;
+            }
             Audio.play('select');
         }
 
+        update() {
+            this._idleTimer++;
+        }
+
         render(ctx) {
-            Sprites.draw(ctx, this.sprite, Math.floor(this.x - 2), Math.floor(this.y - 10));
+            // Gentle idle bob animation
+            var bob = Math.sin(this._idleTimer * 0.06) * 1.5;
+            Sprites.draw(ctx, this.sprite, Math.floor(this.x - 2), Math.floor(this.y - 10 + bob));
+
+            // Exclamation mark indicator if NPC hasn't been talked to yet
+            if (!this.interacted) {
+                var indicatorBob = Math.sin(this._idleTimer * 0.12) * 2;
+                ctx.fillStyle = C.yellow;
+                // Small "!" mark
+                ctx.fillRect(Math.floor(this.x + 4), Math.floor(this.y - 18 + indicatorBob), 2, 4);
+                ctx.fillRect(Math.floor(this.x + 4), Math.floor(this.y - 13 + indicatorBob), 2, 1);
+            }
         }
     }
 

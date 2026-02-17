@@ -392,6 +392,82 @@
           osc.stop(t + 0.4);
           break;
 
+        // ---- Footstep: very short quiet noise tap (30ms) ----
+        case 'footstep':
+          gain = this._gain(0.12);
+          gain.gain.setValueAtTime(0.12 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.03);
+          this._noise(0.03, gain, t);
+          break;
+
+        // ---- Whoosh: room transition sweep (150ms) ----
+        case 'whoosh':
+          gain = this._gain(0.3);
+          gain.gain.setValueAtTime(0.3 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+          this._noise(0.15, gain, t);
+          osc = this.ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(400, t);
+          osc.frequency.exponentialRampToValueAtTime(100, t + 0.15);
+          var whooshGain = this._gain(0.15);
+          whooshGain.gain.setValueAtTime(0.15 * this.masterVolume, t);
+          whooshGain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+          osc.connect(whooshGain);
+          osc.start(t);
+          osc.stop(t + 0.15);
+          break;
+
+        // ---- Stagger: dull thud impact (100ms) ----
+        case 'stagger':
+          gain = this._gain(0.5);
+          gain.gain.setValueAtTime(0.5 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+          osc = this.ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(200, t);
+          osc.frequency.exponentialRampToValueAtTime(60, t + 0.1);
+          osc.connect(gain);
+          osc.start(t);
+          osc.stop(t + 0.1);
+          break;
+
+        // ---- Save: ascending two-note chime (200ms) ----
+        case 'save':
+          gain = this._gain(0.3);
+          gain.gain.setValueAtTime(0.3 * this.masterVolume, t);
+          gain.gain.setValueAtTime(0.3 * this.masterVolume, t + 0.15);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+          this._osc('triangle', 440, gain, t, t + 0.1);
+          this._osc('triangle', 660, gain, t + 0.1, t + 0.2);
+          break;
+
+        // ---- Pause: short descending note (80ms) ----
+        case 'pause':
+          gain = this._gain(0.3);
+          gain.gain.setValueAtTime(0.3 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+          osc = this.ctx.createOscillator();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(600, t);
+          osc.frequency.exponentialRampToValueAtTime(400, t + 0.08);
+          osc.connect(gain);
+          osc.start(t);
+          osc.stop(t + 0.08);
+          break;
+
+        // ---- Chest: rewarding short fanfare (400ms) ----
+        case 'chest':
+          gain = this._gain(0.4);
+          gain.gain.setValueAtTime(0.4 * this.masterVolume, t);
+          gain.gain.setValueAtTime(0.4 * this.masterVolume, t + 0.35);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+          this._osc('square', 330, gain, t, t + 0.1);
+          this._osc('square', 440, gain, t + 0.1, t + 0.2);
+          this._osc('square', 554, gain, t + 0.2, t + 0.3);
+          this._osc('square', 660, gain, t + 0.3, t + 0.4);
+          break;
+
         default:
           console.warn('Unknown sound effect:', name);
       }

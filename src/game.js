@@ -1035,22 +1035,346 @@
     // WEATHER / AMBIENT PARTICLES
     // =====================================================================
 
+    // =====================================================================
+    // ENVIRONMENTAL PARTICLE SYSTEMS
+    // =====================================================================
+
+    // --- Forest Falling Leaves (persistent array, not Particles system) ---
+    var _leafParticles = [];
+    var _leafWindDir = 1;       // 1 = right, -1 = left
+    var _leafWindTimer = 0;
+
+    function initLeaves() {
+        _leafParticles = [];
+        var leafColors = [C.green, C.darkGreen, C.brown, C.lightBrown, '#c07020'];
+        for (var i = 0; i < 10; i++) {
+            _leafParticles.push({
+                x: Utils.randInt(0, W),
+                y: Utils.randInt(-20, H),
+                phase: Math.random() * Math.PI * 2,  // sin-wave x offset phase
+                speed: 0.3 + Math.random() * 0.3,    // fall speed
+                drift: 0.4 + Math.random() * 0.3,    // sin amplitude for x drift
+                color: Utils.choice(leafColors),
+                w: 2,
+                h: 3
+            });
+        }
+    }
+
+    function updateLeaves() {
+        // Wind direction shifts every 120 frames
+        _leafWindTimer++;
+        if (_leafWindTimer >= 120) {
+            _leafWindTimer = 0;
+            _leafWindDir = -_leafWindDir;
+        }
+
+        for (var i = 0; i < _leafParticles.length; i++) {
+            var lf = _leafParticles[i];
+            // Sine-wave horizontal drift + wind bias
+            lf.x += Math.sin(lf.phase + Game.frame * 0.04) * lf.drift * 0.3 + _leafWindDir * 0.15;
+            lf.y += lf.speed;
+            lf.phase += 0.02;
+
+            // Reset when leaf falls off screen
+            if (lf.y > H + 10 || lf.x < -20 || lf.x > W + 20) {
+                var leafColors = [C.green, C.darkGreen, C.brown, C.lightBrown, '#c07020'];
+                lf.x = Utils.randInt(-10, W + 10);
+                lf.y = -Utils.randInt(5, 20);
+                lf.phase = Math.random() * Math.PI * 2;
+                lf.speed = 0.3 + Math.random() * 0.3;
+                lf.drift = 0.4 + Math.random() * 0.3;
+                lf.color = Utils.choice(leafColors);
+            }
+        }
+    }
+
+    function renderLeaves(ctx) {
+        for (var i = 0; i < _leafParticles.length; i++) {
+            var lf = _leafParticles[i];
+            ctx.fillStyle = lf.color;
+            ctx.fillRect(Math.floor(lf.x), Math.floor(lf.y), lf.w, lf.h);
+        }
+    }
+
+    // --- Town Dust Motes ---
+    var _dustMotes = [];
+
+    function initDustMotes() {
+        _dustMotes = [];
+        for (var i = 0; i < 5; i++) {
+            _dustMotes.push({
+                x: Utils.randInt(16, W - 16),
+                y: Utils.randInt(20, H),
+                vy: -(0.1 + Math.random() * 0.15),
+                vx: (Math.random() - 0.5) * 0.2,
+                phase: Math.random() * Math.PI * 2,
+                life: Utils.randInt(120, 240)
+            });
+        }
+    }
+
+    function updateDustMotes() {
+        for (var i = 0; i < _dustMotes.length; i++) {
+            var dm = _dustMotes[i];
+            dm.x += dm.vx + Math.sin(dm.phase + Game.frame * 0.02) * 0.1;
+            dm.y += dm.vy;
+            dm.life--;
+            if (dm.life <= 0 || dm.y < -5) {
+                dm.x = Utils.randInt(16, W - 16);
+                dm.y = Utils.randInt(H * 0.5, H);
+                dm.vy = -(0.1 + Math.random() * 0.15);
+                dm.vx = (Math.random() - 0.5) * 0.2;
+                dm.phase = Math.random() * Math.PI * 2;
+                dm.life = Utils.randInt(120, 240);
+            }
+        }
+    }
+
+    function renderDustMotes(ctx) {
+        for (var i = 0; i < _dustMotes.length; i++) {
+            var dm = _dustMotes[i];
+            var alpha = Math.min(0.5, dm.life / 60);
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = C.white;
+            ctx.fillRect(Math.floor(dm.x), Math.floor(dm.y), 1, 1);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    // --- Temple Ember Particles (near torches) ---
+    var _emberParticles = [];
+
+    function initEmbers(room) {
+        _emberParticles = [];
+        var torches = getTorchPositions(room);
+        // 2 embers per torch
+        for (var t = 0; t < torches.length; t++) {
+            for (var i = 0; i < 2; i++) {
+                _emberParticles.push({
+                    x: torches[t].x + (Math.random() - 0.5) * 10,
+                    y: torches[t].y,
+                    baseX: torches[t].x,
+                    baseY: torches[t].y,
+                    vy: -(0.2 + Math.random() * 0.3),
+                    vx: (Math.random() - 0.5) * 0.3,
+                    life: Utils.randInt(40, 80),
+                    maxLife: 80
+                });
+            }
+        }
+    }
+
+    function updateEmbers(room) {
+        var torches = getTorchPositions(room);
+        for (var i = 0; i < _emberParticles.length; i++) {
+            var em = _emberParticles[i];
+            em.x += em.vx + (Math.random() - 0.5) * 0.2;
+            em.y += em.vy;
+            em.life--;
+            if (em.life <= 0) {
+                // Respawn near a random torch
+                var src = torches.length > 0 ? torches[Utils.randInt(0, torches.length - 1)] : { x: W / 2, y: H / 2 };
+                em.x = src.x + (Math.random() - 0.5) * 12;
+                em.y = src.y - Math.random() * 4;
+                em.baseX = src.x;
+                em.baseY = src.y;
+                em.vy = -(0.2 + Math.random() * 0.3);
+                em.vx = (Math.random() - 0.5) * 0.3;
+                em.life = Utils.randInt(40, 80);
+            }
+        }
+    }
+
+    function renderEmbers(ctx) {
+        for (var i = 0; i < _emberParticles.length; i++) {
+            var em = _emberParticles[i];
+            var alpha = Math.min(0.8, em.life / 20);
+            ctx.globalAlpha = alpha;
+            // Orange-yellow ember color
+            ctx.fillStyle = Math.random() > 0.5 ? C.gold : '#ff8030';
+            ctx.fillRect(Math.floor(em.x), Math.floor(em.y), 1, 1);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    // --- Boss Room: Purple Energy Wisps orbiting pillars ---
+    var _bossWisps = [];
+    // Pillar positions in boss room (diamond pattern from map data)
+    var _bossPillars = [
+        { x: 7 * TILE + TILE / 2, y: 4 * TILE + TILE / 2 },   // top
+        { x: 4 * TILE + TILE / 2, y: 6 * TILE + TILE / 2 },   // left
+        { x: 11 * TILE + TILE / 2, y: 6 * TILE + TILE / 2 },  // right
+        { x: 8 * TILE + TILE / 2, y: 8 * TILE + TILE / 2 }    // bottom
+    ];
+
+    function initBossWisps() {
+        _bossWisps = [];
+        for (var i = 0; i < _bossPillars.length; i++) {
+            // 2 wisps per pillar
+            for (var w = 0; w < 2; w++) {
+                _bossWisps.push({
+                    pillarIdx: i,
+                    angle: Math.random() * Math.PI * 2,
+                    radius: 12 + Math.random() * 6,
+                    speed: 0.03 + Math.random() * 0.02,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+        }
+    }
+
+    function updateBossWisps() {
+        // Accelerate wisps in boss phase 3
+        var speedMult = (Game.boss && Game.boss.phase >= 3) ? 2.5 : 1.0;
+        for (var i = 0; i < _bossWisps.length; i++) {
+            var bw = _bossWisps[i];
+            bw.angle += bw.speed * speedMult;
+        }
+    }
+
+    function renderBossWisps(ctx) {
+        for (var i = 0; i < _bossWisps.length; i++) {
+            var bw = _bossWisps[i];
+            var pil = _bossPillars[bw.pillarIdx];
+            var wx = pil.x + Math.cos(bw.angle) * bw.radius;
+            var wy = pil.y + Math.sin(bw.angle) * bw.radius;
+            var alpha = 0.5 + Math.sin(bw.phase + Game.frame * 0.08) * 0.3;
+            ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+            ctx.fillStyle = C.purple;
+            ctx.fillRect(Math.floor(wx), Math.floor(wy), 2, 2);
+            // Subtle trail
+            ctx.globalAlpha = Math.max(0, alpha * 0.3);
+            ctx.fillStyle = C.lightPurple;
+            var trailX = pil.x + Math.cos(bw.angle - 0.3) * bw.radius;
+            var trailY = pil.y + Math.sin(bw.angle - 0.3) * bw.radius;
+            ctx.fillRect(Math.floor(trailX), Math.floor(trailY), 1, 1);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    // --- Deep Forest Fireflies ---
+    var _fireflies = [];
+
+    function initFireflies() {
+        _fireflies = [];
+        for (var i = 0; i < 6; i++) {
+            _fireflies.push({
+                x: Utils.randInt(20, W - 20),
+                y: Utils.randInt(30, H - 30),
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                phase: Math.random() * Math.PI * 2
+            });
+        }
+    }
+
+    function updateFireflies() {
+        for (var i = 0; i < _fireflies.length; i++) {
+            var ff = _fireflies[i];
+            ff.x += ff.vx + (Math.random() - 0.5) * 0.15;
+            ff.y += ff.vy + (Math.random() - 0.5) * 0.15;
+            // Gently bound to screen
+            if (ff.x < 16) ff.vx = Math.abs(ff.vx);
+            if (ff.x > W - 16) ff.vx = -Math.abs(ff.vx);
+            if (ff.y < 16) ff.vy = Math.abs(ff.vy);
+            if (ff.y > H - 16) ff.vy = -Math.abs(ff.vy);
+        }
+    }
+
+    function renderFireflies(ctx) {
+        for (var i = 0; i < _fireflies.length; i++) {
+            var ff = _fireflies[i];
+            // Sin-wave alpha pulse
+            var alpha = 0.4 + Math.sin(ff.phase + Game.frame * 0.06 + i * 1.5) * 0.4;
+            alpha = Math.max(0, Math.min(1, alpha));
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = C.yellow;
+            ctx.fillRect(Math.floor(ff.x), Math.floor(ff.y), 2, 2);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    // --- Environment init tracking ---
+    var _envInitRoom = null;
+
+    function ensureEnvInit(roomId, room) {
+        if (_envInitRoom === roomId) return;
+        _envInitRoom = roomId;
+
+        // Initialize particles for the current room type
+        if (roomId && roomId.indexOf('ebon_forest') === 0) {
+            initLeaves();
+            if (roomId === 'ebon_forest_deep') {
+                initFireflies();
+            }
+        }
+        if (roomId && roomId.indexOf('ebon_vale') === 0) {
+            initDustMotes();
+        }
+        if (roomId && isTempleRoom(roomId) && roomId !== 'temple_boss') {
+            initEmbers(room);
+        }
+        if (roomId === 'temple_boss') {
+            initEmbers(room);
+            initBossWisps();
+        }
+    }
+
     function updateWeather() {
         if (!Game.currentRoom) return;
         var roomId = Game.currentRoom.id;
 
-        // Forest: falling leaves
+        // Ensure environmental particles are initialized for this room
+        ensureEnvInit(roomId, Game.currentRoom);
+
+        // Forest: falling leaves (persistent leaf system, all forest rooms)
         if (roomId && roomId.indexOf('ebon_forest') === 0) {
-            if (Game.frame % 20 === 0) {
-                Particles.add(Utils.randInt(-10, W + 10), -5, {
-                    vx: 0.3 + Math.random() * 0.4,
-                    vy: 0.4 + Math.random() * 0.3,
-                    life: 120 + Utils.randInt(0, 60),
-                    color: Utils.choice([C.green, C.darkGreen, C.brown, C.lightBrown]),
-                    size: 2,
-                    gravity: 0.005
-                });
+            updateLeaves();
+            // Deep forest: fireflies
+            if (roomId === 'ebon_forest_deep') {
+                updateFireflies();
             }
+        }
+
+        // Town rooms: dust motes drifting upward
+        if (roomId && roomId.indexOf('ebon_vale') === 0) {
+            updateDustMotes();
+        }
+
+        // Temple rooms: ember particles near torches
+        if (roomId && isTempleRoom(roomId)) {
+            updateEmbers(Game.currentRoom);
+        }
+
+        // Boss room: purple energy wisps orbiting pillars
+        if (roomId === 'temple_boss') {
+            updateBossWisps();
+        }
+    }
+
+    // Render environmental particles (called from render functions)
+    function renderEnvironmentParticles(ctx) {
+        if (!Game.currentRoom) return;
+        var roomId = Game.currentRoom.id;
+
+        if (roomId && roomId.indexOf('ebon_forest') === 0) {
+            renderLeaves(ctx);
+            if (roomId === 'ebon_forest_deep') {
+                renderFireflies(ctx);
+            }
+        }
+
+        if (roomId && roomId.indexOf('ebon_vale') === 0) {
+            renderDustMotes(ctx);
+        }
+
+        if (roomId && isTempleRoom(roomId)) {
+            renderEmbers(ctx);
+        }
+
+        if (roomId === 'temple_boss') {
+            renderBossWisps(ctx);
         }
     }
 
@@ -1095,17 +1419,44 @@
         for (var i = 0; i < torches.length; i++) {
             var tx = torches[i].x;
             var ty = torches[i].y;
+            // Pulsing radius 24-32px using sin wave (matches darkness cutout)
             var flickerR = 28 + Math.sin(flickerSeed + i * 2.5) * 4;
-            var flickerA = 0.12 + Math.sin(flickerSeed * 1.3 + i) * 0.04;
+            // Random jitter ±2px for flicker
+            flickerR += (Math.random() - 0.5) * 4;
+            var flickerA = 0.14 + Math.sin(flickerSeed * 1.3 + i) * 0.05;
 
-            // Warm glow gradient
+            // Warm glow gradient — two-layer for richer look
             var grad = ctx.createRadialGradient(tx, ty, 0, tx, ty, flickerR);
-            grad.addColorStop(0, 'rgba(255,200,80,' + (flickerA + 0.06) + ')');
-            grad.addColorStop(0.5, 'rgba(255,150,40,' + flickerA + ')');
-            grad.addColorStop(1, 'rgba(255,100,20,0)');
+            grad.addColorStop(0, 'rgba(255,210,90,' + (flickerA + 0.08) + ')');
+            grad.addColorStop(0.35, 'rgba(255,160,50,' + (flickerA + 0.03) + ')');
+            grad.addColorStop(0.7, 'rgba(255,100,20,' + (flickerA * 0.5) + ')');
+            grad.addColorStop(1, 'rgba(255,80,10,0)');
             ctx.fillStyle = grad;
             ctx.fillRect(tx - flickerR, ty - flickerR, flickerR * 2, flickerR * 2);
+
+            // Inner bright core for added flicker punch
+            var coreR = 6 + Math.sin(flickerSeed * 2.1 + i * 3.7) * 2;
+            var coreA = 0.10 + Math.sin(flickerSeed * 1.7 + i * 1.3) * 0.04;
+            var coreGrad = ctx.createRadialGradient(tx, ty, 0, tx, ty, coreR);
+            coreGrad.addColorStop(0, 'rgba(255,240,180,' + coreA + ')');
+            coreGrad.addColorStop(1, 'rgba(255,200,100,0)');
+            ctx.fillStyle = coreGrad;
+            ctx.fillRect(tx - coreR, ty - coreR, coreR * 2, coreR * 2);
         }
+    }
+
+    // Reusable offscreen canvas for darkness overlay (avoid creating each frame)
+    var _darknessCanvas = null;
+    var _darknessCtx = null;
+
+    function getDarknessCanvas() {
+        if (!_darknessCanvas) {
+            _darknessCanvas = document.createElement('canvas');
+            _darknessCanvas.width = W;
+            _darknessCanvas.height = H;
+            _darknessCtx = _darknessCanvas.getContext('2d');
+        }
+        return { canvas: _darknessCanvas, ctx: _darknessCtx };
     }
 
     function renderDarknessOverlay(ctx, room) {
@@ -1114,28 +1465,33 @@
         var torches = getTorchPositions(room);
         var flickerSeed = Game.frame * 0.12;
 
-        // Create a temporary canvas for the darkness mask
-        var dCanvas = document.createElement('canvas');
-        dCanvas.width = W;
-        dCanvas.height = H;
-        var dCtx = dCanvas.getContext('2d');
+        // Reuse offscreen canvas for the darkness mask
+        var dc = getDarknessCanvas();
+        var dCtx = dc.ctx;
 
-        // Fill with semi-darkness
-        dCtx.fillStyle = 'rgba(0,0,10,0.55)';
+        // Clear and fill with 80% opacity darkness
+        dCtx.globalCompositeOperation = 'source-over';
+        dCtx.clearRect(0, 0, W, H);
+        dCtx.fillStyle = 'rgba(0,0,10,0.80)';
         dCtx.fillRect(0, 0, W, H);
 
         // Cut out light circles using destination-out compositing
         dCtx.globalCompositeOperation = 'destination-out';
 
-        // Light around each torch
+        // Light around each torch: pulsing radius 24-32px via sin wave, ±2px random jitter
         for (var i = 0; i < torches.length; i++) {
             var tx = torches[i].x;
             var ty = torches[i].y;
-            var lr = 32 + Math.sin(flickerSeed + i * 2.5) * 5;
+            // Base pulsing radius: oscillates between 24 and 32 using sin wave
+            var pulseR = 28 + Math.sin(flickerSeed + i * 2.5) * 4;
+            // Random jitter ±2px each frame for flicker effect
+            var jitter = (Math.random() - 0.5) * 4; // -2 to +2
+            var lr = pulseR + jitter;
 
             var grad = dCtx.createRadialGradient(tx, ty, 0, tx, ty, lr);
             grad.addColorStop(0, 'rgba(0,0,0,1)');
-            grad.addColorStop(0.6, 'rgba(0,0,0,0.6)');
+            grad.addColorStop(0.5, 'rgba(0,0,0,0.8)');
+            grad.addColorStop(0.8, 'rgba(0,0,0,0.3)');
             grad.addColorStop(1, 'rgba(0,0,0,0)');
             dCtx.fillStyle = grad;
             dCtx.beginPath();
@@ -1143,15 +1499,19 @@
             dCtx.fill();
         }
 
-        // Light around the player
+        // Light around the player: 40px radius, shrinks to 28px at low HP
         if (Game.player) {
             var px = Game.player.x + Game.player.w / 2;
             var py = Game.player.y + Game.player.h / 2;
-            var pr = 36;
+            // Player light shrinks as HP drops: 40px at full, 28px at 0 HP
+            var hpRatio = Game.player.maxHp > 0 ? (Game.player.hp / Game.player.maxHp) : 0;
+            hpRatio = Math.max(0, Math.min(1, hpRatio));
+            var pr = 28 + hpRatio * 12; // 28 at 0hp, 40 at full hp
 
             var pGrad = dCtx.createRadialGradient(px, py, 0, px, py, pr);
             pGrad.addColorStop(0, 'rgba(0,0,0,1)');
-            pGrad.addColorStop(0.5, 'rgba(0,0,0,0.7)');
+            pGrad.addColorStop(0.4, 'rgba(0,0,0,0.85)');
+            pGrad.addColorStop(0.75, 'rgba(0,0,0,0.3)');
             pGrad.addColorStop(1, 'rgba(0,0,0,0)');
             dCtx.fillStyle = pGrad;
             dCtx.beginPath();
@@ -1159,23 +1519,24 @@
             dCtx.fill();
         }
 
-        // Light around boss projectiles
+        // Light around boss projectiles: 16px radius
         if (Game.boss && Game.boss.projectiles) {
             for (var j = 0; j < Game.boss.projectiles.length; j++) {
                 var p = Game.boss.projectiles[j];
-                var ppGrad = dCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 14);
-                ppGrad.addColorStop(0, 'rgba(0,0,0,0.8)');
+                var ppGrad = dCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 16);
+                ppGrad.addColorStop(0, 'rgba(0,0,0,0.9)');
+                ppGrad.addColorStop(0.6, 'rgba(0,0,0,0.4)');
                 ppGrad.addColorStop(1, 'rgba(0,0,0,0)');
                 dCtx.fillStyle = ppGrad;
                 dCtx.beginPath();
-                dCtx.arc(p.x, p.y, 14, 0, Math.PI * 2);
+                dCtx.arc(p.x, p.y, 16, 0, Math.PI * 2);
                 dCtx.fill();
             }
         }
 
         // Draw the darkness overlay onto the main buffer
         dCtx.globalCompositeOperation = 'source-over';
-        ctx.drawImage(dCanvas, 0, 0);
+        ctx.drawImage(dc.canvas, 0, 0);
     }
 
     // =====================================================================
@@ -2619,6 +2980,9 @@
             Game.player.render(ctx);
         }
 
+        // Render environment particles (leaves, dust, embers, fireflies, wisps)
+        renderEnvironmentParticles(ctx);
+
         // Render particles
         Particles.render(ctx);
 
@@ -2768,6 +3132,9 @@
         // Update floating texts and screen flash
         updateFloatingTexts();
         updateScreenFlash();
+
+        // Update weather/ambient particles (boss wisps, embers)
+        updateWeather();
 
         // Particles
         Particles.update();
@@ -2963,6 +3330,9 @@
         if (Game.player && Game.player.render) {
             Game.player.render(ctx);
         }
+
+        // Environment particles (embers, boss wisps)
+        renderEnvironmentParticles(ctx);
 
         // Particles
         Particles.render(ctx);

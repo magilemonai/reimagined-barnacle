@@ -28,7 +28,9 @@
             this.dir = 'down';     // down, up, left, right
             this.frame = 0;        // animation frame (0 or 1)
             this.frameTimer = 0;
+            this.walkPhase = 0;    // 4-phase walk cycle: 0,1,2,3
             this.moving = false;
+            this._idleTimer = 0;   // timer for idle breathing animation
 
             this.characterId = characterId; // 'daxon', 'luigi', 'lirielle'
             this.maxHp = (characterId === 'daxon') ? 8 : 6; // half-hearts
@@ -123,6 +125,7 @@
 
             // Apply movement with per-axis collision
             if (this.moving) {
+                this._idleTimer = 0;
                 var newX = this.x + dx * this.speed;
                 var newY = this.y + dy * this.speed;
 
@@ -135,19 +138,23 @@
                     this.y = newY;
                 }
 
-                // Walk animation
+                // Walk animation: 4-phase cycle (0->1->2->3) with 8-tick hold per phase
+                // Sprite mapping: phase 0,2 = frame 0 (stride), phase 1,3 = frame 1 (upright)
                 this.frameTimer++;
-                if (this.frameTimer >= 10) {
-                    this.frame = 1 - this.frame;
+                if (this.frameTimer >= 8) {
+                    this.walkPhase = (this.walkPhase + 1) % 4;
+                    this.frame = (this.walkPhase % 2 === 0) ? 0 : 1;
                     this.frameTimer = 0;
-                    // Play footstep sound on each step
-                    if (this.frame === 0) {
+                    // Play footstep sound at the start of each stride (phases 0 and 2)
+                    if (this.walkPhase === 0 || this.walkPhase === 2) {
                         Audio.play('footstep');
                     }
                 }
             } else {
                 this.frame = 0;
                 this.frameTimer = 0;
+                this.walkPhase = 0;
+                this._idleTimer++;
             }
 
             // Attack input (Z key)
@@ -333,6 +340,14 @@
             var sx = this.x + this.w / 2 - this.spriteW / 2;
             var sy = this.y + this.h - this.spriteH;
 
+            // Idle breathing: 1px vertical shift on 90-frame cycle when not moving
+            if (!this.moving && !this.attacking) {
+                var breathCycle = this._idleTimer % 90;
+                if (breathCycle >= 45) {
+                    sy += 1;
+                }
+            }
+
             // Hurt squash: compress sprite 1px vertically during recoil
             var squashOffset = 0;
             if (this.hurtSquash && this.hurtSquash > 0) {
@@ -489,6 +504,7 @@
             this.dir = 'down';
             this.frame = 0;
             this.frameTimer = 0;
+            this.walkPhase = 0;    // 4-phase walk cycle: 0,1,2,3
 
             this.speed       = (type === 'goblin') ? 0.6 : 0.5;
             this.maxHp       = (type === 'goblin') ? 3   : 6;
@@ -654,10 +670,11 @@
                 if (!this.collidesWithMap(room, this.x, ny)) this.y = ny;
             }
 
-            // Animation
+            // Animation: 4-phase walk cycle with 8-tick hold per phase
             this.frameTimer++;
-            if (this.frameTimer >= 12) {
-                this.frame = 1 - this.frame;
+            if (this.frameTimer >= 8) {
+                this.walkPhase = (this.walkPhase + 1) % 4;
+                this.frame = (this.walkPhase % 2 === 0) ? 0 : 1;
                 this.frameTimer = 0;
             }
 
@@ -798,8 +815,14 @@
                 this.hurtSquash--;
             }
 
+            // Telegraph hop: 1px up when winding up to attack
+            var telegraphHop = 0;
+            if (this._telegraphing && this._telegraphTimer > 2) {
+                telegraphHop = -1;
+            }
+
             var drawX = Math.floor(sx);
-            var drawY = Math.floor(sy) + squashY;
+            var drawY = Math.floor(sy) + squashY + telegraphHop;
             var flip = (this.dir === 'left');
 
             Sprites.draw(ctx, spriteKey, drawX, drawY, flip);
@@ -864,9 +887,11 @@
         }
 
         render(ctx) {
-            // Gentle idle bob animation
-            var bob = Math.sin(this._idleTimer * 0.06) * 1.5;
-            Sprites.draw(ctx, this.sprite, Math.floor(this.x - 2), Math.floor(this.y - 10 + bob));
+            // Idle breathing: 1px vertical shift on a 60-frame cycle
+            // First 30 frames: normal position (0px), next 30 frames: shifted down 1px
+            var breathCycle = this._idleTimer % 60;
+            var breathOffset = (breathCycle < 30) ? 0 : 1;
+            Sprites.draw(ctx, this.sprite, Math.floor(this.x - 2), Math.floor(this.y - 10) + breathOffset);
 
             // Exclamation mark indicator if NPC hasn't been talked to yet
             if (!this.interacted) {
@@ -1589,6 +1614,7 @@
             this.dir = 'down';
             this.frame = 0;
             this.frameTimer = 0;
+            this.walkPhase = 0;    // 4-phase walk cycle: 0,1,2,3
 
             this.speed = 0.4;
             this.maxHp = 3;
@@ -1735,9 +1761,13 @@
                 if (!this.collidesWithMap(room, this.x, py)) this.y = py;
             }
 
-            // Animation
+            // Animation: 4-phase walk cycle with 8-tick hold per phase
             this.frameTimer++;
-            if (this.frameTimer >= 14) { this.frame = 1 - this.frame; this.frameTimer = 0; }
+            if (this.frameTimer >= 8) {
+                this.walkPhase = (this.walkPhase + 1) % 4;
+                this.frame = (this.walkPhase % 2 === 0) ? 0 : 1;
+                this.frameTimer = 0;
+            }
             this.clampToRoom();
             return false;
         }
@@ -1829,6 +1859,13 @@
             var spriteKey = 'goblin_' + this.frame;
             var sx = this.x + this.w / 2 - this.spriteW / 2;
             var sy = this.y + this.h - this.spriteH;
+
+            // Telegraph hop: 1px up when winding up to shoot
+            var telegraphHop = 0;
+            if (this._telegraphing && this._telegraphTimer > 4) {
+                telegraphHop = -1;
+            }
+            sy += telegraphHop;
 
             if (this.flash > 0) {
                 ctx.fillStyle = C.white;

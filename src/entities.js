@@ -205,20 +205,37 @@
             this.specialCooldown = this.specialMaxCooldown;
 
             if (this.characterId === 'daxon') {
-                // Shield: brief invincibility
+                // Shield: brief invincibility with barrier VFX
                 this.invincible = 90; // 1.5 seconds
-                this.flash = 90;
+                this.flash = 6;
+                // Blue barrier ring burst
+                Particles.ring(this.x + this.w / 2, this.y + this.h / 2, 14, 12, C.lightBlue);
                 Particles.sparkle(this.x + this.w / 2, this.y, C.lightBlue);
                 Audio.play('pickup');
             } else if (this.characterId === 'luigi') {
                 // Brog attack: a seeking projectile (created by the game layer)
                 this._pendingProjectile = true;
+                // Purple energy gather effect
+                Particles.ring(this.x + this.w / 2, this.y + this.h / 2, 8, 8, C.purple);
                 Audio.play('sword');
             } else if (this.characterId === 'lirielle') {
-                // Heal 2 half-hearts
+                // Heal 2 half-hearts with expanding green ring + leaf burst
                 this.hp = Math.min(this.hp + 2, this.maxHp);
-                Particles.sparkle(this.x + this.w / 2, this.y, C.paleGreen);
-                Audio.play('pickup');
+                // Expanding heal ring
+                Particles.ring(this.x + this.w / 2, this.y + this.h / 2, 10, 10, C.paleGreen);
+                // Leaf particles rising
+                for (var i = 0; i < 6; i++) {
+                    Particles.add(
+                        this.x + this.w / 2 + (Math.random() * 12 - 6),
+                        this.y + this.h / 2 + (Math.random() * 8 - 4), {
+                        vx: (Math.random() - 0.5) * 0.4,
+                        vy: -0.5 - Math.random() * 0.6,
+                        life: 25 + Math.floor(Math.random() * 15),
+                        color: Math.random() < 0.5 ? C.green : C.lightGreen,
+                        size: 1, gravity: -0.015
+                    });
+                }
+                Audio.play('heal');
             }
         }
 
@@ -227,18 +244,28 @@
             if (this.invincible > 0) return;
             this.hp -= amount;
             this.invincible = 60; // 1 second invincibility
-            this.flash = 8;
+            this.flash = 10;
+            this.hitWhite = 3; // full white sprite overlay frames
+            this.hurtSquash = 6; // visual recoil frames
 
-            // Knockback away from damage source
+            // Hitstop scales with damage: light = 4, heavy = 7
+            this.hitstop = amount >= 2 ? 7 : 4;
+
+            // Knockback away from damage source — stronger for bigger hits
+            var kbForce = amount >= 2 ? 4.5 : 3;
             var angle = Math.atan2(this.y - fromY, this.x - fromX);
             this.knockback = {
-                vx: Math.cos(angle) * 3,
-                vy: Math.sin(angle) * 3,
-                timer: 8
+                vx: Math.cos(angle) * kbForce,
+                vy: Math.sin(angle) * kbForce,
+                timer: 10
             };
 
             Audio.play('hurt');
-            Particles.burst(this.x + this.w / 2, this.y + this.h / 2, 5, C.red);
+            Particles.burst(this.x + this.w / 2, this.y + this.h / 2, 8, C.red);
+
+            // Flag for game layer to spawn screen shake + floating number
+            this._wasHurt = true;
+            this._lastDamage = amount;
 
             if (this.hp <= 0) {
                 this.hp = 0;
@@ -306,16 +333,49 @@
             var sx = this.x + this.w / 2 - this.spriteW / 2;
             var sy = this.y + this.h - this.spriteH;
 
-            // White flash overlay
-            if (this.flash > 0) {
-                ctx.fillStyle = 'rgba(255,255,255,0.7)';
-                ctx.fillRect(Math.floor(sx), Math.floor(sy), this.spriteW, this.spriteH);
+            // Hurt squash: compress sprite 1px vertically during recoil
+            var squashOffset = 0;
+            if (this.hurtSquash && this.hurtSquash > 0) {
+                squashOffset = 1;
+                this.hurtSquash--;
             }
 
             var flip = (this.dir === 'left');
-            Sprites.draw(ctx, spriteKey, Math.floor(sx), Math.floor(sy), flip);
+            var drawX = Math.floor(sx);
+            var drawY = Math.floor(sy) + squashOffset;
 
-            // Draw attack effect
+            // Attack lunge: move 2px forward during attack frames
+            if (this.attacking && this.attackTimer > 5) {
+                switch (this.dir) {
+                    case 'down':  drawY += 2; break;
+                    case 'up':    drawY -= 2; break;
+                    case 'left':  drawX -= 2; break;
+                    case 'right': drawX += 2; break;
+                }
+            }
+
+            // Draw the sprite
+            Sprites.draw(ctx, spriteKey, drawX, drawY, flip);
+
+            // Hit white overlay: full white for 3 frames on taking damage
+            if (this.hitWhite && this.hitWhite > 0) {
+                ctx.globalCompositeOperation = 'source-atop';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(drawX, drawY, this.spriteW, this.spriteH);
+                ctx.globalCompositeOperation = 'source-over';
+                this.hitWhite--;
+            } else if (this.flash > 0) {
+                // Softer flash after white frames
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.fillRect(drawX, drawY, this.spriteW, this.spriteH);
+            }
+
+            // Daxon shield VFX: rotating barrier
+            if (this.characterId === 'daxon' && this.invincible > 30 && this.specialCooldown > 0) {
+                this.renderShieldVFX(ctx, drawX, drawY);
+            }
+
+            // Draw attack effect (slash arc)
             if (this.attacking && this.attackHitbox) {
                 this.renderAttackEffect(ctx);
             }
@@ -324,26 +384,93 @@
         renderAttackEffect(ctx) {
             var ah = this.attackHitbox;
             var progress = 1 - (this.attackTimer / this.attackDuration);
+            var cx = this.x + this.w / 2;
+            var cy = this.y + this.h / 2;
+            var alpha = 0.7 * (1 - progress);
 
             if (this.characterId === 'luigi') {
-                // Teal energy blast
+                // Teal energy blast — expanding ring
                 ctx.fillStyle = C.teal;
                 ctx.globalAlpha = 0.6 * (1 - progress);
                 ctx.fillRect(Math.floor(ah.x + 2), Math.floor(ah.y + 2), ah.w - 4, ah.h - 4);
+                // Energy crackle particles
+                if (progress < 0.3) {
+                    Particles.trail(ah.x + ah.w / 2, ah.y + ah.h / 2, C.teal, 1);
+                }
                 ctx.globalAlpha = 1;
             } else if (this.characterId === 'lirielle') {
-                // Green sparkle arc
-                ctx.fillStyle = C.lightGreen;
-                ctx.globalAlpha = 0.5 * (1 - progress);
-                ctx.fillRect(Math.floor(ah.x + 3), Math.floor(ah.y + 3), ah.w - 6, ah.h - 6);
+                // Green crescent slash with leaf particles
+                ctx.globalAlpha = alpha;
+                this._drawSlashArc(ctx, cx, cy, 14, C.lightGreen, progress);
+                if (progress < 0.4 && Math.random() < 0.4) {
+                    Particles.add(ah.x + Math.random() * ah.w, ah.y + Math.random() * ah.h, {
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: -0.5 - Math.random() * 0.3,
+                        life: 12, color: C.green, size: 1, gravity: -0.01
+                    });
+                }
                 ctx.globalAlpha = 1;
             } else {
-                // Daxon: sword arc -- white flash
-                ctx.fillStyle = C.white;
-                ctx.globalAlpha = 0.4 * (1 - progress);
-                ctx.fillRect(Math.floor(ah.x + 2), Math.floor(ah.y + 2), ah.w - 4, ah.h - 4);
+                // Daxon: crisp white sword slash arc
+                ctx.globalAlpha = alpha;
+                this._drawSlashArc(ctx, cx, cy, 14, C.white, progress);
+                // Spark particles on hit frame
+                if (progress > 0.2 && progress < 0.5 && this.attackDealt) {
+                    Particles.add(ah.x + ah.w / 2 + (Math.random() * 6 - 3), ah.y + ah.h / 2, {
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2,
+                        life: 6, color: C.white, size: 1, gravity: 0
+                    });
+                }
                 ctx.globalAlpha = 1;
             }
+        }
+
+        /** Draw a directional slash arc (quarter-circle of pixels) */
+        _drawSlashArc(ctx, cx, cy, radius, color, progress) {
+            ctx.fillStyle = color;
+            var startAngle, sweepDir;
+            switch (this.dir) {
+                case 'down':  startAngle = -0.3; sweepDir = 1; cy += 10; break;
+                case 'up':    startAngle = Math.PI - 0.3; sweepDir = 1; cy -= 14; break;
+                case 'left':  startAngle = Math.PI / 2 - 0.3; sweepDir = 1; cx -= 12; break;
+                case 'right': startAngle = -Math.PI / 2 - 0.3; sweepDir = 1; cx += 12; break;
+                default:      startAngle = 0; sweepDir = 1;
+            }
+            // 3-frame arc: draw pixels along an arc path
+            var arcLen = Math.PI * 0.6; // sweep ~108 degrees
+            var steps = 8;
+            var arcProgress = Math.min(progress * 2.5, 1); // arc completes in first 40% of attack
+            var thickness = Math.max(1, Math.floor(2 * (1 - progress)));
+            for (var i = 0; i < Math.floor(steps * arcProgress); i++) {
+                var t = i / steps;
+                var a = startAngle + t * arcLen * sweepDir;
+                var r = radius - 2 + t * 4;
+                var px = Math.round(cx + Math.cos(a) * r);
+                var py = Math.round(cy + Math.sin(a) * r);
+                ctx.fillRect(px, py, thickness, thickness);
+            }
+        }
+
+        /** Render Daxon's shield special VFX — rotating hexagonal barrier */
+        renderShieldVFX(ctx, sx, sy) {
+            var cx = sx + this.spriteW / 2;
+            var cy = sy + this.spriteH / 2;
+            var r = 12 + Math.sin(this.invincible * 0.15) * 2;
+            var rotation = this.invincible * 0.08;
+            ctx.globalAlpha = 0.35 + Math.sin(this.invincible * 0.2) * 0.15;
+            ctx.strokeStyle = C.lightBlue;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (var i = 0; i <= 6; i++) {
+                var a = rotation + (i / 6) * Math.PI * 2;
+                var px = cx + Math.cos(a) * r;
+                var py = cy + Math.sin(a) * r;
+                if (i === 0) ctx.moveTo(Math.round(px), Math.round(py));
+                else ctx.lineTo(Math.round(px), Math.round(py));
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 1;
         }
     }
 
@@ -553,10 +680,12 @@
             if (this.invincible > 0 || this.dead) return;
             this.hp -= amount;
             this.invincible = 20;
-            this.flash = 6;
+            this.flash = 8;
+            this.hitWhite = 3; // full white sprite overlay
+            this.hurtSquash = 6; // visual recoil: compress 1px vertically
 
-            // Hitstop: both attacker and target freeze for 3 frames
-            this.hitstop = 3;
+            // Hitstop scales with damage: light = 4, heavy = 6, crit = 8
+            this.hitstop = amount >= 3 ? 8 : (amount >= 2 ? 6 : 4);
 
             // Stagger system: 3 rapid hits = stunned
             this.staggerCount++;
@@ -564,15 +693,17 @@
             if (this.staggerCount >= 3) {
                 this.staggered = true;
                 this.staggerTimer = 40; // stun duration
-                Particles.burst(this.x + this.w / 2, this.y - 4, 6, C.yellow);
+                Particles.burst(this.x + this.w / 2, this.y - 4, 8, C.yellow);
                 Audio.play('stagger');
             }
 
+            // Directional knockback — away from attacker, scales with damage
+            var kbForce = amount >= 3 ? 7 : (amount >= 2 ? 6 : 5);
             var angle = Math.atan2(this.y - fromY, this.x - fromX);
             this.knockback = {
-                vx: Math.cos(angle) * 5,
-                vy: Math.sin(angle) * 5,
-                timer: 5
+                vx: Math.cos(angle) * kbForce,
+                vy: Math.sin(angle) * kbForce,
+                timer: 6
             };
 
             Audio.play('hit');
@@ -629,8 +760,21 @@
         /* ----- rendering -------------------------------------------- */
         render(ctx) {
             if (this.dead) {
-                // Fade out death animation
-                ctx.globalAlpha = this.deathTimer / 30;
+                // Death animation: fade + shrink for dissolve feel
+                var deathProgress = this.deathTimer / 30;
+                ctx.globalAlpha = deathProgress;
+                // Spawn dissolution particles during death
+                if (this.deathTimer > 0 && this.deathTimer % 4 === 0) {
+                    Particles.add(
+                        this.x + Math.random() * this.w,
+                        this.y + Math.random() * this.h, {
+                        vx: (Math.random() - 0.5) * 0.8,
+                        vy: -0.3 - Math.random() * 0.5,
+                        life: 12 + Math.floor(Math.random() * 8),
+                        color: this.type === 'spinecleaver' ? C.gray : C.green,
+                        size: 1, gravity: -0.02
+                    });
+                }
             }
 
             if (this.invincible > 0 && Math.floor(this.invincible / 2) % 2 === 0) {
@@ -647,13 +791,30 @@
             var sx = this.x + this.w / 2 - this.spriteW / 2;
             var sy = this.y + this.h - this.spriteH;
 
-            if (this.flash > 0) {
-                ctx.fillStyle = C.white;
-                ctx.fillRect(Math.floor(sx), Math.floor(sy), this.spriteW, this.spriteH);
+            // Hurt squash: compress 1px vertically on hit
+            var squashY = 0;
+            if (this.hurtSquash && this.hurtSquash > 0) {
+                squashY = 1;
+                this.hurtSquash--;
             }
 
+            var drawX = Math.floor(sx);
+            var drawY = Math.floor(sy) + squashY;
             var flip = (this.dir === 'left');
-            Sprites.draw(ctx, spriteKey, Math.floor(sx), Math.floor(sy), flip);
+
+            Sprites.draw(ctx, spriteKey, drawX, drawY, flip);
+
+            // Hit white overlay — full white for impact frames
+            if (this.hitWhite && this.hitWhite > 0) {
+                ctx.globalCompositeOperation = 'source-atop';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(drawX, drawY, this.spriteW, this.spriteH);
+                ctx.globalCompositeOperation = 'source-over';
+                this.hitWhite--;
+            } else if (this.flash > 0) {
+                ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                ctx.fillRect(drawX, drawY, this.spriteW, this.spriteH);
+            }
 
             ctx.globalAlpha = 1;
         }
@@ -1561,7 +1722,10 @@
                 if (Utils.aabb(player.attackHitbox, enemyBox)) {
                     enemy.takeDamage(atkDmg, player.x + player.w / 2, player.y + player.h / 2);
                     player.attackDealt = true;
-                    player.hitstop = 3; // Attacker also freezes for juicy impact
+                    // Attacker hitstop matches target: heavier hits freeze longer
+                    player.hitstop = atkDmg >= 3 ? 5 : 3;
+                    // Screen shake scales with damage
+                    player._hitShake = atkDmg >= 3 ? 3 : 2;
                 }
             }
 
@@ -1571,7 +1735,8 @@
                 if (Utils.aabb(player.attackHitbox, bossBox)) {
                     boss.takeDamage(atkDmg, player.x + player.w / 2, player.y + player.h / 2);
                     player.attackDealt = true;
-                    player.hitstop = 3;
+                    player.hitstop = 5; // Boss hits always feel weighty
+                    player._hitShake = 3;
                 }
             }
         }

@@ -83,6 +83,7 @@
 
         // Screenshake
         shake: 0,
+        shakeIntensity: 0, // variable shake magnitude (pixels)
 
         // Frame counter
         frame: 0,
@@ -104,6 +105,9 @@
 
         // Floating damage/heal numbers
         floatingTexts: [],
+
+        // Screen flash system (overlay color for impact moments)
+        screenFlash: null, // { color, life, maxLife }
 
         // Enemy kill counter (for HUD)
         enemiesDefeated: 0,
@@ -209,21 +213,32 @@
     // FLOATING DAMAGE/HEAL NUMBERS
     // =====================================================================
 
-    function spawnFloatingText(x, y, text, color) {
+    function spawnFloatingText(x, y, text, color, big) {
+        // Slight random x-offset so stacked hits don't overlap
+        var offsetX = (Math.random() - 0.5) * 8;
         Game.floatingTexts.push({
-            x: x,
+            x: x + offsetX,
             y: y,
             text: String(text),
             color: color || C.white,
-            life: 40,
-            maxLife: 40
+            life: 45,
+            maxLife: 45,
+            scale: big ? 2 : 1,
+            vy: -0.8, // initial upward velocity
+            vx: offsetX * 0.02 // slight drift matching offset
         });
+        // Cap pool at 12 active numbers
+        if (Game.floatingTexts.length > 12) {
+            Game.floatingTexts.shift();
+        }
     }
 
     function updateFloatingTexts() {
         for (var i = Game.floatingTexts.length - 1; i >= 0; i--) {
             var ft = Game.floatingTexts[i];
-            ft.y -= 0.5;
+            ft.y += ft.vy;
+            ft.x += ft.vx;
+            ft.vy += 0.015; // gravity: numbers rise fast then slow down
             ft.life--;
             if (ft.life <= 0) {
                 Game.floatingTexts.splice(i, 1);
@@ -234,11 +249,47 @@
     function renderFloatingTexts(ctx) {
         for (var i = 0; i < Game.floatingTexts.length; i++) {
             var ft = Game.floatingTexts[i];
-            var alpha = ft.life / ft.maxLife;
+            var alpha = Math.min(1, ft.life / (ft.maxLife * 0.4));
+            // Pop-in effect: scale up briefly on spawn
+            var age = ft.maxLife - ft.life;
+            var popScale = age < 4 ? 1.0 + (4 - age) * 0.15 : 1.0;
+            var finalScale = ft.scale * popScale;
+
             ctx.globalAlpha = alpha;
-            Utils.drawText(ctx, ft.text, Math.floor(ft.x), Math.floor(ft.y), ft.color, 1);
+            // Draw shadow for readability
+            Utils.drawText(ctx, ft.text, Math.floor(ft.x) + 1, Math.floor(ft.y) + 1, C.black, finalScale);
+            Utils.drawText(ctx, ft.text, Math.floor(ft.x), Math.floor(ft.y), ft.color, finalScale);
             ctx.globalAlpha = 1;
         }
+    }
+
+    // =====================================================================
+    // SCREEN FLASH SYSTEM (impact overlays)
+    // =====================================================================
+
+    function triggerScreenFlash(color, duration) {
+        Game.screenFlash = { color: color, life: duration, maxLife: duration };
+    }
+
+    function updateScreenFlash() {
+        if (Game.screenFlash) {
+            Game.screenFlash.life--;
+            if (Game.screenFlash.life <= 0) {
+                Game.screenFlash = null;
+            }
+        }
+    }
+
+    function renderScreenFlash(ctx) {
+        if (!Game.screenFlash) return;
+        var sf = Game.screenFlash;
+        var alpha = sf.life / sf.maxLife;
+        // First few frames are full opacity, then fade
+        if (sf.life > sf.maxLife - 3) alpha = 1;
+        ctx.globalAlpha = alpha * 0.6;
+        ctx.fillStyle = sf.color;
+        ctx.fillRect(0, 0, W, H);
+        ctx.globalAlpha = 1;
     }
 
     // =====================================================================
@@ -2441,12 +2492,19 @@
         // Spawn floating damage numbers based on HP changes
         if (Game.player && Game.player.hp < playerHPBefore) {
             var dmg = playerHPBefore - Game.player.hp;
-            spawnFloatingText(Game.player.x + 2, Game.player.y - 4, dmg, C.red);
+            var isBig = dmg >= 2;
+            spawnFloatingText(Game.player.x + 2, Game.player.y - 4, dmg, C.red, isBig);
+        }
+        // Healing numbers (green) — detect HP increase
+        if (Game.player && Game.player.hp > playerHPBefore) {
+            var healed = Game.player.hp - playerHPBefore;
+            spawnFloatingText(Game.player.x + 2, Game.player.y - 4, '+' + healed, C.paleGreen, false);
         }
         for (var ej = 0; ej < Game.enemies.length; ej++) {
             if (ej < enemyHPBefore.length && Game.enemies[ej].hp < enemyHPBefore[ej]) {
                 var edmg = enemyHPBefore[ej] - Game.enemies[ej].hp;
-                spawnFloatingText(Game.enemies[ej].x + 2, Game.enemies[ej].y - 6, edmg, C.white);
+                var eBig = edmg >= 3; // big number for heavy hits
+                spawnFloatingText(Game.enemies[ej].x + 2, Game.enemies[ej].y - 6, edmg, C.white, eBig);
             }
         }
 
@@ -2457,8 +2515,9 @@
         // Check dead enemies & drops
         checkDeadEnemies();
 
-        // Update floating texts
+        // Update floating texts and screen flash
         updateFloatingTexts();
+        updateScreenFlash();
 
         // Update weather/ambient particles
         updateWeather();
@@ -2484,10 +2543,18 @@
         // Check game over
         checkGameOver();
 
-        // Screenshake from player damage (increased for impact)
+        // Screenshake from player damage — scales with damage taken
         if (Game.player && Game.player._wasHurt) {
-            Game.shake = 4;
+            var dmgShake = (Game.player._lastDamage >= 2) ? 6 : 4;
+            Game.shake = Math.max(Game.shake, dmgShake);
+            Game.shakeIntensity = (Game.player._lastDamage >= 2) ? 3 : 2;
             Game.player._wasHurt = false;
+        }
+        // Screenshake from player landing hits
+        if (Game.player && Game.player._hitShake) {
+            Game.shake = Math.max(Game.shake, Game.player._hitShake);
+            Game.shakeIntensity = Math.max(Game.shakeIntensity || 1, Game.player._hitShake > 2 ? 2 : 1);
+            Game.player._hitShake = 0;
         }
     }
 
@@ -2560,6 +2627,9 @@
 
         // Render floating damage numbers
         renderFloatingTexts(ctx);
+
+        // Screen flash overlay (impact moments)
+        renderScreenFlash(ctx);
 
         // Render HUD
         renderHUD(ctx);
@@ -2695,8 +2765,9 @@
         // Dead enemies
         checkDeadEnemies();
 
-        // Update floating texts
+        // Update floating texts and screen flash
         updateFloatingTexts();
+        updateScreenFlash();
 
         // Particles
         Particles.update();
@@ -2704,10 +2775,18 @@
         // Check game over
         checkGameOver();
 
-        // Screenshake from player damage (increased for impact)
+        // Screenshake from player damage — scales with damage taken
         if (Game.player && Game.player._wasHurt) {
-            Game.shake = 4;
+            var bDmgShake = (Game.player._lastDamage >= 2) ? 7 : 5;
+            Game.shake = Math.max(Game.shake, bDmgShake);
+            Game.shakeIntensity = (Game.player._lastDamage >= 2) ? 4 : 2;
             Game.player._wasHurt = false;
+        }
+        // Screenshake from player landing hits on boss
+        if (Game.player && Game.player._hitShake) {
+            Game.shake = Math.max(Game.shake, Game.player._hitShake + 1);
+            Game.shakeIntensity = Math.max(Game.shakeIntensity || 1, 2);
+            Game.player._hitShake = 0;
         }
 
         // Boss screenshake on hit (increased)
@@ -2907,6 +2986,9 @@
 
         // Floating damage numbers
         renderFloatingTexts(ctx);
+
+        // Screen flash overlay
+        renderScreenFlash(ctx);
 
         // HUD
         renderHUD(ctx);
@@ -4010,13 +4092,17 @@
             case 'paused':     renderPaused();    break;
         }
 
-        // Blit offscreen buffer to display canvas (with screenshake)
+        // Blit offscreen buffer to display canvas (with variable-intensity screenshake)
         display.imageSmoothingEnabled = false;
         var sx = 0, sy = 0;
         if (Game.shake > 0) {
-            sx = Utils.randInt(-2, 2);
-            sy = Utils.randInt(-2, 2);
+            var intensity = Game.shakeIntensity || 2;
+            sx = Utils.randInt(-intensity, intensity);
+            sy = Utils.randInt(-intensity, intensity);
             Game.shake--;
+            if (Game.shake <= 0) {
+                Game.shakeIntensity = 0;
+            }
         }
         display.clearRect(0, 0, display.canvas.width, display.canvas.height);
         display.drawImage(buf.canvas, sx * 3, sy * 3, display.canvas.width, display.canvas.height);

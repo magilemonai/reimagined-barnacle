@@ -925,6 +925,12 @@
         update(room, player) {
             if (this.dead) return;
 
+            // Hitstop: freeze for impact feel
+            if (this.hitstop && this.hitstop > 0) {
+                this.hitstop--;
+                return;
+            }
+
             // Phase transition animation
             if (this.phaseTransition) {
                 this.phaseTransitionTimer--;
@@ -1014,14 +1020,24 @@
             var actions;
 
             if (this.phase === 1) {
+                // Phase 1 "The Queen": measured, tactical. Pauses to monologue
+                this._actionCount = (this._actionCount || 0) + 1;
+                if (this._actionCount % 4 === 0) {
+                    // Every 4th action: pause (exploitable opening teaches patience)
+                    this.state = 'taunt';
+                    this.stateTimer = 50;
+                    return;
+                }
                 actions = ['chase', 'chase', 'shoot'];
                 this.stateTimer = 60 + Utils.randInt(0, 30);
             } else if (this.phase === 2) {
-                actions = ['chase', 'chase', 'charge', 'shoot'];
-                this.stateTimer = 55 + Utils.randInt(0, 25);
-            } else {
-                actions = ['chase', 'charge', 'shoot', 'barrage'];
+                // Phase 2 "The Fury": aggressive, faster, adds charge
+                actions = ['chase', 'chase', 'charge', 'shoot', 'shoot'];
                 this.stateTimer = 45 + Utils.randInt(0, 20);
+            } else {
+                // Phase 3 "The Shadow": teleport-based, void zones, barrages
+                actions = ['teleport', 'voidzone', 'barrage', 'barrage'];
+                this.stateTimer = 40 + Utils.randInt(0, 20);
             }
 
             this.state = Utils.choice(actions);
@@ -1033,8 +1049,43 @@
                 this._chargeExhaust = 12; // exhaustion when timer <= 12 (recovery window)
             }
 
-            // If close to player, prefer melee
-            if (dist < 30 && this.attackCooldown <= 0) {
+            // Teleport: move to a pillar position instantly
+            if (this.state === 'teleport') {
+                this.stateTimer = 30;
+                var pillars = [
+                    { x: 3 * TILE, y: 4 * TILE },
+                    { x: 12 * TILE, y: 4 * TILE },
+                    { x: 3 * TILE, y: 10 * TILE },
+                    { x: 12 * TILE, y: 10 * TILE }
+                ];
+                var target = Utils.choice(pillars);
+                // Vanish particles at old position
+                Particles.burst(this.x + this.w / 2, this.y + this.h / 2, 10, C.purple);
+                this.x = target.x;
+                this.y = target.y;
+                // Appear particles at new position
+                Particles.burst(this.x + this.w / 2, this.y + this.h / 2, 10, C.purple);
+                Audio.play('whoosh');
+            }
+
+            // Void zone: mark area then damage after delay
+            if (this.state === 'voidzone') {
+                this.stateTimer = 65;
+                this._voidZones = [];
+                // Mark 2 zones near the player
+                for (var vz = 0; vz < 2; vz++) {
+                    this._voidZones.push({
+                        x: player.x + (Math.random() - 0.5) * 40,
+                        y: player.y + (Math.random() - 0.5) * 40,
+                        w: 32, h: 32,
+                        timer: 40, // frames until eruption
+                        erupted: false
+                    });
+                }
+            }
+
+            // If close to player and not phase 3, prefer melee
+            if (dist < 30 && this.attackCooldown <= 0 && this.phase < 3) {
                 this.state = 'attack';
                 this.stateTimer = 25;
             }
@@ -1050,11 +1101,27 @@
                     this.dir = this.angleToDir(angle);
                     break;
 
+                case 'taunt':
+                    // Phase 1: Bargnot pauses to monologue (exploitable opening)
+                    this.dir = this.angleToDir(angle);
+                    // Head bobble — subtle idle motion during taunt
+                    if (this.stateTimer % 20 === 0) {
+                        Particles.add(this.x + this.w / 2, this.y - 4, {
+                            vx: 0, vy: -0.3, life: 20,
+                            color: C.gold, size: 1, gravity: 0
+                        });
+                    }
+                    break;
+
                 case 'charge':
                     if (this.stateTimer > this._chargeWindup) {
-                        // TELEGRAPH (30 frames): boss pauses, particles gather inward
+                        // TELEGRAPH (30 frames): boss crouches, particles gather inward
                         this.flash = 2;
                         this.dir = this.angleToDir(angle);
+                        // Lock charge direction at start of dash
+                        if (this.stateTimer === this._chargeWindup + 1) {
+                            this._chargeAngle = angle;
+                        }
                         if (this.stateTimer % 3 === 0) {
                             var gatherAngle = Math.random() * Math.PI * 2;
                             var gatherDist = 20 + Math.random() * 15;
@@ -1072,45 +1139,96 @@
                             );
                         }
                     } else if (this.stateTimer > this._chargeExhaust) {
-                        // DASH (16 frames): fast charge at 2x speed
-                        this.x += Math.cos(angle) * this.speed * 2;
-                        this.y += Math.sin(angle) * this.speed * 2;
-                        this.dir = this.angleToDir(angle);
-                        if (this.stateTimer % 3 === 0) {
+                        // DASH (16 frames): fast charge at locked direction, 3x speed
+                        var chargeAngle = this._chargeAngle || angle;
+                        this.x += Math.cos(chargeAngle) * this.speed * 3;
+                        this.y += Math.sin(chargeAngle) * this.speed * 3;
+                        this.dir = this.angleToDir(chargeAngle);
+                        // Trail particles
+                        if (this.stateTimer % 2 === 0) {
                             Particles.burst(
-                                this.x + this.w / 2, this.y + this.h / 2, 2,
+                                this.x + this.w / 2, this.y + this.h / 2, 3,
                                 (this.phase === 3) ? C.purple : C.red
                             );
                         }
                     } else {
-                        // EXHAUSTION (12 frames): boss staggers, vulnerable
+                        // EXHAUSTION (12 frames): boss dizzy, head bobble, vulnerable DPS window
                         this.flash = (this.stateTimer % 4 < 2) ? 1 : 0;
+                        // Dizzy stars
+                        if (this.stateTimer % 6 === 0) {
+                            Particles.add(
+                                this.x + this.w / 2 + (Math.random() - 0.5) * 16,
+                                this.y - 4, {
+                                vx: (Math.random() - 0.5) * 0.5,
+                                vy: -0.3, life: 15,
+                                color: C.yellow, size: 1, gravity: 0
+                            });
+                        }
                     }
                     break;
 
                 case 'shoot':
-                    // Fire projectile at player at specific timer values
-                    if (this.stateTimer === 30 || this.stateTimer === 15) {
-                        this.fireProjectile(angle);
+                    // Fire projectile at player — phase 2 fires a spread
+                    if (this.phase === 2) {
+                        if (this.stateTimer === 25 || this.stateTimer === 12) {
+                            this.fireProjectile(angle - 0.15);
+                            this.fireProjectile(angle + 0.15);
+                        }
+                    } else {
+                        if (this.stateTimer === 30 || this.stateTimer === 15) {
+                            this.fireProjectile(angle);
+                        }
                     }
                     this.dir = this.angleToDir(angle);
                     break;
 
                 case 'barrage':
-                    // Phase 3: fire in multiple directions (slower cadence, wider spread)
-                    if (this.stateTimer % 12 === 0) {
+                    // Phase 3: 3-orb fan spread, slower but larger
+                    if (this.stateTimer % 15 === 0) {
                         for (var i = 0; i < 3; i++) {
-                            this.fireProjectile(angle + (i * Math.PI / 4) - Math.PI / 4);
+                            this.fireProjectile(angle + (i * Math.PI / 5) - Math.PI / 5);
+                        }
+                    }
+                    this.dir = this.angleToDir(angle);
+                    break;
+
+                case 'teleport':
+                    // Phase 3: after teleporting, fire a quick shot
+                    if (this.stateTimer === 15) {
+                        this.fireProjectile(angle);
+                    }
+                    this.dir = this.angleToDir(angle);
+                    break;
+
+                case 'voidzone':
+                    // Phase 3: mark areas then erupt
+                    this.dir = this.angleToDir(angle);
+                    if (this._voidZones) {
+                        for (var vi = 0; vi < this._voidZones.length; vi++) {
+                            var vz = this._voidZones[vi];
+                            vz.timer--;
+                            if (vz.timer <= 0 && !vz.erupted) {
+                                vz.erupted = true;
+                                // Eruption: check if player is in zone
+                                var pBox = { x: player.x, y: player.y, w: player.w, h: player.h };
+                                var vzBox = { x: vz.x, y: vz.y, w: vz.w, h: vz.h };
+                                if (Utils.aabb(pBox, vzBox)) {
+                                    player.takeDamage(2, vz.x + vz.w / 2, vz.y + vz.h / 2);
+                                }
+                                // Eruption VFX
+                                Particles.burst(vz.x + vz.w / 2, vz.y + vz.h / 2, 15, C.darkPurple);
+                                Audio.play('explosion');
+                            }
                         }
                     }
                     break;
 
                 case 'attack':
-                    // Melee attack
+                    // Melee attack with 12-frame telegraph
                     if (!this.attacking && this.attackCooldown <= 0) {
                         this.attacking = true;
-                        this.attackTimer = 20;
-                        this.attackCooldown = 40;
+                        this.attackTimer = 24; // longer wind-up for readability
+                        this.attackCooldown = 45;
                         Audio.play('bosshit');
                     }
                     if (this.attacking) {
@@ -1164,18 +1282,21 @@
             if (this.invincible > 0 || this.dead || this.phaseTransition) return;
             this.hp -= amount;
             this.invincible = 15;
-            this.flash = 4;
+            this.flash = 6;
+            this.hitWhite = 3; // full white overlay
+            this.hurtSquash = 4; // visual recoil
+            this.hitstop = 5; // boss hits always feel weighty
 
             var angle = Math.atan2(this.y - fromY, this.x - fromX);
             this.knockback = {
                 vx: Math.cos(angle) * 2,
                 vy: Math.sin(angle) * 2,
-                timer: 5
+                timer: 4
             };
 
             Audio.play('bosshit');
             Particles.burst(
-                this.x + this.w / 2, this.y + this.h / 2, 6,
+                this.x + this.w / 2, this.y + this.h / 2, 8,
                 (this.phase === 3) ? C.purple : C.red
             );
 
@@ -1184,7 +1305,7 @@
                 this.dead = true;
                 Audio.play('explosion');
                 Particles.burst(this.x + this.w / 2, this.y + this.h / 2, 30, C.gold);
-                // boss_defeat dialogue is triggered by game.js with proper callback chain
+                Particles.ring(this.x + this.w / 2, this.y + this.h / 2, 20, 16, C.white);
             }
         }
 
@@ -1197,6 +1318,26 @@
         render(ctx) {
             // Invincibility flash (skip frame)
             if (this.invincible > 0 && Math.floor(this.invincible / 2) % 2 === 0 && !this.phaseTransition) return;
+
+            // Render void zones (Phase 3) — pulsing dark circles
+            if (this._voidZones) {
+                for (var vi = 0; vi < this._voidZones.length; vi++) {
+                    var vz = this._voidZones[vi];
+                    if (!vz.erupted) {
+                        var vzAlpha = 0.15 + Math.sin(vz.timer * 0.3) * 0.1;
+                        // Pulsing warning zone
+                        ctx.globalAlpha = vzAlpha;
+                        ctx.fillStyle = C.darkPurple;
+                        ctx.fillRect(Math.floor(vz.x), Math.floor(vz.y), vz.w, vz.h);
+                        // Brighter border
+                        ctx.globalAlpha = vzAlpha + 0.2;
+                        ctx.strokeStyle = C.purple;
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(Math.floor(vz.x), Math.floor(vz.y), vz.w, vz.h);
+                        ctx.globalAlpha = 1;
+                    }
+                }
+            }
 
             // Phase aura effect
             if (this.phase >= 2) {
@@ -1235,12 +1376,33 @@
             var sx = this.x + this.w / 2 - this.spriteW / 2;
             var sy = this.y + this.h - this.spriteH;
 
-            if (this.flash > 0) {
-                ctx.fillStyle = C.white;
-                ctx.fillRect(Math.floor(sx), Math.floor(sy), this.spriteW, this.spriteH);
+            // Phase 3: float 2px off ground with sine bob
+            if (this.phase === 3) {
+                sy -= 2 + Math.sin(Date.now() * 0.005) * 1.5;
             }
 
-            Sprites.draw(ctx, spriteKey, Math.floor(sx), Math.floor(sy));
+            // Hurt squash: compress 1px vertically
+            if (this.hurtSquash && this.hurtSquash > 0) {
+                sy += 1;
+                this.hurtSquash--;
+            }
+
+            var drawX = Math.floor(sx);
+            var drawY = Math.floor(sy);
+
+            Sprites.draw(ctx, spriteKey, drawX, drawY);
+
+            // Hit white overlay — full white for impact frames
+            if (this.hitWhite && this.hitWhite > 0) {
+                ctx.globalCompositeOperation = 'source-atop';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(drawX, drawY, this.spriteW, this.spriteH);
+                ctx.globalCompositeOperation = 'source-over';
+                this.hitWhite--;
+            } else if (this.flash > 0) {
+                ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                ctx.fillRect(drawX, drawY, this.spriteW, this.spriteH);
+            }
 
             // Boss HP bar
             this.renderHPBar(ctx);

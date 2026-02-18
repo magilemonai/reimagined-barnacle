@@ -24,10 +24,10 @@
     // -----------------------------------------------------------------
 
     intro_cutscene: [
-      { speaker: '', text: 'The realm of Valisar trembles... In the town of Ebon Vale, darkness gathers.', scene: 'town' },
-      { speaker: '', text: 'Goblins raid from the Ebon Forest. Their queen, Bargnot, defiles an ancient temple.', scene: 'forest' },
-      { speaker: '', text: 'She seeks to summon the spirit Smaldge... and usher in the Ascendant Shadow.', scene: 'temple' },
-      { speaker: '', text: 'Three heroes answer the call. The fate of Valisar rests in their hands.', scene: 'heroes' }
+      { speaker: '', text: 'Ebon Vale was never a grand place. Too small for kings to notice, too stubborn to die. For a while, that was enough.', scene: 'town' },
+      { speaker: '', text: 'Then the goblins came. Not raiders -- refugees. Desperate, starving, and following a queen who promised them the world.', scene: 'forest' },
+      { speaker: '', text: 'Bargnot found the Temple of Nitriti. Found the old rituals. Found a spirit called Smaldge who whispered terrible, beautiful lies.', scene: 'temple' },
+      { speaker: '', text: 'And so three travelers arrived at the edge of everything going wrong, carrying nothing but sharp steel, old magic, and stubbornness.', scene: 'heroes' }
     ],
 
     // -----------------------------------------------------------------
@@ -35,20 +35,22 @@
     // -----------------------------------------------------------------
 
     fawks_greeting: [
-      { speaker: 'Fawks', text: 'Welcome to The Dancing Pig! You look like adventurers.' },
-      { speaker: 'Fawks', text: 'Goblins have been raiding from the north forest. Please, be careful out there.' }
+      { speaker: 'Fawks', text: 'Welcome to The Dancing Pig! ...Don\'t mind the name. Long story involving my ex-husband and an actual pig.' },
+      { speaker: 'Fawks', text: 'Listen -- those goblins? They took Rorik Flamebeard right out of the market. Broad daylight. Nobody did a thing.' },
+      { speaker: 'Fawks', text: 'I just pour drinks. But Braxon\'s forge is south of here, and Brother Soren\'s chapel. They can actually help.' }
     ],
 
     helena_greeting: [
-      { speaker: 'Helena', text: 'Ah, you must be the ones Braxon mentioned. Our town is in danger.' },
-      { speaker: 'Helena', text: 'Goblins from the Ebon Forest grow bolder each day. Their queen, Bargnot... she must be stopped.' },
-      { speaker: 'Helena', text: 'Visit Braxon and Brother Soren in the market south of here before heading north to the forest.' }
+      { speaker: 'Helena', text: 'You must be the ones Braxon sent word about. Thank the spirits.' },
+      { speaker: 'Helena', text: 'I won\'t dress this up. We\'re losing. The goblins took Rorik, they\'ve cut our supply lines, and my guard captain is running on fury and stubbornness.' },
+      { speaker: 'Helena', text: 'Head south to the market. Braxon will outfit you. Brother Soren can bless your journey. And then... north. Into the forest.' },
+      { speaker: 'Helena', text: 'I wish I could send soldiers with you. I can only send my hope.' }
     ],
 
     elira_greeting: [
-      { speaker: 'Elira', text: 'I am Captain Voss of the town guard. We have captured some goblin scouts...' },
-      { speaker: 'Elira', text: 'But their main force hides in the forest temple. I do not trust spirits, but I trust steel.' },
-      { speaker: 'Elira', text: 'Give that goblin queen what she deserves.' }
+      { speaker: 'Elira', text: 'Captain Voss. I command what\'s left of the town guard, which is six people and a dog.' },
+      { speaker: 'Elira', text: 'We caught some goblin scouts. They talk tough until you separate them. Their queen, Bargnot -- she\'s the real threat.' },
+      { speaker: 'Elira', text: 'I don\'t trust spirits, prophecies, or chosen ones. But I trust sharp steel. Don\'t let me down.' }
     ],
 
     // -----------------------------------------------------------------
@@ -56,22 +58,23 @@
     // -----------------------------------------------------------------
 
     braxon_greeting: [
-      { speaker: 'Braxon', text: 'Well met, adventurer! I am Braxon, the town blacksmith.' },
-      { speaker: 'Braxon', text: 'If my boy Daxon is with you, keep him safe.' },
-      { speaker: 'Braxon', text: 'Goblin armor is weak at the joints. Bring me their teeth and I can forge you something useful.' }
+      { speaker: 'Braxon', text: 'Name\'s Braxon. I make weapons. Lately I\'ve been making a lot of weapons.' },
+      { speaker: 'Braxon', text: 'If you\'re heading to that temple, you\'ll want something better than whatever you\'re carrying. Take what you need from the forge.' },
+      { speaker: 'Braxon', text: 'And if you see my boy Daxon out there... tell him his old man still worries.' }
     ],
 
     braxon_greeting_daxon: [
-      { speaker: 'Braxon', text: 'Daxon! My boy! You have returned to us at last.' },
-      { speaker: 'Daxon', text: 'Father! I heard the goblins have taken the temple. I came as fast as I could.' },
-      { speaker: 'Braxon', text: 'Aye, and they have poor Rorik prisoner in there too. Be careful, son.' },
-      { speaker: 'Braxon', text: 'Here - take what you need from the forge. I will not let you face those monsters unarmed.' }
+      { speaker: 'Braxon', text: '...Daxon? DAXON! Boy, get over here!' },
+      { speaker: 'Braxon', text: 'Let me look at you. You\'ve gotten thinner. Are you eating? You\'re not eating.' },
+      { speaker: 'Braxon', text: 'Your mother would kill me if she knew I was sending you into a goblin-infested temple. Good thing she\'s not here.' },
+      { speaker: 'Braxon', text: 'Take whatever you need from the forge. And Daxon -- come back. That\'s not a request.' }
     ],
 
     soren_greeting: [
-      { speaker: 'Soren', text: 'Blessings of the spirits upon you. I tend to the dwarven refugees here.' },
-      { speaker: 'Soren', text: 'They fled from the goblins in the mountains. The Temple of Nitriti was once sacred...' },
-      { speaker: 'Soren', text: 'Now Bargnot defiles it with dark rituals. Return to me when you need healing.' }
+      { speaker: 'Soren', text: 'Ah. Adventurers. I can smell the determination on you. ...And the road. Mostly the road.' },
+      { speaker: 'Soren', text: 'I am Brother Soren. I tend to the refugees here -- what remains of the mountain dwarves after the goblins came.' },
+      { speaker: 'Soren', text: 'The spirits have been restless since Bargnot entered the temple. I can feel it in my whiskers. That sounds absurd but it\'s true.' },
+      { speaker: 'Soren', text: 'Come. Let me bless you before you go. It\'s the least the spirits can offer.' }
     ],
 
     rorik_greeting: [
@@ -81,13 +84,17 @@
     ],
 
     svana_greeting: [
-      { speaker: 'Svana', text: 'I am Svana Ironveil. My kin Rorik was taken by the goblins to their temple...' },
-      { speaker: 'Svana', text: 'Please, if you find him in there, bring him home safe. He is all I have left.' }
+      { speaker: 'Svana', text: 'What are you looking at? ...Sorry. I\'m Svana. I haven\'t slept.' },
+      { speaker: 'Svana', text: 'They took my cousin Rorik. Dragged him to their temple for some ritual. He\'s strong but he\'s not... he\'s not invincible.' },
+      { speaker: 'Svana', text: 'If you find him in there -- when you find him -- tell him Svana says he\'s an idiot for getting caught.' },
+      { speaker: 'Svana', text: '...And tell him to come home.' }
     ],
 
     rorik_rescue: [
-      { speaker: 'Rorik', text: 'You... you saved me! That monster was going to sacrifice me to Smaldge!' },
-      { speaker: 'Rorik', text: 'I owe you my life. Thank the forge-spirits you came when you did.' }
+      { speaker: 'Rorik', text: 'You... I thought... I thought no one was coming.' },
+      { speaker: 'Rorik', text: 'She was going to sacrifice me. I could feel the shadow pulling at my bones...' },
+      { speaker: 'Rorik', text: 'Svana -- is Svana safe? Tell me she\'s safe.' },
+      { speaker: 'Rorik', text: 'Thank the forge-spirits. I owe you everything. Now let\'s finish this.' }
     ],
 
     // -----------------------------------------------------------------
@@ -95,7 +102,8 @@
     // -----------------------------------------------------------------
 
     sign_warning: [
-      { speaker: 'Sign', text: 'EBON FOREST - NORTH. WARNING: Goblin activity reported! Travel at your own risk.' }
+      { speaker: 'Sign', text: 'EBON FOREST -- NORTH. "Goblins sighted beyond this point. Travel in groups. By order of Cpt. Voss."' },
+      { speaker: 'Sign', text: 'Someone has scratched underneath: "GOOD LUCK"' }
     ],
 
     // -----------------------------------------------------------------
@@ -103,10 +111,11 @@
     // -----------------------------------------------------------------
 
     querubra_greeting: [
-      { speaker: 'Que\'Rubra', text: '... I feel your footsteps, small ones. I am Que\'Rubra. This grove is my domain.' },
-      { speaker: 'Que\'Rubra', text: 'The goblin queen defiles Nitriti\'s temple. She seeks to bind the spirit Smaldge and sacrifice the captured dwarf.' },
-      { speaker: 'Que\'Rubra', text: 'In the temple, find the three relics: Crown, Cape, and Scepter. Place them on the shadow statue.' },
-      { speaker: 'Que\'Rubra', text: 'Only then will the inner sanctum open. Go now. May Nitriti watch over you.' }
+      { speaker: 'Que\'Rubra', text: '... Be still. I feel your footsteps like splinters in old wood.' },
+      { speaker: 'Que\'Rubra', text: 'I am Que\'Rubra. I have watched this forest for longer than your kingdoms have had names.' },
+      { speaker: 'Que\'Rubra', text: 'The goblin queen desecrates Nitriti\'s temple. She means to bind the spirit Smaldge -- a thing of hunger and shadow. She does not understand what she summons.' },
+      { speaker: 'Que\'Rubra', text: 'The temple demands three offerings: the Crown of Authority, the Cape of Presence, the Scepter of Command. Place them on the statue in the antechamber.' },
+      { speaker: 'Que\'Rubra', text: 'I cannot help you further. The old agreements bind me to this grove. But I can tell you this: Bargnot is afraid. That makes her dangerous.' }
     ],
 
     // -----------------------------------------------------------------
@@ -119,13 +128,13 @@
     ],
 
     statue_incomplete: [
-      { speaker: 'Statue', text: 'A dark statue looms before you. It is missing something...' },
-      { speaker: 'Statue', text: 'Three empty holders: crown, cape, scepter.' }
+      { speaker: 'Statue', text: 'The statue watches with hollow eyes. Three empty slots carved into the pedestal: crown, cape, scepter.' },
+      { speaker: 'Statue', text: 'You can feel the stone humming. It is waiting for something.' }
     ],
 
     statue_complete: [
-      { speaker: 'Statue', text: 'You place the final relic. The statue\'s eyes glow with dark energy.' },
-      { speaker: 'Statue', text: 'A rumbling sound echoes through the temple... The path forward is open!' }
+      { speaker: 'Statue', text: 'The final relic clicks into place. The statue\'s eyes ignite with violet fire.' },
+      { speaker: 'Statue', text: 'A sound like thunder rolls through the temple. The way forward tears itself open.' }
     ],
 
     puzzle_crown: [
@@ -145,23 +154,26 @@
     // -----------------------------------------------------------------
 
     boss_intro: [
-      { speaker: 'Bargnot', text: 'WHO DARES ENTER MY DOMAIN?! You are too late, little heroes.' },
-      { speaker: 'Bargnot', text: 'The dwarf\'s blood will feed Smaldge! And the Ascendant Shadow shall rise!' },
-      { speaker: 'Bargnot', text: 'COME THEN! FACE YOUR QUEEN!' }
+      { speaker: 'Bargnot', text: 'Ah. Helena\'s little rescue party. How... predictable.' },
+      { speaker: 'Bargnot', text: 'Do you know why I took this temple? Why I need the dwarf?' },
+      { speaker: 'Bargnot', text: 'My people are dying. The mountain clans push us out. Your towns burn our warrens. And Smaldge -- Smaldge promised us a place in the world.' },
+      { speaker: 'Bargnot', text: 'So yes, the dwarf bleeds tonight. And yes, the Shadow rises. Because YOU left us no other choice.' },
+      { speaker: 'Bargnot', text: 'Enough talk. DEFEND YOURSELVES!' }
     ],
 
     boss_phase2: [
-      { speaker: 'Bargnot', text: 'ENOUGH! You think you can defeat ME?!' },
-      { speaker: 'Bargnot', text: 'I am Queen Bargnot the Undying! FEEL MY WRATH!' }
+      { speaker: 'Bargnot', text: 'You\'re stronger than I expected. Good. I was getting bored.' },
+      { speaker: 'Bargnot', text: 'But strength won\'t save you. SMALDGE! GIVE ME WHAT YOU PROMISED!' }
     ],
 
     boss_phase3: [
-      { speaker: 'Bargnot', text: 'No... NO! SMALDGE, GIVE ME POWER!' },
-      { speaker: 'Bargnot', text: 'YESSS... I feel the shadow flowing! NOW YOU WILL PERISH!' }
+      { speaker: 'Bargnot', text: 'I can feel it... oh gods, I can feel it... this is too much... NO. I WILL NOT STOP.' },
+      { speaker: 'Bargnot', text: 'THE SHADOW IS MINE TO COMMAND! MINE!' }
     ],
 
     boss_defeat: [
-      { speaker: 'Bargnot', text: 'Im... impossible... The shadow... promised me... This... is not... the end...' }
+      { speaker: 'Bargnot', text: 'The shadow... it\'s pulling me apart... I only wanted... my people to be safe...' },
+      { speaker: 'Bargnot', text: 'Was I wrong...?' }
     ],
 
     // -----------------------------------------------------------------
@@ -174,16 +186,18 @@
     ],
 
     ending_nitriti: [
-      { speaker: 'Nitriti', text: 'Heroes of Ebon Vale... I am Nitriti, Spirit of Night. You have cleansed my temple.', scene: 'nitriti' },
-      { speaker: 'Nitriti', text: 'But dark forces still stir. The Bonemoon prophecy approaches. Eternal darkness threatens Valisar.', scene: 'darkness' },
-      { speaker: 'Nitriti', text: 'Seek the Eldspyre, the source of all magic. Your journey has only just begun.', scene: 'eldspyre' }
+      { speaker: 'Nitriti', text: 'You came. After so long in the dark... you came.', scene: 'nitriti' },
+      { speaker: 'Nitriti', text: 'I am Nitriti. I was the silence between stars, once. Before Bargnot broke what she could not understand.', scene: 'nitriti' },
+      { speaker: 'Nitriti', text: 'She was not evil. Only desperate. Remember that, when you tell this story.', scene: 'darkness' },
+      { speaker: 'Nitriti', text: 'But the Bonemoon rises. Smaldge was only a whisper of the true darkness gathering beyond the veil.', scene: 'darkness' },
+      { speaker: 'Nitriti', text: 'Seek the Eldspyre -- the source of all magic. You will need its light before the end.', scene: 'eldspyre' }
     ],
 
     ending_final: [
-      { speaker: '', text: 'With Queen Bargnot defeated, peace returns to Ebon Vale... But the Bonemoon prophecy looms.', scene: 'vale_peace' },
-      { speaker: '', text: 'An infinite sea of darkness awaits. Never again shall Valisar see the stars...', scene: 'bonemoon' },
-      { speaker: '', text: 'The heroes must grow stronger. For the true darkness has yet to come.', scene: 'heroes_path' },
-      { speaker: '', text: 'VALISAR: SHADOWS OF THE ELDSPYRE. Thank you for playing!', scene: 'title_card' }
+      { speaker: '', text: 'Ebon Vale breathes again. The tavern lights burn late. For one night, no one is afraid.', scene: 'vale_peace' },
+      { speaker: '', text: 'But beyond the mountains, the Bonemoon swells. An infinite sea of darkness that swallows even starlight.', scene: 'bonemoon' },
+      { speaker: '', text: 'Three travelers stand at the edge of what comes next. They are tired. They are wounded. They are not done.', scene: 'heroes_path' },
+      { speaker: '', text: 'VALISAR: SHADOWS OF THE ELDSPYRE. Thank you for playing.', scene: 'title_card' }
     ],
 
     // -----------------------------------------------------------------
@@ -207,15 +221,18 @@
     // -----------------------------------------------------------------
 
     sign_market: [
-      { speaker: 'Sign', text: 'EBON VALE MARKET - Trade goods and supplies. "All are welcome at The Dancing Pig!"' }
+      { speaker: 'Sign', text: 'EBON VALE MARKET -- Braxon\'s Forge. Chapel of the Wandering Spirit.' },
+      { speaker: 'Sign', text: '"All are welcome at The Dancing Pig (children must be accompanied by an adult)."' }
     ],
 
     sign_square: [
-      { speaker: 'Sign', text: 'EBON VALE TOWN SQUARE - Founded in the Age of Starfall by the Valisar settlers.' }
+      { speaker: 'Sign', text: 'EBON VALE TOWN SQUARE -- Founded in the Age of Starfall by the Valisar settlers.' },
+      { speaker: 'Sign', text: 'The paint is faded. Someone has nailed a fresh notice: "STAY INDOORS AFTER DARK."' }
     ],
 
     sign_temple: [
-      { speaker: 'Inscription', text: 'Here lies the Temple of Nitriti, Spirit of Silence. Let those who enter speak only truth.' }
+      { speaker: 'Inscription', text: 'The stone is ancient. Most of the carving has been clawed away.' },
+      { speaker: 'Inscription', text: 'You can make out: "...Nitriti, She Who Guards... between worlds... speak only... truth..."' }
     ],
 
     // -----------------------------------------------------------------
@@ -231,33 +248,95 @@
     // -----------------------------------------------------------------
 
     fawks_return: [
-      { speaker: 'Fawks', text: 'Back again? Need a drink? The goblins raided our storehouse last week.' },
-      { speaker: 'Fawks', text: 'Collect their teeth for Braxon. He buys them.' }
+      { speaker: 'Fawks', text: 'Back already? You look like you need a drink more than I do.' },
+      { speaker: 'Fawks', text: 'Helena\'s putting on a brave face but I can tell -- she hasn\'t slept in days.' }
     ],
 
     helena_return: [
-      { speaker: 'Helena', text: 'Any progress against the goblins? Visit Brother Soren if you need healing.' }
+      { speaker: 'Helena', text: 'Still standing. That\'s more than I expected. ...That came out wrong. I believe in you. I do.' }
     ],
 
     elira_return: [
-      { speaker: 'Elira', text: 'Still standing? Good. My scouts report archers in the deeper forest. Watch for their arrows.' }
+      { speaker: 'Elira', text: 'My scouts report archers deeper in the forest. They shoot first, miss often, but often isn\'t always.' }
     ],
 
     braxon_return: [
-      { speaker: 'Braxon', text: 'Got goblin teeth? I can forge useful things from their remains. Bring me teeth and I will trade.' }
+      { speaker: 'Braxon', text: 'Still here? Good. I worry less when you\'re within shouting distance.' }
     ],
 
     soren_return: [
-      { speaker: 'Soren', text: 'Rest here, child. I sense your weariness. Let me restore your strength once more.' }
+      { speaker: 'Soren', text: 'You\'ve returned. The spirits told me you would. ...Actually I just heard the door. Sit. Rest. Let me tend your wounds.' }
     ],
 
     svana_return: [
-      { speaker: 'Svana', text: 'Have you found Rorik? Please hurry... I heard terrible sounds from the temple.' }
+      { speaker: 'Svana', text: 'No news? ...No. Don\'t answer that. Just keep going. He\'s alive. I know he is.' }
     ],
 
     querubra_return: [
-      { speaker: 'Que\'Rubra', text: 'The forest trembles... Bargnot\'s power grows. Have you collected the three relics yet?' },
-      { speaker: 'Que\'Rubra', text: 'Crown, Cape, Scepter... Place them on the statue.' }
+      { speaker: 'Que\'Rubra', text: 'The forest knows your progress. Hurry. I can feel Nitriti\'s temple crying out.' },
+      { speaker: 'Que\'Rubra', text: 'The walls themselves remember what they were.' }
+    ],
+
+    // -----------------------------------------------------------------
+    // Post-Boss Victory Dialogues
+    // -----------------------------------------------------------------
+
+    fawks_victory: [
+      { speaker: 'Fawks', text: 'Drinks are on the house tonight!' },
+      { speaker: 'Fawks', text: '...Don\'t tell Helena I said that.' }
+    ],
+
+    helena_victory: [
+      { speaker: 'Helena', text: 'You did it. You actually did it.' },
+      { speaker: 'Helena', text: 'I\'m going to sleep for the first time in a month. Thank you. From all of us.' }
+    ],
+
+    elira_victory: [
+      { speaker: 'Elira', text: 'Heard you took down the goblin queen.' },
+      { speaker: 'Elira', text: '...Okay. Maybe I trust chosen ones a little.' }
+    ],
+
+    svana_victory: [
+      { speaker: 'Svana', text: 'RORIK! You absolute fool, I thought you were --' },
+      { speaker: 'Svana', text: 'Don\'t you EVER -- ...come here.' }
+    ],
+
+    braxon_victory: [
+      { speaker: 'Braxon', text: 'You came back. All of you came back.' },
+      { speaker: 'Braxon', text: 'That\'s all that matters to an old smith.' }
+    ],
+
+    soren_victory: [
+      { speaker: 'Soren', text: 'The spirits are quiet again. For the first time in weeks, my whiskers have stopped twitching.' },
+      { speaker: 'Soren', text: 'You have done a great thing. Rest now. You have earned it.' }
+    ],
+
+    // -----------------------------------------------------------------
+    // Midgame Dialogues (after visiting forest)
+    // -----------------------------------------------------------------
+
+    fawks_midgame: [
+      { speaker: 'Fawks', text: 'You\'ve been to the forest? I can see it in your eyes. Drink this -- on the house.' },
+      { speaker: 'Fawks', text: 'People are saying maybe there\'s hope after all. Don\'t let us down, okay?' }
+    ],
+
+    helena_midgame: [
+      { speaker: 'Helena', text: 'You\'ve seen the forest. You know what we\'re up against now.' },
+      { speaker: 'Helena', text: 'Elira says the temple is worse. Much worse. Be careful in there.' }
+    ],
+
+    elira_midgame: [
+      { speaker: 'Elira', text: 'My scouts tracked your path through the forest. Not bad. You might actually survive the temple.' },
+      { speaker: 'Elira', text: 'Bargnot\'s strongest are in there. Spinecleavers. Big, armored, mean. Hit them from behind.' }
+    ],
+
+    // -----------------------------------------------------------------
+    // Dynamic Que'Rubra Progress Dialogue
+    // -----------------------------------------------------------------
+
+    querubra_progress: [
+      { speaker: 'Que\'Rubra', text: 'The forest knows your progress. You have collected [X] of the three relics.' },
+      { speaker: 'Que\'Rubra', text: 'Hurry. I can feel Nitriti\'s temple crying out. The walls themselves remember what they were.' }
     ]
   };
 
@@ -274,7 +353,9 @@
   var BOX_H = 60;         // tall enough for speaker name + 2 text rows
   var BOX_PAD = 8;        // inner padding from box edges
   var BORDER_COLOR = '#6a6a7a';    // lighter border (matches C.gray)
+  var INNER_BORDER_COLOR = '#4a4a5a'; // slightly darker inner border
   var BOX_BG = 'rgba(10, 10, 20, 0.88)';
+  var CORNER_COLOR = '#e8b830';    // gold corner ornaments (C.gold)
 
   /** Text positioning inside the box */
   var NAME_X = BOX_X + BOX_PAD;
@@ -332,6 +413,7 @@
     _slideProgress: 0,
     _onComplete: null,
     _dialogueId: null,
+    _punctPause: 0,       // punctuation pause countdown (in frames)
 
     /** Pre-computed wrapped rows for the current line's full text */
     _fullRows: [],
@@ -371,6 +453,7 @@
       this._blinkTimer = 0;
       this._slideProgress = 0;
       this._rowPage = 0;
+      this._punctPause = 0;
       this._onComplete = onComplete || null;
       this.active = true;
       this._computeRows();
@@ -461,6 +544,7 @@
         this.displayedChars = 0;
         this.charTimer = 0;
         this._blinkTimer = 0;
+        this._punctPause = 0;
         this._computeRows();
         if (window.GameAudio) window.GameAudio.play('select');
       }
@@ -495,14 +579,42 @@
         speed = 1;
       }
 
-      // Typewriter reveal
+      // Typewriter reveal with punctuation pauses
       if (this.displayedChars < line.text.length) {
-        this.charTimer++;
-        if (this.charTimer >= speed) {
-          this.charTimer = 0;
-          this.displayedChars++;
-          if (this.displayedChars % 2 === 0 && window.GameAudio) {
-            window.GameAudio.play('dialogue');
+        // If we're in a punctuation pause, count it down first
+        if (this._punctPause > 0) {
+          this._punctPause--;
+        } else {
+          this.charTimer++;
+          if (this.charTimer >= speed) {
+            this.charTimer = 0;
+            this.displayedChars++;
+            if (this.displayedChars % 2 === 0 && window.GameAudio) {
+              window.GameAudio.play('dialogue');
+            }
+
+            // Check for punctuation pauses after revealing a character
+            var idx = this.displayedChars - 1;
+            var ch = line.text.charAt(idx);
+            if (ch === '.' || ch === '!' || ch === '?') {
+              // Detect ellipsis: three dots in a row
+              if (ch === '.' && idx >= 2 &&
+                  line.text.charAt(idx - 1) === '.' &&
+                  line.text.charAt(idx - 2) === '.') {
+                this._punctPause = 12;
+              } else if (ch === '.') {
+                // Don't pause on individual dots that are part of an upcoming ellipsis
+                var nextCh = (idx + 1 < line.text.length) ? line.text.charAt(idx + 1) : '';
+                if (nextCh !== '.') {
+                  this._punctPause = 8;
+                }
+              } else {
+                // ! or ?
+                this._punctPause = 8;
+              }
+            } else if (ch === ',') {
+              this._punctPause = 4;
+            }
           }
         }
       }
@@ -522,23 +634,79 @@
 
       var slideOffset = Math.floor((1 - this._slideProgress) * BOX_H);
       var hasPortrait = line.speaker && line.speaker.length > 0;
+      var bx = BOX_X;
+      var by = BOX_Y + slideOffset;
+      var bw = BOX_W;
+      var bh = BOX_H;
 
-      // --- Semi-transparent background ---
+      // --- Semi-transparent background with subtle noise texture ---
       ctx.fillStyle = BOX_BG;
-      ctx.fillRect(BOX_X, BOX_Y + slideOffset, BOX_W, BOX_H);
+      ctx.fillRect(bx, by, bw, bh);
 
-      // --- 1px border ---
+      // Subtle 1px noise texture: every ~8th pixel gets a slightly different shade
+      ctx.fillStyle = 'rgba(30, 30, 50, 0.35)';
+      for (var ny = by; ny < by + bh; ny += 1) {
+        for (var nx = bx; nx < bx + bw; nx += 1) {
+          // Deterministic pseudo-random noise based on pixel position
+          if (((nx * 7 + ny * 13) % 8) === 0) {
+            ctx.fillRect(nx, ny, 1, 1);
+          }
+        }
+      }
+
+      // --- Double-line pixel art border ---
+      // Outer border: 1px line in BORDER_COLOR
       ctx.strokeStyle = BORDER_COLOR;
       ctx.lineWidth = 1;
-      ctx.strokeRect(BOX_X + 0.5, BOX_Y + slideOffset + 0.5, BOX_W - 1, BOX_H - 1);
+      ctx.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1);
+
+      // Inner border: 1px line 2px inward in darker color
+      ctx.strokeStyle = INNER_BORDER_COLOR;
+      ctx.strokeRect(bx + 2.5, by + 2.5, bw - 5, bh - 5);
+
+      // Corner ornaments: 3x3 pixel L-shapes at each corner in gold
+      var cc = CORNER_COLOR;
+      ctx.fillStyle = cc;
+      // Top-left corner L
+      ctx.fillRect(bx, by, 3, 1);
+      ctx.fillRect(bx, by, 1, 3);
+      // Top-right corner L
+      ctx.fillRect(bx + bw - 3, by, 3, 1);
+      ctx.fillRect(bx + bw - 1, by, 1, 3);
+      // Bottom-left corner L
+      ctx.fillRect(bx, by + bh - 1, 3, 1);
+      ctx.fillRect(bx, by + bh - 3, 1, 3);
+      // Bottom-right corner L
+      ctx.fillRect(bx + bw - 3, by + bh - 1, 3, 1);
+      ctx.fillRect(bx + bw - 1, by + bh - 3, 1, 3);
 
       var nameColor, textStartY;
 
       if (hasPortrait) {
-        // --- Speaker portrait indicator ---
+        // --- Speaker name tab above the dialogue box ---
         nameColor = SPEAKER_COLORS[line.speaker] || DEFAULT_SPEAKER_COLOR;
+        var nameLen = line.speaker.length * 6 + 8; // text width + padding
+        var tabX = bx + 6;
+        var tabY = by - 2; // extends 2px above the main box border
+        var tabW = nameLen;
+        var tabH = 10;
+
+        // Tab background
+        ctx.fillStyle = nameColor;
+        ctx.globalAlpha = 0.85;
+        ctx.fillRect(tabX, tabY - tabH + 2, tabW, tabH);
+        ctx.globalAlpha = 1;
+        // Tab border
+        ctx.strokeStyle = nameColor;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(tabX + 0.5, tabY - tabH + 2.5, tabW - 1, tabH - 1);
+
+        // Speaker name text in the tab
+        window.Utils.drawText(ctx, line.speaker, tabX + 4, tabY - tabH + 4, '#f0f0f0', 1);
+
+        // --- Speaker portrait indicator ---
         var portraitX = BOX_X + 4;
-        var portraitY = BOX_Y + slideOffset + 4;
+        var portraitY = by + 4;
         var portraitSize = 14;
 
         ctx.fillStyle = nameColor;
@@ -551,23 +719,20 @@
         var initial = line.speaker.charAt(0);
         window.Utils.drawText(ctx, initial, portraitX + 4, portraitY + 3, nameColor, 1);
 
-        // --- Speaker name ---
-        window.Utils.drawText(ctx, line.speaker, NAME_X + 16, NAME_Y + slideOffset, nameColor, 1);
-
         textStartY = TEXT_Y + slideOffset;
       } else {
         // Narrator mode: no portrait, center text vertically in box
         nameColor = NARRATOR_COLOR;
-        textStartY = BOX_Y + slideOffset + 14;
+        textStartY = by + 14;
       }
 
       // Line progress dots
       var totalLines = this.lines.length;
       if (totalLines > 1) {
-        var dotBaseX = BOX_X + BOX_W - 8 - totalLines * 4;
+        var dotBaseX = bx + bw - 8 - totalLines * 4;
         for (var d = 0; d < totalLines; d++) {
           ctx.fillStyle = (d <= this.currentLine) ? (hasPortrait ? nameColor : NARRATOR_COLOR) : '#333';
-          ctx.fillRect(dotBaseX + d * 4, BOX_Y + slideOffset + 4, 2, 2);
+          ctx.fillRect(dotBaseX + d * 4, by + 4, 2, 2);
         }
       }
 
@@ -603,15 +768,15 @@
       // Page indicator for multi-page lines
       if (this._totalPages() > 1) {
         var pageText = (this._rowPage + 1) + '/' + this._totalPages();
-        window.Utils.drawText(ctx, pageText, BOX_X + BOX_W - 30, BOX_Y + slideOffset + BOX_H - 12, '#888', 1);
+        window.Utils.drawText(ctx, pageText, bx + bw - 30, by + bh - 12, '#888', 1);
       }
 
       // --- Skip hint for seen dialogues ---
       if (this._canSkip) {
-        window.Utils.drawText(ctx, '[X] SKIP', BOX_X + BOX_W - 50, BOX_Y + slideOffset + 4, '#888', 1);
+        window.Utils.drawText(ctx, '[X] SKIP', bx + bw - 50, by + 4, '#888', 1);
       }
 
-      // --- Blinking advance indicator ---
+      // --- Animated down-arrow advance indicator ---
       var charsToEndOfPage = 0;
       for (var rp = 0; rp < pageEnd; rp++) {
         charsToEndOfPage += this._fullRows[rp].length;
@@ -619,18 +784,22 @@
       }
 
       if (this.displayedChars >= charsToEndOfPage) {
-        var show = (this._blinkTimer % (INDICATOR_BLINK_RATE * 2)) < INDICATOR_BLINK_RATE;
-        if (show) {
-          var indX = BOX_X + BOX_W - 16;
-          var indY = BOX_Y + slideOffset + BOX_H - 12;
-          ctx.fillStyle = '#f0f0f0';
-          ctx.beginPath();
-          ctx.moveTo(indX, indY);
-          ctx.lineTo(indX + 6, indY);
-          ctx.lineTo(indX + 3, indY + 4);
-          ctx.closePath();
-          ctx.fill();
-        }
+        // 2-frame bounce animation, alternating every 15 frames
+        var arrowFrame = Math.floor(this._blinkTimer / 15) % 2;
+        var bounceOffset = arrowFrame === 0 ? 0 : 2;
+
+        var indX = bx + bw - 14;
+        var indY = by + bh - 10 + bounceOffset;
+
+        // Down-arrow pixel art (5px wide, 5px tall)
+        ctx.fillStyle = '#f0f0f0';
+        // Horizontal bar
+        ctx.fillRect(indX, indY, 5, 1);
+        // Arrow shaft
+        ctx.fillRect(indX + 2, indY + 1, 1, 1);
+        // Arrow point
+        ctx.fillRect(indX + 1, indY + 2, 3, 1);
+        ctx.fillRect(indX + 2, indY + 3, 1, 1);
       }
     },
 
@@ -658,6 +827,7 @@
       this.displayedChars = 0;
       this.charTimer = 0;
       this._blinkTimer = 0;
+      this._punctPause = 0;
       this._fullRows = [];
       this._rowPage = 0;
       this._dialogueId = null;

@@ -83,6 +83,7 @@
 
         // Screenshake
         shake: 0,
+        shakeIntensity: 0, // variable shake magnitude (pixels)
 
         // Frame counter
         frame: 0,
@@ -104,6 +105,9 @@
 
         // Floating damage/heal numbers
         floatingTexts: [],
+
+        // Screen flash system (overlay color for impact moments)
+        screenFlash: null, // { color, life, maxLife }
 
         // Enemy kill counter (for HUD)
         enemiesDefeated: 0,
@@ -171,7 +175,15 @@
         subtitleReveal: 0,
 
         // Difficulty menu
-        difficultyMenuIndex: 1
+        difficultyMenuIndex: 1,
+
+        // Heart shake timers for damage animation (Pass 6D)
+        _heartShakeTimers: [],
+        _prevHeartHP: -1,
+
+        // Puzzle item collection sparkle timers (Pass 6D)
+        _puzzleSparkles: { crown: 0, cape: 0, scepter: 0 },
+        _prevPuzzleFlags: { puzzleCrown: false, puzzleCape: false, puzzleScepter: false }
     };
 
     window.Game = Game;
@@ -209,21 +221,32 @@
     // FLOATING DAMAGE/HEAL NUMBERS
     // =====================================================================
 
-    function spawnFloatingText(x, y, text, color) {
+    function spawnFloatingText(x, y, text, color, big) {
+        // Slight random x-offset so stacked hits don't overlap
+        var offsetX = (Math.random() - 0.5) * 8;
         Game.floatingTexts.push({
-            x: x,
+            x: x + offsetX,
             y: y,
             text: String(text),
             color: color || C.white,
-            life: 40,
-            maxLife: 40
+            life: 45,
+            maxLife: 45,
+            scale: big ? 2 : 1,
+            vy: -0.8, // initial upward velocity
+            vx: offsetX * 0.02 // slight drift matching offset
         });
+        // Cap pool at 12 active numbers
+        if (Game.floatingTexts.length > 12) {
+            Game.floatingTexts.shift();
+        }
     }
 
     function updateFloatingTexts() {
         for (var i = Game.floatingTexts.length - 1; i >= 0; i--) {
             var ft = Game.floatingTexts[i];
-            ft.y -= 0.5;
+            ft.y += ft.vy;
+            ft.x += ft.vx;
+            ft.vy += 0.015; // gravity: numbers rise fast then slow down
             ft.life--;
             if (ft.life <= 0) {
                 Game.floatingTexts.splice(i, 1);
@@ -234,11 +257,47 @@
     function renderFloatingTexts(ctx) {
         for (var i = 0; i < Game.floatingTexts.length; i++) {
             var ft = Game.floatingTexts[i];
-            var alpha = ft.life / ft.maxLife;
+            var alpha = Math.min(1, ft.life / (ft.maxLife * 0.4));
+            // Pop-in effect: scale up briefly on spawn
+            var age = ft.maxLife - ft.life;
+            var popScale = age < 4 ? 1.0 + (4 - age) * 0.15 : 1.0;
+            var finalScale = ft.scale * popScale;
+
             ctx.globalAlpha = alpha;
-            Utils.drawText(ctx, ft.text, Math.floor(ft.x), Math.floor(ft.y), ft.color, 1);
+            // Draw shadow for readability
+            Utils.drawText(ctx, ft.text, Math.floor(ft.x) + 1, Math.floor(ft.y) + 1, C.black, finalScale);
+            Utils.drawText(ctx, ft.text, Math.floor(ft.x), Math.floor(ft.y), ft.color, finalScale);
             ctx.globalAlpha = 1;
         }
+    }
+
+    // =====================================================================
+    // SCREEN FLASH SYSTEM (impact overlays)
+    // =====================================================================
+
+    function triggerScreenFlash(color, duration) {
+        Game.screenFlash = { color: color, life: duration, maxLife: duration };
+    }
+
+    function updateScreenFlash() {
+        if (Game.screenFlash) {
+            Game.screenFlash.life--;
+            if (Game.screenFlash.life <= 0) {
+                Game.screenFlash = null;
+            }
+        }
+    }
+
+    function renderScreenFlash(ctx) {
+        if (!Game.screenFlash) return;
+        var sf = Game.screenFlash;
+        var alpha = sf.life / sf.maxLife;
+        // First few frames are full opacity, then fade
+        if (sf.life > sf.maxLife - 3) alpha = 1;
+        ctx.globalAlpha = alpha * 0.6;
+        ctx.fillStyle = sf.color;
+        ctx.fillRect(0, 0, W, H);
+        ctx.globalAlpha = 1;
     }
 
     // =====================================================================
@@ -984,22 +1043,346 @@
     // WEATHER / AMBIENT PARTICLES
     // =====================================================================
 
+    // =====================================================================
+    // ENVIRONMENTAL PARTICLE SYSTEMS
+    // =====================================================================
+
+    // --- Forest Falling Leaves (persistent array, not Particles system) ---
+    var _leafParticles = [];
+    var _leafWindDir = 1;       // 1 = right, -1 = left
+    var _leafWindTimer = 0;
+
+    function initLeaves() {
+        _leafParticles = [];
+        var leafColors = [C.green, C.darkGreen, C.brown, C.lightBrown, '#c07020'];
+        for (var i = 0; i < 10; i++) {
+            _leafParticles.push({
+                x: Utils.randInt(0, W),
+                y: Utils.randInt(-20, H),
+                phase: Math.random() * Math.PI * 2,  // sin-wave x offset phase
+                speed: 0.3 + Math.random() * 0.3,    // fall speed
+                drift: 0.4 + Math.random() * 0.3,    // sin amplitude for x drift
+                color: Utils.choice(leafColors),
+                w: 2,
+                h: 3
+            });
+        }
+    }
+
+    function updateLeaves() {
+        // Wind direction shifts every 120 frames
+        _leafWindTimer++;
+        if (_leafWindTimer >= 120) {
+            _leafWindTimer = 0;
+            _leafWindDir = -_leafWindDir;
+        }
+
+        for (var i = 0; i < _leafParticles.length; i++) {
+            var lf = _leafParticles[i];
+            // Sine-wave horizontal drift + wind bias
+            lf.x += Math.sin(lf.phase + Game.frame * 0.04) * lf.drift * 0.3 + _leafWindDir * 0.15;
+            lf.y += lf.speed;
+            lf.phase += 0.02;
+
+            // Reset when leaf falls off screen
+            if (lf.y > H + 10 || lf.x < -20 || lf.x > W + 20) {
+                var leafColors = [C.green, C.darkGreen, C.brown, C.lightBrown, '#c07020'];
+                lf.x = Utils.randInt(-10, W + 10);
+                lf.y = -Utils.randInt(5, 20);
+                lf.phase = Math.random() * Math.PI * 2;
+                lf.speed = 0.3 + Math.random() * 0.3;
+                lf.drift = 0.4 + Math.random() * 0.3;
+                lf.color = Utils.choice(leafColors);
+            }
+        }
+    }
+
+    function renderLeaves(ctx) {
+        for (var i = 0; i < _leafParticles.length; i++) {
+            var lf = _leafParticles[i];
+            ctx.fillStyle = lf.color;
+            ctx.fillRect(Math.floor(lf.x), Math.floor(lf.y), lf.w, lf.h);
+        }
+    }
+
+    // --- Town Dust Motes ---
+    var _dustMotes = [];
+
+    function initDustMotes() {
+        _dustMotes = [];
+        for (var i = 0; i < 5; i++) {
+            _dustMotes.push({
+                x: Utils.randInt(16, W - 16),
+                y: Utils.randInt(20, H),
+                vy: -(0.1 + Math.random() * 0.15),
+                vx: (Math.random() - 0.5) * 0.2,
+                phase: Math.random() * Math.PI * 2,
+                life: Utils.randInt(120, 240)
+            });
+        }
+    }
+
+    function updateDustMotes() {
+        for (var i = 0; i < _dustMotes.length; i++) {
+            var dm = _dustMotes[i];
+            dm.x += dm.vx + Math.sin(dm.phase + Game.frame * 0.02) * 0.1;
+            dm.y += dm.vy;
+            dm.life--;
+            if (dm.life <= 0 || dm.y < -5) {
+                dm.x = Utils.randInt(16, W - 16);
+                dm.y = Utils.randInt(H * 0.5, H);
+                dm.vy = -(0.1 + Math.random() * 0.15);
+                dm.vx = (Math.random() - 0.5) * 0.2;
+                dm.phase = Math.random() * Math.PI * 2;
+                dm.life = Utils.randInt(120, 240);
+            }
+        }
+    }
+
+    function renderDustMotes(ctx) {
+        for (var i = 0; i < _dustMotes.length; i++) {
+            var dm = _dustMotes[i];
+            var alpha = Math.min(0.5, dm.life / 60);
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = C.white;
+            ctx.fillRect(Math.floor(dm.x), Math.floor(dm.y), 1, 1);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    // --- Temple Ember Particles (near torches) ---
+    var _emberParticles = [];
+
+    function initEmbers(room) {
+        _emberParticles = [];
+        var torches = getTorchPositions(room);
+        // 2 embers per torch
+        for (var t = 0; t < torches.length; t++) {
+            for (var i = 0; i < 2; i++) {
+                _emberParticles.push({
+                    x: torches[t].x + (Math.random() - 0.5) * 10,
+                    y: torches[t].y,
+                    baseX: torches[t].x,
+                    baseY: torches[t].y,
+                    vy: -(0.2 + Math.random() * 0.3),
+                    vx: (Math.random() - 0.5) * 0.3,
+                    life: Utils.randInt(40, 80),
+                    maxLife: 80
+                });
+            }
+        }
+    }
+
+    function updateEmbers(room) {
+        var torches = getTorchPositions(room);
+        for (var i = 0; i < _emberParticles.length; i++) {
+            var em = _emberParticles[i];
+            em.x += em.vx + (Math.random() - 0.5) * 0.2;
+            em.y += em.vy;
+            em.life--;
+            if (em.life <= 0) {
+                // Respawn near a random torch
+                var src = torches.length > 0 ? torches[Utils.randInt(0, torches.length - 1)] : { x: W / 2, y: H / 2 };
+                em.x = src.x + (Math.random() - 0.5) * 12;
+                em.y = src.y - Math.random() * 4;
+                em.baseX = src.x;
+                em.baseY = src.y;
+                em.vy = -(0.2 + Math.random() * 0.3);
+                em.vx = (Math.random() - 0.5) * 0.3;
+                em.life = Utils.randInt(40, 80);
+            }
+        }
+    }
+
+    function renderEmbers(ctx) {
+        for (var i = 0; i < _emberParticles.length; i++) {
+            var em = _emberParticles[i];
+            var alpha = Math.min(0.8, em.life / 20);
+            ctx.globalAlpha = alpha;
+            // Orange-yellow ember color
+            ctx.fillStyle = Math.random() > 0.5 ? C.gold : '#ff8030';
+            ctx.fillRect(Math.floor(em.x), Math.floor(em.y), 1, 1);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    // --- Boss Room: Purple Energy Wisps orbiting pillars ---
+    var _bossWisps = [];
+    // Pillar positions in boss room (diamond pattern from map data)
+    var _bossPillars = [
+        { x: 7 * TILE + TILE / 2, y: 4 * TILE + TILE / 2 },   // top
+        { x: 4 * TILE + TILE / 2, y: 6 * TILE + TILE / 2 },   // left
+        { x: 11 * TILE + TILE / 2, y: 6 * TILE + TILE / 2 },  // right
+        { x: 8 * TILE + TILE / 2, y: 8 * TILE + TILE / 2 }    // bottom
+    ];
+
+    function initBossWisps() {
+        _bossWisps = [];
+        for (var i = 0; i < _bossPillars.length; i++) {
+            // 2 wisps per pillar
+            for (var w = 0; w < 2; w++) {
+                _bossWisps.push({
+                    pillarIdx: i,
+                    angle: Math.random() * Math.PI * 2,
+                    radius: 12 + Math.random() * 6,
+                    speed: 0.03 + Math.random() * 0.02,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+        }
+    }
+
+    function updateBossWisps() {
+        // Accelerate wisps in boss phase 3
+        var speedMult = (Game.boss && Game.boss.phase >= 3) ? 2.5 : 1.0;
+        for (var i = 0; i < _bossWisps.length; i++) {
+            var bw = _bossWisps[i];
+            bw.angle += bw.speed * speedMult;
+        }
+    }
+
+    function renderBossWisps(ctx) {
+        for (var i = 0; i < _bossWisps.length; i++) {
+            var bw = _bossWisps[i];
+            var pil = _bossPillars[bw.pillarIdx];
+            var wx = pil.x + Math.cos(bw.angle) * bw.radius;
+            var wy = pil.y + Math.sin(bw.angle) * bw.radius;
+            var alpha = 0.5 + Math.sin(bw.phase + Game.frame * 0.08) * 0.3;
+            ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+            ctx.fillStyle = C.purple;
+            ctx.fillRect(Math.floor(wx), Math.floor(wy), 2, 2);
+            // Subtle trail
+            ctx.globalAlpha = Math.max(0, alpha * 0.3);
+            ctx.fillStyle = C.lightPurple;
+            var trailX = pil.x + Math.cos(bw.angle - 0.3) * bw.radius;
+            var trailY = pil.y + Math.sin(bw.angle - 0.3) * bw.radius;
+            ctx.fillRect(Math.floor(trailX), Math.floor(trailY), 1, 1);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    // --- Deep Forest Fireflies ---
+    var _fireflies = [];
+
+    function initFireflies() {
+        _fireflies = [];
+        for (var i = 0; i < 6; i++) {
+            _fireflies.push({
+                x: Utils.randInt(20, W - 20),
+                y: Utils.randInt(30, H - 30),
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                phase: Math.random() * Math.PI * 2
+            });
+        }
+    }
+
+    function updateFireflies() {
+        for (var i = 0; i < _fireflies.length; i++) {
+            var ff = _fireflies[i];
+            ff.x += ff.vx + (Math.random() - 0.5) * 0.15;
+            ff.y += ff.vy + (Math.random() - 0.5) * 0.15;
+            // Gently bound to screen
+            if (ff.x < 16) ff.vx = Math.abs(ff.vx);
+            if (ff.x > W - 16) ff.vx = -Math.abs(ff.vx);
+            if (ff.y < 16) ff.vy = Math.abs(ff.vy);
+            if (ff.y > H - 16) ff.vy = -Math.abs(ff.vy);
+        }
+    }
+
+    function renderFireflies(ctx) {
+        for (var i = 0; i < _fireflies.length; i++) {
+            var ff = _fireflies[i];
+            // Sin-wave alpha pulse
+            var alpha = 0.4 + Math.sin(ff.phase + Game.frame * 0.06 + i * 1.5) * 0.4;
+            alpha = Math.max(0, Math.min(1, alpha));
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = C.yellow;
+            ctx.fillRect(Math.floor(ff.x), Math.floor(ff.y), 2, 2);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    // --- Environment init tracking ---
+    var _envInitRoom = null;
+
+    function ensureEnvInit(roomId, room) {
+        if (_envInitRoom === roomId) return;
+        _envInitRoom = roomId;
+
+        // Initialize particles for the current room type
+        if (roomId && roomId.indexOf('ebon_forest') === 0) {
+            initLeaves();
+            if (roomId === 'ebon_forest_deep') {
+                initFireflies();
+            }
+        }
+        if (roomId && roomId.indexOf('ebon_vale') === 0) {
+            initDustMotes();
+        }
+        if (roomId && isTempleRoom(roomId) && roomId !== 'temple_boss') {
+            initEmbers(room);
+        }
+        if (roomId === 'temple_boss') {
+            initEmbers(room);
+            initBossWisps();
+        }
+    }
+
     function updateWeather() {
         if (!Game.currentRoom) return;
         var roomId = Game.currentRoom.id;
 
-        // Forest: falling leaves
+        // Ensure environmental particles are initialized for this room
+        ensureEnvInit(roomId, Game.currentRoom);
+
+        // Forest: falling leaves (persistent leaf system, all forest rooms)
         if (roomId && roomId.indexOf('ebon_forest') === 0) {
-            if (Game.frame % 20 === 0) {
-                Particles.add(Utils.randInt(-10, W + 10), -5, {
-                    vx: 0.3 + Math.random() * 0.4,
-                    vy: 0.4 + Math.random() * 0.3,
-                    life: 120 + Utils.randInt(0, 60),
-                    color: Utils.choice([C.green, C.darkGreen, C.brown, C.lightBrown]),
-                    size: 2,
-                    gravity: 0.005
-                });
+            updateLeaves();
+            // Deep forest: fireflies
+            if (roomId === 'ebon_forest_deep') {
+                updateFireflies();
             }
+        }
+
+        // Town rooms: dust motes drifting upward
+        if (roomId && roomId.indexOf('ebon_vale') === 0) {
+            updateDustMotes();
+        }
+
+        // Temple rooms: ember particles near torches
+        if (roomId && isTempleRoom(roomId)) {
+            updateEmbers(Game.currentRoom);
+        }
+
+        // Boss room: purple energy wisps orbiting pillars
+        if (roomId === 'temple_boss') {
+            updateBossWisps();
+        }
+    }
+
+    // Render environmental particles (called from render functions)
+    function renderEnvironmentParticles(ctx) {
+        if (!Game.currentRoom) return;
+        var roomId = Game.currentRoom.id;
+
+        if (roomId && roomId.indexOf('ebon_forest') === 0) {
+            renderLeaves(ctx);
+            if (roomId === 'ebon_forest_deep') {
+                renderFireflies(ctx);
+            }
+        }
+
+        if (roomId && roomId.indexOf('ebon_vale') === 0) {
+            renderDustMotes(ctx);
+        }
+
+        if (roomId && isTempleRoom(roomId)) {
+            renderEmbers(ctx);
+        }
+
+        if (roomId === 'temple_boss') {
+            renderBossWisps(ctx);
         }
     }
 
@@ -1044,17 +1427,44 @@
         for (var i = 0; i < torches.length; i++) {
             var tx = torches[i].x;
             var ty = torches[i].y;
+            // Pulsing radius 24-32px using sin wave (matches darkness cutout)
             var flickerR = 28 + Math.sin(flickerSeed + i * 2.5) * 4;
-            var flickerA = 0.12 + Math.sin(flickerSeed * 1.3 + i) * 0.04;
+            // Random jitter ±2px for flicker
+            flickerR += (Math.random() - 0.5) * 4;
+            var flickerA = 0.14 + Math.sin(flickerSeed * 1.3 + i) * 0.05;
 
-            // Warm glow gradient
+            // Warm glow gradient — two-layer for richer look
             var grad = ctx.createRadialGradient(tx, ty, 0, tx, ty, flickerR);
-            grad.addColorStop(0, 'rgba(255,200,80,' + (flickerA + 0.06) + ')');
-            grad.addColorStop(0.5, 'rgba(255,150,40,' + flickerA + ')');
-            grad.addColorStop(1, 'rgba(255,100,20,0)');
+            grad.addColorStop(0, 'rgba(255,210,90,' + (flickerA + 0.08) + ')');
+            grad.addColorStop(0.35, 'rgba(255,160,50,' + (flickerA + 0.03) + ')');
+            grad.addColorStop(0.7, 'rgba(255,100,20,' + (flickerA * 0.5) + ')');
+            grad.addColorStop(1, 'rgba(255,80,10,0)');
             ctx.fillStyle = grad;
             ctx.fillRect(tx - flickerR, ty - flickerR, flickerR * 2, flickerR * 2);
+
+            // Inner bright core for added flicker punch
+            var coreR = 6 + Math.sin(flickerSeed * 2.1 + i * 3.7) * 2;
+            var coreA = 0.10 + Math.sin(flickerSeed * 1.7 + i * 1.3) * 0.04;
+            var coreGrad = ctx.createRadialGradient(tx, ty, 0, tx, ty, coreR);
+            coreGrad.addColorStop(0, 'rgba(255,240,180,' + coreA + ')');
+            coreGrad.addColorStop(1, 'rgba(255,200,100,0)');
+            ctx.fillStyle = coreGrad;
+            ctx.fillRect(tx - coreR, ty - coreR, coreR * 2, coreR * 2);
         }
+    }
+
+    // Reusable offscreen canvas for darkness overlay (avoid creating each frame)
+    var _darknessCanvas = null;
+    var _darknessCtx = null;
+
+    function getDarknessCanvas() {
+        if (!_darknessCanvas) {
+            _darknessCanvas = document.createElement('canvas');
+            _darknessCanvas.width = W;
+            _darknessCanvas.height = H;
+            _darknessCtx = _darknessCanvas.getContext('2d');
+        }
+        return { canvas: _darknessCanvas, ctx: _darknessCtx };
     }
 
     function renderDarknessOverlay(ctx, room) {
@@ -1063,28 +1473,33 @@
         var torches = getTorchPositions(room);
         var flickerSeed = Game.frame * 0.12;
 
-        // Create a temporary canvas for the darkness mask
-        var dCanvas = document.createElement('canvas');
-        dCanvas.width = W;
-        dCanvas.height = H;
-        var dCtx = dCanvas.getContext('2d');
+        // Reuse offscreen canvas for the darkness mask
+        var dc = getDarknessCanvas();
+        var dCtx = dc.ctx;
 
-        // Fill with semi-darkness
-        dCtx.fillStyle = 'rgba(0,0,10,0.55)';
+        // Clear and fill with 80% opacity darkness
+        dCtx.globalCompositeOperation = 'source-over';
+        dCtx.clearRect(0, 0, W, H);
+        dCtx.fillStyle = 'rgba(0,0,10,0.80)';
         dCtx.fillRect(0, 0, W, H);
 
         // Cut out light circles using destination-out compositing
         dCtx.globalCompositeOperation = 'destination-out';
 
-        // Light around each torch
+        // Light around each torch: pulsing radius 24-32px via sin wave, ±2px random jitter
         for (var i = 0; i < torches.length; i++) {
             var tx = torches[i].x;
             var ty = torches[i].y;
-            var lr = 32 + Math.sin(flickerSeed + i * 2.5) * 5;
+            // Base pulsing radius: oscillates between 24 and 32 using sin wave
+            var pulseR = 28 + Math.sin(flickerSeed + i * 2.5) * 4;
+            // Random jitter ±2px each frame for flicker effect
+            var jitter = (Math.random() - 0.5) * 4; // -2 to +2
+            var lr = pulseR + jitter;
 
             var grad = dCtx.createRadialGradient(tx, ty, 0, tx, ty, lr);
             grad.addColorStop(0, 'rgba(0,0,0,1)');
-            grad.addColorStop(0.6, 'rgba(0,0,0,0.6)');
+            grad.addColorStop(0.5, 'rgba(0,0,0,0.8)');
+            grad.addColorStop(0.8, 'rgba(0,0,0,0.3)');
             grad.addColorStop(1, 'rgba(0,0,0,0)');
             dCtx.fillStyle = grad;
             dCtx.beginPath();
@@ -1092,15 +1507,19 @@
             dCtx.fill();
         }
 
-        // Light around the player
+        // Light around the player: 40px radius, shrinks to 28px at low HP
         if (Game.player) {
             var px = Game.player.x + Game.player.w / 2;
             var py = Game.player.y + Game.player.h / 2;
-            var pr = 36;
+            // Player light shrinks as HP drops: 40px at full, 28px at 0 HP
+            var hpRatio = Game.player.maxHp > 0 ? (Game.player.hp / Game.player.maxHp) : 0;
+            hpRatio = Math.max(0, Math.min(1, hpRatio));
+            var pr = 28 + hpRatio * 12; // 28 at 0hp, 40 at full hp
 
             var pGrad = dCtx.createRadialGradient(px, py, 0, px, py, pr);
             pGrad.addColorStop(0, 'rgba(0,0,0,1)');
-            pGrad.addColorStop(0.5, 'rgba(0,0,0,0.7)');
+            pGrad.addColorStop(0.4, 'rgba(0,0,0,0.85)');
+            pGrad.addColorStop(0.75, 'rgba(0,0,0,0.3)');
             pGrad.addColorStop(1, 'rgba(0,0,0,0)');
             dCtx.fillStyle = pGrad;
             dCtx.beginPath();
@@ -1108,23 +1527,24 @@
             dCtx.fill();
         }
 
-        // Light around boss projectiles
+        // Light around boss projectiles: 16px radius
         if (Game.boss && Game.boss.projectiles) {
             for (var j = 0; j < Game.boss.projectiles.length; j++) {
                 var p = Game.boss.projectiles[j];
-                var ppGrad = dCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 14);
-                ppGrad.addColorStop(0, 'rgba(0,0,0,0.8)');
+                var ppGrad = dCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 16);
+                ppGrad.addColorStop(0, 'rgba(0,0,0,0.9)');
+                ppGrad.addColorStop(0.6, 'rgba(0,0,0,0.4)');
                 ppGrad.addColorStop(1, 'rgba(0,0,0,0)');
                 dCtx.fillStyle = ppGrad;
                 dCtx.beginPath();
-                dCtx.arc(p.x, p.y, 14, 0, Math.PI * 2);
+                dCtx.arc(p.x, p.y, 16, 0, Math.PI * 2);
                 dCtx.fill();
             }
         }
 
         // Draw the darkness overlay onto the main buffer
         dCtx.globalCompositeOperation = 'source-over';
-        ctx.drawImage(dCanvas, 0, 0);
+        ctx.drawImage(dc.canvas, 0, 0);
     }
 
     // =====================================================================
@@ -1154,19 +1574,46 @@
     function renderHUD(ctx) {
         if (!Game.player) return;
 
-        // Hearts - top left
+        // Hearts - top left (with damage shake and low HP pulse)
         var maxHearts = Math.ceil(Game.player.maxHp / 2);
         var currentHP = Game.player.hp;
+
+        // Low HP pulse: when player has 1-2 half-hearts (hp <= 2), pulse between red and dark red
+        var isLowHP = currentHP > 0 && currentHP <= 2;
+        var lowHPPulseActive = false;
+        if (isLowHP) {
+            // 30-frame cycle: first 15 frames = normal, last 15 = dark pulse
+            lowHPPulseActive = (Game.frame % 30) >= 15;
+        }
 
         for (var i = 0; i < maxHearts; i++) {
             var hx = 4 + i * 12;
             var hy = 4;
             var hpForThisHeart = currentHP - i * 2;
 
+            // Heart damage shake: offset +/-1px randomly while timer active
+            if (Game._heartShakeTimers && Game._heartShakeTimers[i] > 0) {
+                hx += (Math.random() < 0.5 ? -1 : 1);
+                hy += (Math.random() < 0.5 ? -1 : 1);
+            }
+
             if (hpForThisHeart >= 2) {
+                // Low HP pulse: tint remaining hearts darker on pulse cycle
+                if (isLowHP && lowHPPulseActive) {
+                    ctx.globalAlpha = 0.6;
+                }
                 safeDraw(ctx, 'item_heart', hx, hy);
+                if (isLowHP && lowHPPulseActive) {
+                    ctx.globalAlpha = 1;
+                }
             } else if (hpForThisHeart === 1) {
+                if (isLowHP && lowHPPulseActive) {
+                    ctx.globalAlpha = 0.6;
+                }
                 safeDraw(ctx, 'item_heart_half', hx, hy);
+                if (isLowHP && lowHPPulseActive) {
+                    ctx.globalAlpha = 1;
+                }
             } else {
                 safeDraw(ctx, 'item_heart_empty', hx, hy);
             }
@@ -1214,19 +1661,51 @@
             }
         }
 
-        // Puzzle items collected - top right (above minimap)
-        var ix = W - 16;
-        if (Game.flags.puzzleCrown) {
-            safeDraw(ctx, 'item_crown', ix, 4);
-            ix -= 14;
-        }
-        if (Game.flags.puzzleCape) {
-            safeDraw(ctx, 'item_cape', ix, 4);
-            ix -= 14;
-        }
-        if (Game.flags.puzzleScepter) {
-            safeDraw(ctx, 'item_scepter', ix, 4);
-            ix -= 14;
+        // Puzzle items - top right: show silhouettes for uncollected, real sprites for collected
+        var puzzleSlots = [
+            { flag: 'puzzleCrown',   sprite: 'item_crown',   sparkle: 'crown' },
+            { flag: 'puzzleCape',    sprite: 'item_cape',    sparkle: 'cape' },
+            { flag: 'puzzleScepter', sprite: 'item_scepter', sparkle: 'scepter' }
+        ];
+        var pix = W - 16;
+        for (var pi = 0; pi < puzzleSlots.length; pi++) {
+            var ps = puzzleSlots[pi];
+            var psx = pix - pi * 14;
+            var psy = 4;
+
+            if (Game.flags[ps.flag]) {
+                // Collected: draw the real sprite
+                safeDraw(ctx, ps.sprite, psx, psy);
+
+                // Brief sparkle effect on collection
+                var sparkleTimer = Game._puzzleSparkles[ps.sparkle];
+                if (sparkleTimer > 0) {
+                    // Draw 4 sparkle pixels around the item, cycling positions
+                    ctx.fillStyle = C.gold;
+                    var sparkPhase = Math.floor(sparkleTimer / 4) % 4;
+                    var offsets = [
+                        [-2, -1], [8, -1], [-2, 8], [8, 8],   // corners
+                        [3, -2], [3, 9], [-2, 3], [9, 3]      // edges
+                    ];
+                    for (var sp = 0; sp < 4; sp++) {
+                        var oi = (sp + sparkPhase) % offsets.length;
+                        ctx.fillRect(psx + offsets[oi][0], psy + offsets[oi][1], 1, 1);
+                    }
+                    // Extra white sparkle center dot
+                    ctx.fillStyle = C.white;
+                    ctx.fillRect(psx + 3, psy + 3, 2, 2);
+                }
+            } else {
+                // Uncollected: draw dark gray silhouette placeholder
+                ctx.fillStyle = C.darkGray;
+                ctx.globalAlpha = 0.5;
+                // Draw a generic silhouette shape (8x8 dark rounded rect)
+                ctx.fillRect(psx + 1, psy, 6, 8);
+                ctx.fillRect(psx, psy + 1, 8, 6);
+                ctx.globalAlpha = 1;
+                // Question mark in the silhouette center
+                Utils.drawText(ctx, '?', psx + 1, psy + 1, C.gray, 1);
+            }
         }
 
         // Minimap - bottom right corner
@@ -1326,9 +1805,12 @@
 
         ctx.globalAlpha = alpha;
 
+        // Build decorated room name with em-dashes: "-- Room Name --"
+        var decoratedName = '-- ' + Game.roomNameText + ' --';
+
         // Draw banner background with gold border
-        var textLen = Game.roomNameText.length * 6;
-        var bannerW = textLen + 20;
+        var textLen = decoratedName.length * 6;
+        var bannerW = textLen + 24; // extra padding for decorative dots
         var bannerX = Math.floor((W - bannerW) / 2 + slideX);
         var bannerY = 18;
 
@@ -1344,8 +1826,15 @@
         ctx.fillRect(bannerX, bannerY, 1, 14);
         ctx.fillRect(bannerX + bannerW - 1, bannerY, 1, 14);
 
-        var tx = Math.floor(bannerX + 10);
-        Utils.drawText(ctx, Game.roomNameText, tx, bannerY + 4, C.white, 1);
+        // Small pixel dots at the ends (decorative flourishes)
+        ctx.fillStyle = C.gold;
+        // Left dot cluster: 2x2 pixel dot at inner-left
+        ctx.fillRect(bannerX + 3, bannerY + 6, 2, 2);
+        // Right dot cluster: 2x2 pixel dot at inner-right
+        ctx.fillRect(bannerX + bannerW - 5, bannerY + 6, 2, 2);
+
+        var tx = Math.floor(bannerX + 12);
+        Utils.drawText(ctx, decoratedName, tx, bannerY + 4, C.white, 1);
         ctx.globalAlpha = 1;
     }
 
@@ -2419,7 +2908,7 @@
         for (var i = 0; i < Game.enemies.length; i++) {
             var enemy = Game.enemies[i];
             if (enemy.update) {
-                enemy.update(Game.currentRoom, Game.player);
+                enemy.update(Game.currentRoom, Game.player, Game.enemies);
             }
         }
 
@@ -2441,14 +2930,65 @@
         // Spawn floating damage numbers based on HP changes
         if (Game.player && Game.player.hp < playerHPBefore) {
             var dmg = playerHPBefore - Game.player.hp;
-            spawnFloatingText(Game.player.x + 2, Game.player.y - 4, dmg, C.red);
+            var isBig = dmg >= 2;
+            spawnFloatingText(Game.player.x + 2, Game.player.y - 4, dmg, C.red, isBig);
+        }
+        // Healing numbers (green) — detect HP increase
+        if (Game.player && Game.player.hp > playerHPBefore) {
+            var healed = Game.player.hp - playerHPBefore;
+            spawnFloatingText(Game.player.x + 2, Game.player.y - 4, '+' + healed, C.paleGreen, false);
         }
         for (var ej = 0; ej < Game.enemies.length; ej++) {
             if (ej < enemyHPBefore.length && Game.enemies[ej].hp < enemyHPBefore[ej]) {
                 var edmg = enemyHPBefore[ej] - Game.enemies[ej].hp;
-                spawnFloatingText(Game.enemies[ej].x + 2, Game.enemies[ej].y - 6, edmg, C.white);
+                var eBig = edmg >= 3; // big number for heavy hits
+                spawnFloatingText(Game.enemies[ej].x + 2, Game.enemies[ej].y - 6, edmg, C.white, eBig);
             }
         }
+
+        // Heart shake timers: detect which hearts lost HP and shake them
+        if (Game.player) {
+            var maxHearts = Math.ceil(Game.player.maxHp / 2);
+            // Initialize shake timers array if needed
+            while (Game._heartShakeTimers.length < maxHearts) {
+                Game._heartShakeTimers.push(0);
+            }
+            // If player took damage, find which hearts changed and shake them
+            if (Game.player.hp < playerHPBefore) {
+                var oldHP = playerHPBefore;
+                var newHP = Game.player.hp;
+                for (var hi = 0; hi < maxHearts; hi++) {
+                    var oldHeart = Math.min(2, Math.max(0, oldHP - hi * 2));
+                    var newHeart = Math.min(2, Math.max(0, newHP - hi * 2));
+                    if (newHeart < oldHeart) {
+                        Game._heartShakeTimers[hi] = 8;
+                    }
+                }
+            }
+            Game._prevHeartHP = Game.player.hp;
+            // Tick down shake timers
+            for (var hs = 0; hs < Game._heartShakeTimers.length; hs++) {
+                if (Game._heartShakeTimers[hs] > 0) Game._heartShakeTimers[hs]--;
+            }
+        }
+
+        // Puzzle item sparkle detection: detect newly collected items
+        if (Game.flags.puzzleCrown && !Game._prevPuzzleFlags.puzzleCrown) {
+            Game._puzzleSparkles.crown = 30;
+        }
+        if (Game.flags.puzzleCape && !Game._prevPuzzleFlags.puzzleCape) {
+            Game._puzzleSparkles.cape = 30;
+        }
+        if (Game.flags.puzzleScepter && !Game._prevPuzzleFlags.puzzleScepter) {
+            Game._puzzleSparkles.scepter = 30;
+        }
+        Game._prevPuzzleFlags.puzzleCrown = Game.flags.puzzleCrown;
+        Game._prevPuzzleFlags.puzzleCape = Game.flags.puzzleCape;
+        Game._prevPuzzleFlags.puzzleScepter = Game.flags.puzzleScepter;
+        // Tick down sparkle timers
+        if (Game._puzzleSparkles.crown > 0) Game._puzzleSparkles.crown--;
+        if (Game._puzzleSparkles.cape > 0) Game._puzzleSparkles.cape--;
+        if (Game._puzzleSparkles.scepter > 0) Game._puzzleSparkles.scepter--;
 
         // Handle Luigi's Brog special
         handleBrogSpecial();
@@ -2457,8 +2997,9 @@
         // Check dead enemies & drops
         checkDeadEnemies();
 
-        // Update floating texts
+        // Update floating texts and screen flash
         updateFloatingTexts();
+        updateScreenFlash();
 
         // Update weather/ambient particles
         updateWeather();
@@ -2484,10 +3025,18 @@
         // Check game over
         checkGameOver();
 
-        // Screenshake from player damage (increased for impact)
+        // Screenshake from player damage — scales with damage taken
         if (Game.player && Game.player._wasHurt) {
-            Game.shake = 4;
+            var dmgShake = (Game.player._lastDamage >= 2) ? 6 : 4;
+            Game.shake = Math.max(Game.shake, dmgShake);
+            Game.shakeIntensity = (Game.player._lastDamage >= 2) ? 3 : 2;
             Game.player._wasHurt = false;
+        }
+        // Screenshake from player landing hits
+        if (Game.player && Game.player._hitShake) {
+            Game.shake = Math.max(Game.shake, Game.player._hitShake);
+            Game.shakeIntensity = Math.max(Game.shakeIntensity || 1, Game.player._hitShake > 2 ? 2 : 1);
+            Game.player._hitShake = 0;
         }
     }
 
@@ -2552,6 +3101,9 @@
             Game.player.render(ctx);
         }
 
+        // Render environment particles (leaves, dust, embers, fireflies, wisps)
+        renderEnvironmentParticles(ctx);
+
         // Render particles
         Particles.render(ctx);
 
@@ -2560,6 +3112,9 @@
 
         // Render floating damage numbers
         renderFloatingTexts(ctx);
+
+        // Screen flash overlay (impact moments)
+        renderScreenFlash(ctx);
 
         // Render HUD
         renderHUD(ctx);
@@ -2664,7 +3219,7 @@
         // Update enemies (boss may summon minions)
         for (var i = 0; i < Game.enemies.length; i++) {
             if (Game.enemies[i].update) {
-                Game.enemies[i].update(Game.currentRoom, Game.player);
+                Game.enemies[i].update(Game.currentRoom, Game.player, Game.enemies);
             }
         }
 
@@ -2695,8 +3250,12 @@
         // Dead enemies
         checkDeadEnemies();
 
-        // Update floating texts
+        // Update floating texts and screen flash
         updateFloatingTexts();
+        updateScreenFlash();
+
+        // Update weather/ambient particles (boss wisps, embers)
+        updateWeather();
 
         // Particles
         Particles.update();
@@ -2704,10 +3263,18 @@
         // Check game over
         checkGameOver();
 
-        // Screenshake from player damage (increased for impact)
+        // Screenshake from player damage — scales with damage taken
         if (Game.player && Game.player._wasHurt) {
-            Game.shake = 4;
+            var bDmgShake = (Game.player._lastDamage >= 2) ? 7 : 5;
+            Game.shake = Math.max(Game.shake, bDmgShake);
+            Game.shakeIntensity = (Game.player._lastDamage >= 2) ? 4 : 2;
             Game.player._wasHurt = false;
+        }
+        // Screenshake from player landing hits on boss
+        if (Game.player && Game.player._hitShake) {
+            Game.shake = Math.max(Game.shake, Game.player._hitShake + 1);
+            Game.shakeIntensity = Math.max(Game.shakeIntensity || 1, 2);
+            Game.player._hitShake = 0;
         }
 
         // Boss screenshake on hit (increased)
@@ -2885,6 +3452,9 @@
             Game.player.render(ctx);
         }
 
+        // Environment particles (embers, boss wisps)
+        renderEnvironmentParticles(ctx);
+
         // Particles
         Particles.render(ctx);
 
@@ -2907,6 +3477,9 @@
 
         // Floating damage numbers
         renderFloatingTexts(ctx);
+
+        // Screen flash overlay
+        renderScreenFlash(ctx);
 
         // HUD
         renderHUD(ctx);
@@ -3965,6 +4538,10 @@
         Game.epilogueTimer = 0;
         Game.boulders = [];
         Game.bouldersClearing = false;
+        Game._heartShakeTimers = [];
+        Game._prevHeartHP = -1;
+        Game._puzzleSparkles = { crown: 0, cape: 0, scepter: 0 };
+        Game._prevPuzzleFlags = { puzzleCrown: false, puzzleCape: false, puzzleScepter: false };
 
         Particles.particles = [];
 
@@ -4010,13 +4587,17 @@
             case 'paused':     renderPaused();    break;
         }
 
-        // Blit offscreen buffer to display canvas (with screenshake)
+        // Blit offscreen buffer to display canvas (with variable-intensity screenshake)
         display.imageSmoothingEnabled = false;
         var sx = 0, sy = 0;
         if (Game.shake > 0) {
-            sx = Utils.randInt(-2, 2);
-            sy = Utils.randInt(-2, 2);
+            var intensity = Game.shakeIntensity || 2;
+            sx = Utils.randInt(-intensity, intensity);
+            sy = Utils.randInt(-intensity, intensity);
             Game.shake--;
+            if (Game.shake <= 0) {
+                Game.shakeIntensity = 0;
+            }
         }
         display.clearRect(0, 0, display.canvas.width, display.canvas.height);
         display.drawImage(buf.canvas, sx * 3, sy * 3, display.canvas.width, display.canvas.height);

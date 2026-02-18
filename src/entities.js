@@ -537,12 +537,24 @@
             this.staggerCount = 0;
             this.staggerTimer = 0;
             this.staggered = false;
+
+            // Flanking: goblins approach from offset angles
+            this._flankOffset = (Math.random() < 0.5) ? -Math.PI / 3 : Math.PI / 3;
+            this._flankTimer = Utils.randInt(0, 60); // stagger initial assignments
+
+            // Fear: flee briefly when an ally dies nearby
+            this._fearTimer = 0;
+            this._fearAngle = 0;
+
+            // Spinecleaver shield-down vulnerability window
+            this._shieldDown = 0;
         }
 
         /**
+         * @param {Array} [allies] optional array of all enemies in the room (for group AI)
          * @returns {boolean} true when the enemy should be removed from the list
          */
-        update(room, player) {
+        update(room, player, allies) {
             // Death animation
             if (this.dead) {
                 this.deathTimer--;
@@ -604,8 +616,56 @@
                 if (this.attackTimer <= 0) {
                     this.attacking = false;
                     this.attackCooldown = 45;
+                    // Spinecleaver: shield drops after attack, creating vulnerability
+                    if (this.type === 'spinecleaver') {
+                        this._shieldDown = 20;
+                    }
                 }
                 return false;
+            }
+
+            // Tick shield-down timer for spinecleaver
+            if (this._shieldDown > 0) this._shieldDown--;
+
+            // --- Fear reaction: flee when a nearby ally dies ---
+            if (this._fearTimer > 0) {
+                this._fearTimer--;
+                var fearDx = Math.cos(this._fearAngle) * this.speed * 1.5;
+                var fearDy = Math.sin(this._fearAngle) * this.speed * 1.5;
+                var fearX = this.x + fearDx;
+                var fearY = this.y + fearDy;
+                if (!this.collidesWithMap(room, fearX, this.y)) this.x = fearX;
+                if (!this.collidesWithMap(room, this.x, fearY)) this.y = fearY;
+                this.dir = this.angleToDir(this._fearAngle);
+                this.clampToRoom();
+                return false;
+            }
+
+            // Check for freshly dead allies nearby — triggers fear
+            if (allies && this.type === 'goblin') {
+                for (var ai = 0; ai < allies.length; ai++) {
+                    var ally = allies[ai];
+                    if (ally === this || !ally.dead) continue;
+                    if (ally.deathTimer >= 28 && ally.deathTimer <= 30) {
+                        // Ally just died (within first 2 frames of death anim)
+                        var allyDist = Utils.dist(this, ally);
+                        if (allyDist < 60) {
+                            this._fearTimer = 30;
+                            this._fearAngle = Math.atan2(this.y - ally.y, this.x - ally.x);
+                            this.state = 'flee';
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // --- Flanking: reassign flank offset every 60 frames ---
+            if (this.type === 'goblin') {
+                this._flankTimer++;
+                if (this._flankTimer >= 60) {
+                    this._flankTimer = 0;
+                    this._flankOffset = (Math.random() < 0.5) ? -Math.PI / 3 : Math.PI / 3;
+                }
             }
 
             var distToPlayer = Utils.dist(this, player);
@@ -619,8 +679,26 @@
             }
 
             if (this.state === 'chase') {
-                // Move toward player
+                // Move toward player (goblins apply flank offset when allies are nearby)
                 var angle = Math.atan2(player.y - this.y, player.x - this.x);
+                if (this.type === 'goblin' && allies && distToPlayer > this.attackRange) {
+                    // Check if another goblin is chasing the same player within 30px on the same side
+                    var shouldFlank = false;
+                    for (var fi = 0; fi < allies.length; fi++) {
+                        var other = allies[fi];
+                        if (other === this || other.dead || other.state !== 'chase') continue;
+                        if (other.type !== 'goblin') continue;
+                        var otherDist = Utils.dist(other, player);
+                        if (otherDist < this.aggroRange) {
+                            // Another goblin is also chasing — apply flanking
+                            shouldFlank = true;
+                            break;
+                        }
+                    }
+                    if (shouldFlank) {
+                        angle += this._flankOffset;
+                    }
+                }
                 var dx = Math.cos(angle) * this.speed;
                 var dy = Math.sin(angle) * this.speed;
 
@@ -837,6 +915,40 @@
             } else if (this.flash > 0) {
                 ctx.fillStyle = 'rgba(255,255,255,0.35)';
                 ctx.fillRect(drawX, drawY, this.spriteW, this.spriteH);
+            }
+
+            // --- Spinecleaver mini-boss: HP bar above sprite ---
+            if (this.type === 'spinecleaver' && !this.dead) {
+                var hpBarW = this.spriteW;  // 16px wide bar
+                var hpBarH = 2;
+                var hpBarX = drawX;
+                var hpBarY = drawY - 4;
+                // Background
+                ctx.fillStyle = C.black;
+                ctx.fillRect(hpBarX - 1, hpBarY - 1, hpBarW + 2, hpBarH + 2);
+                // Empty
+                ctx.fillStyle = C.darkRed;
+                ctx.fillRect(hpBarX, hpBarY, hpBarW, hpBarH);
+                // Filled
+                var hpFill = (this.hp / this.maxHp) * hpBarW;
+                ctx.fillStyle = C.red;
+                ctx.fillRect(hpBarX, hpBarY, hpFill, hpBarH);
+            }
+
+            // --- Spinecleaver: shield-down vulnerability indicator ---
+            if (this.type === 'spinecleaver' && this._shieldDown > 0 && !this.dead) {
+                // Flashing blue outline to indicate vulnerability window
+                if (Math.floor(this._shieldDown / 3) % 2 === 0) {
+                    ctx.strokeStyle = C.lightBlue;
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(drawX, drawY, this.spriteW, this.spriteH);
+                }
+                // Small down-arrow indicator above the HP bar
+                ctx.fillStyle = C.yellow;
+                var indicatorX = drawX + this.spriteW / 2;
+                var indicatorY = drawY - 8;
+                ctx.fillRect(Math.floor(indicatorX - 1), Math.floor(indicatorY), 3, 2);
+                ctx.fillRect(Math.floor(indicatorX), Math.floor(indicatorY + 2), 1, 1);
             }
 
             ctx.globalAlpha = 1;
@@ -1648,6 +1760,13 @@
             this.shootCooldown = 0;
             this._telegraphing = false;
             this._telegraphTimer = 0;
+
+            // Retreat/dodge when player gets too close
+            this._retreatTimer = 0;
+
+            // Panic burst at low HP
+            this._panicFired = false;
+            this._fleeing = false;
         }
 
         update(room, player) {
@@ -1686,6 +1805,7 @@
             if (this.attackCooldown > 0) this.attackCooldown--;
             if (this.shootCooldown > 0) this.shootCooldown--;
             if (this.flash > 0) this.flash--;
+            if (this._retreatTimer > 0) this._retreatTimer--;
 
             // Update arrows
             for (var ai = this.arrows.length - 1; ai >= 0; ai--) {
@@ -1700,11 +1820,70 @@
 
             var distToPlayer = Utils.dist(this, player);
 
+            // --- Panic burst: at 1 HP, fire rapid 3-arrow burst then flee ---
+            if (this.hp <= 1 && !this._panicFired && !this.dead) {
+                this._panicFired = true;
+                this._fleeing = true;
+                // Fire 3 rapid arrows in a slight spread
+                var panicAngle = Math.atan2(player.y - this.y, player.x - this.x);
+                for (var pi = -1; pi <= 1; pi++) {
+                    var psx = this.x + this.w / 2;
+                    var psy = this.y + this.h / 2;
+                    var spreadAngle = panicAngle + pi * 0.2;
+                    this.arrows.push({
+                        x: psx, y: psy,
+                        vx: Math.cos(spreadAngle) * 2.5,
+                        vy: Math.sin(spreadAngle) * 2.5,
+                        life: 70,
+                        damage: 1,
+                        w: 4, h: 4
+                    });
+                }
+                Audio.play('arrow');
+                this.flash = 6;
+            }
+
+            // --- Fleeing mode (after panic burst) ---
+            if (this._fleeing) {
+                var fleeAngle = Math.atan2(this.y - player.y, this.x - player.x);
+                this.dir = this.angleToDir(fleeAngle);
+                var fleeDx = Math.cos(fleeAngle) * this.speed * 1.5;
+                var fleeDy = Math.sin(fleeAngle) * this.speed * 1.5;
+                var fleeX = this.x + fleeDx;
+                var fleeY = this.y + fleeDy;
+                if (!this.collidesWithMap(room, fleeX, this.y)) this.x = fleeX;
+                if (!this.collidesWithMap(room, this.x, fleeY)) this.y = fleeY;
+                // Animation
+                this.frameTimer++;
+                if (this.frameTimer >= 8) {
+                    this.walkPhase = (this.walkPhase + 1) % 4;
+                    this.frame = (this.walkPhase % 2 === 0) ? 0 : 1;
+                    this.frameTimer = 0;
+                }
+                this.clampToRoom();
+                return false;
+            }
+
             // AI: stay at range, shoot arrows
             if (distToPlayer < this.aggroRange) {
                 this.state = 'chase';
                 var angle = Math.atan2(player.y - this.y, player.x - this.x);
                 this.dir = this.angleToDir(angle);
+
+                // --- Dodge/retreat when player gets within 48px ---
+                if (distToPlayer < 48 && this._retreatTimer <= 0) {
+                    this._retreatTimer = 20;
+                    // Dodge backward + sideways
+                    var dodgeAngle = angle + Math.PI + (Math.random() < 0.5 ? 0.5 : -0.5);
+                    var dodgeDx = Math.cos(dodgeAngle) * this.speed * 2.5;
+                    var dodgeDy = Math.sin(dodgeAngle) * this.speed * 2.5;
+                    var dodgeX = this.x + dodgeDx;
+                    var dodgeY = this.y + dodgeDy;
+                    if (!this.collidesWithMap(room, dodgeX, this.y)) this.x = dodgeX;
+                    if (!this.collidesWithMap(room, this.x, dodgeY)) this.y = dodgeY;
+                    this.clampToRoom();
+                    return false;
+                }
 
                 if (distToPlayer < this.minRange) {
                     // Back away

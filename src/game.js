@@ -175,7 +175,15 @@
         subtitleReveal: 0,
 
         // Difficulty menu
-        difficultyMenuIndex: 1
+        difficultyMenuIndex: 1,
+
+        // Heart shake timers for damage animation (Pass 6D)
+        _heartShakeTimers: [],
+        _prevHeartHP: -1,
+
+        // Puzzle item collection sparkle timers (Pass 6D)
+        _puzzleSparkles: { crown: 0, cape: 0, scepter: 0 },
+        _prevPuzzleFlags: { puzzleCrown: false, puzzleCape: false, puzzleScepter: false }
     };
 
     window.Game = Game;
@@ -1566,19 +1574,46 @@
     function renderHUD(ctx) {
         if (!Game.player) return;
 
-        // Hearts - top left
+        // Hearts - top left (with damage shake and low HP pulse)
         var maxHearts = Math.ceil(Game.player.maxHp / 2);
         var currentHP = Game.player.hp;
+
+        // Low HP pulse: when player has 1-2 half-hearts (hp <= 2), pulse between red and dark red
+        var isLowHP = currentHP > 0 && currentHP <= 2;
+        var lowHPPulseActive = false;
+        if (isLowHP) {
+            // 30-frame cycle: first 15 frames = normal, last 15 = dark pulse
+            lowHPPulseActive = (Game.frame % 30) >= 15;
+        }
 
         for (var i = 0; i < maxHearts; i++) {
             var hx = 4 + i * 12;
             var hy = 4;
             var hpForThisHeart = currentHP - i * 2;
 
+            // Heart damage shake: offset +/-1px randomly while timer active
+            if (Game._heartShakeTimers && Game._heartShakeTimers[i] > 0) {
+                hx += (Math.random() < 0.5 ? -1 : 1);
+                hy += (Math.random() < 0.5 ? -1 : 1);
+            }
+
             if (hpForThisHeart >= 2) {
+                // Low HP pulse: tint remaining hearts darker on pulse cycle
+                if (isLowHP && lowHPPulseActive) {
+                    ctx.globalAlpha = 0.6;
+                }
                 safeDraw(ctx, 'item_heart', hx, hy);
+                if (isLowHP && lowHPPulseActive) {
+                    ctx.globalAlpha = 1;
+                }
             } else if (hpForThisHeart === 1) {
+                if (isLowHP && lowHPPulseActive) {
+                    ctx.globalAlpha = 0.6;
+                }
                 safeDraw(ctx, 'item_heart_half', hx, hy);
+                if (isLowHP && lowHPPulseActive) {
+                    ctx.globalAlpha = 1;
+                }
             } else {
                 safeDraw(ctx, 'item_heart_empty', hx, hy);
             }
@@ -1626,19 +1661,51 @@
             }
         }
 
-        // Puzzle items collected - top right (above minimap)
-        var ix = W - 16;
-        if (Game.flags.puzzleCrown) {
-            safeDraw(ctx, 'item_crown', ix, 4);
-            ix -= 14;
-        }
-        if (Game.flags.puzzleCape) {
-            safeDraw(ctx, 'item_cape', ix, 4);
-            ix -= 14;
-        }
-        if (Game.flags.puzzleScepter) {
-            safeDraw(ctx, 'item_scepter', ix, 4);
-            ix -= 14;
+        // Puzzle items - top right: show silhouettes for uncollected, real sprites for collected
+        var puzzleSlots = [
+            { flag: 'puzzleCrown',   sprite: 'item_crown',   sparkle: 'crown' },
+            { flag: 'puzzleCape',    sprite: 'item_cape',    sparkle: 'cape' },
+            { flag: 'puzzleScepter', sprite: 'item_scepter', sparkle: 'scepter' }
+        ];
+        var pix = W - 16;
+        for (var pi = 0; pi < puzzleSlots.length; pi++) {
+            var ps = puzzleSlots[pi];
+            var psx = pix - pi * 14;
+            var psy = 4;
+
+            if (Game.flags[ps.flag]) {
+                // Collected: draw the real sprite
+                safeDraw(ctx, ps.sprite, psx, psy);
+
+                // Brief sparkle effect on collection
+                var sparkleTimer = Game._puzzleSparkles[ps.sparkle];
+                if (sparkleTimer > 0) {
+                    // Draw 4 sparkle pixels around the item, cycling positions
+                    ctx.fillStyle = C.gold;
+                    var sparkPhase = Math.floor(sparkleTimer / 4) % 4;
+                    var offsets = [
+                        [-2, -1], [8, -1], [-2, 8], [8, 8],   // corners
+                        [3, -2], [3, 9], [-2, 3], [9, 3]      // edges
+                    ];
+                    for (var sp = 0; sp < 4; sp++) {
+                        var oi = (sp + sparkPhase) % offsets.length;
+                        ctx.fillRect(psx + offsets[oi][0], psy + offsets[oi][1], 1, 1);
+                    }
+                    // Extra white sparkle center dot
+                    ctx.fillStyle = C.white;
+                    ctx.fillRect(psx + 3, psy + 3, 2, 2);
+                }
+            } else {
+                // Uncollected: draw dark gray silhouette placeholder
+                ctx.fillStyle = C.darkGray;
+                ctx.globalAlpha = 0.5;
+                // Draw a generic silhouette shape (8x8 dark rounded rect)
+                ctx.fillRect(psx + 1, psy, 6, 8);
+                ctx.fillRect(psx, psy + 1, 8, 6);
+                ctx.globalAlpha = 1;
+                // Question mark in the silhouette center
+                Utils.drawText(ctx, '?', psx + 1, psy + 1, C.gray, 1);
+            }
         }
 
         // Minimap - bottom right corner
@@ -1738,9 +1805,12 @@
 
         ctx.globalAlpha = alpha;
 
+        // Build decorated room name with em-dashes: "-- Room Name --"
+        var decoratedName = '-- ' + Game.roomNameText + ' --';
+
         // Draw banner background with gold border
-        var textLen = Game.roomNameText.length * 6;
-        var bannerW = textLen + 20;
+        var textLen = decoratedName.length * 6;
+        var bannerW = textLen + 24; // extra padding for decorative dots
         var bannerX = Math.floor((W - bannerW) / 2 + slideX);
         var bannerY = 18;
 
@@ -1756,8 +1826,15 @@
         ctx.fillRect(bannerX, bannerY, 1, 14);
         ctx.fillRect(bannerX + bannerW - 1, bannerY, 1, 14);
 
-        var tx = Math.floor(bannerX + 10);
-        Utils.drawText(ctx, Game.roomNameText, tx, bannerY + 4, C.white, 1);
+        // Small pixel dots at the ends (decorative flourishes)
+        ctx.fillStyle = C.gold;
+        // Left dot cluster: 2x2 pixel dot at inner-left
+        ctx.fillRect(bannerX + 3, bannerY + 6, 2, 2);
+        // Right dot cluster: 2x2 pixel dot at inner-right
+        ctx.fillRect(bannerX + bannerW - 5, bannerY + 6, 2, 2);
+
+        var tx = Math.floor(bannerX + 12);
+        Utils.drawText(ctx, decoratedName, tx, bannerY + 4, C.white, 1);
         ctx.globalAlpha = 1;
     }
 
@@ -2831,7 +2908,7 @@
         for (var i = 0; i < Game.enemies.length; i++) {
             var enemy = Game.enemies[i];
             if (enemy.update) {
-                enemy.update(Game.currentRoom, Game.player);
+                enemy.update(Game.currentRoom, Game.player, Game.enemies);
             }
         }
 
@@ -2868,6 +2945,50 @@
                 spawnFloatingText(Game.enemies[ej].x + 2, Game.enemies[ej].y - 6, edmg, C.white, eBig);
             }
         }
+
+        // Heart shake timers: detect which hearts lost HP and shake them
+        if (Game.player) {
+            var maxHearts = Math.ceil(Game.player.maxHp / 2);
+            // Initialize shake timers array if needed
+            while (Game._heartShakeTimers.length < maxHearts) {
+                Game._heartShakeTimers.push(0);
+            }
+            // If player took damage, find which hearts changed and shake them
+            if (Game.player.hp < playerHPBefore) {
+                var oldHP = playerHPBefore;
+                var newHP = Game.player.hp;
+                for (var hi = 0; hi < maxHearts; hi++) {
+                    var oldHeart = Math.min(2, Math.max(0, oldHP - hi * 2));
+                    var newHeart = Math.min(2, Math.max(0, newHP - hi * 2));
+                    if (newHeart < oldHeart) {
+                        Game._heartShakeTimers[hi] = 8;
+                    }
+                }
+            }
+            Game._prevHeartHP = Game.player.hp;
+            // Tick down shake timers
+            for (var hs = 0; hs < Game._heartShakeTimers.length; hs++) {
+                if (Game._heartShakeTimers[hs] > 0) Game._heartShakeTimers[hs]--;
+            }
+        }
+
+        // Puzzle item sparkle detection: detect newly collected items
+        if (Game.flags.puzzleCrown && !Game._prevPuzzleFlags.puzzleCrown) {
+            Game._puzzleSparkles.crown = 30;
+        }
+        if (Game.flags.puzzleCape && !Game._prevPuzzleFlags.puzzleCape) {
+            Game._puzzleSparkles.cape = 30;
+        }
+        if (Game.flags.puzzleScepter && !Game._prevPuzzleFlags.puzzleScepter) {
+            Game._puzzleSparkles.scepter = 30;
+        }
+        Game._prevPuzzleFlags.puzzleCrown = Game.flags.puzzleCrown;
+        Game._prevPuzzleFlags.puzzleCape = Game.flags.puzzleCape;
+        Game._prevPuzzleFlags.puzzleScepter = Game.flags.puzzleScepter;
+        // Tick down sparkle timers
+        if (Game._puzzleSparkles.crown > 0) Game._puzzleSparkles.crown--;
+        if (Game._puzzleSparkles.cape > 0) Game._puzzleSparkles.cape--;
+        if (Game._puzzleSparkles.scepter > 0) Game._puzzleSparkles.scepter--;
 
         // Handle Luigi's Brog special
         handleBrogSpecial();
@@ -3098,7 +3219,7 @@
         // Update enemies (boss may summon minions)
         for (var i = 0; i < Game.enemies.length; i++) {
             if (Game.enemies[i].update) {
-                Game.enemies[i].update(Game.currentRoom, Game.player);
+                Game.enemies[i].update(Game.currentRoom, Game.player, Game.enemies);
             }
         }
 
@@ -4417,6 +4538,10 @@
         Game.epilogueTimer = 0;
         Game.boulders = [];
         Game.bouldersClearing = false;
+        Game._heartShakeTimers = [];
+        Game._prevHeartHP = -1;
+        Game._puzzleSparkles = { crown: 0, cape: 0, scepter: 0 };
+        Game._prevPuzzleFlags = { puzzleCrown: false, puzzleCape: false, puzzleScepter: false };
 
         Particles.particles = [];
 

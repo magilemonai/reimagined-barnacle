@@ -353,7 +353,9 @@
   var BOX_H = 60;         // tall enough for speaker name + 2 text rows
   var BOX_PAD = 8;        // inner padding from box edges
   var BORDER_COLOR = '#6a6a7a';    // lighter border (matches C.gray)
+  var INNER_BORDER_COLOR = '#4a4a5a'; // slightly darker inner border
   var BOX_BG = 'rgba(10, 10, 20, 0.88)';
+  var CORNER_COLOR = '#e8b830';    // gold corner ornaments (C.gold)
 
   /** Text positioning inside the box */
   var NAME_X = BOX_X + BOX_PAD;
@@ -411,6 +413,7 @@
     _slideProgress: 0,
     _onComplete: null,
     _dialogueId: null,
+    _punctPause: 0,       // punctuation pause countdown (in frames)
 
     /** Pre-computed wrapped rows for the current line's full text */
     _fullRows: [],
@@ -450,6 +453,7 @@
       this._blinkTimer = 0;
       this._slideProgress = 0;
       this._rowPage = 0;
+      this._punctPause = 0;
       this._onComplete = onComplete || null;
       this.active = true;
       this._computeRows();
@@ -540,6 +544,7 @@
         this.displayedChars = 0;
         this.charTimer = 0;
         this._blinkTimer = 0;
+        this._punctPause = 0;
         this._computeRows();
         if (window.GameAudio) window.GameAudio.play('select');
       }
@@ -574,14 +579,42 @@
         speed = 1;
       }
 
-      // Typewriter reveal
+      // Typewriter reveal with punctuation pauses
       if (this.displayedChars < line.text.length) {
-        this.charTimer++;
-        if (this.charTimer >= speed) {
-          this.charTimer = 0;
-          this.displayedChars++;
-          if (this.displayedChars % 2 === 0 && window.GameAudio) {
-            window.GameAudio.play('dialogue');
+        // If we're in a punctuation pause, count it down first
+        if (this._punctPause > 0) {
+          this._punctPause--;
+        } else {
+          this.charTimer++;
+          if (this.charTimer >= speed) {
+            this.charTimer = 0;
+            this.displayedChars++;
+            if (this.displayedChars % 2 === 0 && window.GameAudio) {
+              window.GameAudio.play('dialogue');
+            }
+
+            // Check for punctuation pauses after revealing a character
+            var idx = this.displayedChars - 1;
+            var ch = line.text.charAt(idx);
+            if (ch === '.' || ch === '!' || ch === '?') {
+              // Detect ellipsis: three dots in a row
+              if (ch === '.' && idx >= 2 &&
+                  line.text.charAt(idx - 1) === '.' &&
+                  line.text.charAt(idx - 2) === '.') {
+                this._punctPause = 12;
+              } else if (ch === '.') {
+                // Don't pause on individual dots that are part of an upcoming ellipsis
+                var nextCh = (idx + 1 < line.text.length) ? line.text.charAt(idx + 1) : '';
+                if (nextCh !== '.') {
+                  this._punctPause = 8;
+                }
+              } else {
+                // ! or ?
+                this._punctPause = 8;
+              }
+            } else if (ch === ',') {
+              this._punctPause = 4;
+            }
           }
         }
       }
@@ -601,23 +634,79 @@
 
       var slideOffset = Math.floor((1 - this._slideProgress) * BOX_H);
       var hasPortrait = line.speaker && line.speaker.length > 0;
+      var bx = BOX_X;
+      var by = BOX_Y + slideOffset;
+      var bw = BOX_W;
+      var bh = BOX_H;
 
-      // --- Semi-transparent background ---
+      // --- Semi-transparent background with subtle noise texture ---
       ctx.fillStyle = BOX_BG;
-      ctx.fillRect(BOX_X, BOX_Y + slideOffset, BOX_W, BOX_H);
+      ctx.fillRect(bx, by, bw, bh);
 
-      // --- 1px border ---
+      // Subtle 1px noise texture: every ~8th pixel gets a slightly different shade
+      ctx.fillStyle = 'rgba(30, 30, 50, 0.35)';
+      for (var ny = by; ny < by + bh; ny += 1) {
+        for (var nx = bx; nx < bx + bw; nx += 1) {
+          // Deterministic pseudo-random noise based on pixel position
+          if (((nx * 7 + ny * 13) % 8) === 0) {
+            ctx.fillRect(nx, ny, 1, 1);
+          }
+        }
+      }
+
+      // --- Double-line pixel art border ---
+      // Outer border: 1px line in BORDER_COLOR
       ctx.strokeStyle = BORDER_COLOR;
       ctx.lineWidth = 1;
-      ctx.strokeRect(BOX_X + 0.5, BOX_Y + slideOffset + 0.5, BOX_W - 1, BOX_H - 1);
+      ctx.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1);
+
+      // Inner border: 1px line 2px inward in darker color
+      ctx.strokeStyle = INNER_BORDER_COLOR;
+      ctx.strokeRect(bx + 2.5, by + 2.5, bw - 5, bh - 5);
+
+      // Corner ornaments: 3x3 pixel L-shapes at each corner in gold
+      var cc = CORNER_COLOR;
+      ctx.fillStyle = cc;
+      // Top-left corner L
+      ctx.fillRect(bx, by, 3, 1);
+      ctx.fillRect(bx, by, 1, 3);
+      // Top-right corner L
+      ctx.fillRect(bx + bw - 3, by, 3, 1);
+      ctx.fillRect(bx + bw - 1, by, 1, 3);
+      // Bottom-left corner L
+      ctx.fillRect(bx, by + bh - 1, 3, 1);
+      ctx.fillRect(bx, by + bh - 3, 1, 3);
+      // Bottom-right corner L
+      ctx.fillRect(bx + bw - 3, by + bh - 1, 3, 1);
+      ctx.fillRect(bx + bw - 1, by + bh - 3, 1, 3);
 
       var nameColor, textStartY;
 
       if (hasPortrait) {
-        // --- Speaker portrait indicator ---
+        // --- Speaker name tab above the dialogue box ---
         nameColor = SPEAKER_COLORS[line.speaker] || DEFAULT_SPEAKER_COLOR;
+        var nameLen = line.speaker.length * 6 + 8; // text width + padding
+        var tabX = bx + 6;
+        var tabY = by - 2; // extends 2px above the main box border
+        var tabW = nameLen;
+        var tabH = 10;
+
+        // Tab background
+        ctx.fillStyle = nameColor;
+        ctx.globalAlpha = 0.85;
+        ctx.fillRect(tabX, tabY - tabH + 2, tabW, tabH);
+        ctx.globalAlpha = 1;
+        // Tab border
+        ctx.strokeStyle = nameColor;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(tabX + 0.5, tabY - tabH + 2.5, tabW - 1, tabH - 1);
+
+        // Speaker name text in the tab
+        window.Utils.drawText(ctx, line.speaker, tabX + 4, tabY - tabH + 4, '#f0f0f0', 1);
+
+        // --- Speaker portrait indicator ---
         var portraitX = BOX_X + 4;
-        var portraitY = BOX_Y + slideOffset + 4;
+        var portraitY = by + 4;
         var portraitSize = 14;
 
         ctx.fillStyle = nameColor;
@@ -630,23 +719,20 @@
         var initial = line.speaker.charAt(0);
         window.Utils.drawText(ctx, initial, portraitX + 4, portraitY + 3, nameColor, 1);
 
-        // --- Speaker name ---
-        window.Utils.drawText(ctx, line.speaker, NAME_X + 16, NAME_Y + slideOffset, nameColor, 1);
-
         textStartY = TEXT_Y + slideOffset;
       } else {
         // Narrator mode: no portrait, center text vertically in box
         nameColor = NARRATOR_COLOR;
-        textStartY = BOX_Y + slideOffset + 14;
+        textStartY = by + 14;
       }
 
       // Line progress dots
       var totalLines = this.lines.length;
       if (totalLines > 1) {
-        var dotBaseX = BOX_X + BOX_W - 8 - totalLines * 4;
+        var dotBaseX = bx + bw - 8 - totalLines * 4;
         for (var d = 0; d < totalLines; d++) {
           ctx.fillStyle = (d <= this.currentLine) ? (hasPortrait ? nameColor : NARRATOR_COLOR) : '#333';
-          ctx.fillRect(dotBaseX + d * 4, BOX_Y + slideOffset + 4, 2, 2);
+          ctx.fillRect(dotBaseX + d * 4, by + 4, 2, 2);
         }
       }
 
@@ -682,15 +768,15 @@
       // Page indicator for multi-page lines
       if (this._totalPages() > 1) {
         var pageText = (this._rowPage + 1) + '/' + this._totalPages();
-        window.Utils.drawText(ctx, pageText, BOX_X + BOX_W - 30, BOX_Y + slideOffset + BOX_H - 12, '#888', 1);
+        window.Utils.drawText(ctx, pageText, bx + bw - 30, by + bh - 12, '#888', 1);
       }
 
       // --- Skip hint for seen dialogues ---
       if (this._canSkip) {
-        window.Utils.drawText(ctx, '[X] SKIP', BOX_X + BOX_W - 50, BOX_Y + slideOffset + 4, '#888', 1);
+        window.Utils.drawText(ctx, '[X] SKIP', bx + bw - 50, by + 4, '#888', 1);
       }
 
-      // --- Blinking advance indicator ---
+      // --- Animated down-arrow advance indicator ---
       var charsToEndOfPage = 0;
       for (var rp = 0; rp < pageEnd; rp++) {
         charsToEndOfPage += this._fullRows[rp].length;
@@ -698,18 +784,22 @@
       }
 
       if (this.displayedChars >= charsToEndOfPage) {
-        var show = (this._blinkTimer % (INDICATOR_BLINK_RATE * 2)) < INDICATOR_BLINK_RATE;
-        if (show) {
-          var indX = BOX_X + BOX_W - 16;
-          var indY = BOX_Y + slideOffset + BOX_H - 12;
-          ctx.fillStyle = '#f0f0f0';
-          ctx.beginPath();
-          ctx.moveTo(indX, indY);
-          ctx.lineTo(indX + 6, indY);
-          ctx.lineTo(indX + 3, indY + 4);
-          ctx.closePath();
-          ctx.fill();
-        }
+        // 2-frame bounce animation, alternating every 15 frames
+        var arrowFrame = Math.floor(this._blinkTimer / 15) % 2;
+        var bounceOffset = arrowFrame === 0 ? 0 : 2;
+
+        var indX = bx + bw - 14;
+        var indY = by + bh - 10 + bounceOffset;
+
+        // Down-arrow pixel art (5px wide, 5px tall)
+        ctx.fillStyle = '#f0f0f0';
+        // Horizontal bar
+        ctx.fillRect(indX, indY, 5, 1);
+        // Arrow shaft
+        ctx.fillRect(indX + 2, indY + 1, 1, 1);
+        // Arrow point
+        ctx.fillRect(indX + 1, indY + 2, 3, 1);
+        ctx.fillRect(indX + 2, indY + 3, 1, 1);
       }
     },
 
@@ -737,6 +827,7 @@
       this.displayedChars = 0;
       this.charTimer = 0;
       this._blinkTimer = 0;
+      this._punctPause = 0;
       this._fullRows = [];
       this._rowPage = 0;
       this._dialogueId = null;

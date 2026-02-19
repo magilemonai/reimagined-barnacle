@@ -233,7 +233,20 @@
 
         // --- Pass 8B: Torch flame react + Door animation ---
         torchReacts: [],   // {col, row, dir, timer} - torch lean-away
-        doorAnimTimer: 0   // frames remaining in door open animation
+        doorAnimTimer: 0,  // frames remaining in door open animation
+
+        // --- Heart heal animation timers ---
+        _healAnimTimers: [],
+
+        // --- Crumbling floor hazard ---
+        crumblingTiles: [],
+
+        // --- Poison mushroom cooldown ---
+        _poisonMushroomCD: 0,
+
+        // --- Relic pickup slow-motion + camera hold ---
+        slowMotion: 0,
+        cameraHold: 0
     };
 
     window.Game = Game;
@@ -367,6 +380,44 @@
         if (!Music) return;
         var theme = getMusicForRoom(roomId);
         if (theme) Music.play(theme);
+    }
+
+    // =====================================================================
+    // PARALLAX BACKGROUND RENDERING
+    // =====================================================================
+
+    function renderParallaxBG(ctx) {
+        if (!Game.currentRoom) return;
+        var roomId = Game.currentRoom.id;
+
+        if (roomId && roomId.indexOf('ebon_forest') === 0) {
+            // Forest rooms: 3 horizontal strips of darker green at slowly shifting Y positions
+            ctx.fillStyle = 'rgba(10,40,10,0.15)';
+            var yOff1 = Math.sin(Game.frame * 0.01) * 3;
+            var yOff2 = Math.sin(Game.frame * 0.015 + 1.5) * 4;
+            var yOff3 = Math.sin(Game.frame * 0.008 + 3.0) * 2;
+            ctx.fillRect(0, 20 + yOff1, W, 12);
+            ctx.fillRect(0, 70 + yOff2, W, 16);
+            ctx.fillRect(0, 130 + yOff3, W, 10);
+        } else if (roomId && roomId.indexOf('temple') === 0 && roomId !== 'temple_boss') {
+            // Temple rooms: dark blue-gray strips at top
+            ctx.fillStyle = 'rgba(15,15,30,0.2)';
+            var tOff1 = Math.sin(Game.frame * 0.008) * 2;
+            var tOff2 = Math.sin(Game.frame * 0.012 + 2.0) * 3;
+            ctx.fillRect(0, 5 + tOff1, W, 8);
+            ctx.fillRect(0, 25 + tOff2, W, 6);
+            ctx.fillRect(0, 50 + Math.sin(Game.frame * 0.006 + 4.0) * 2, W, 10);
+        } else if (roomId === 'temple_boss') {
+            // Boss room: slowly shifting purple-black gradient strips
+            ctx.fillStyle = 'rgba(30,10,40,0.12)';
+            var bOff1 = Math.sin(Game.frame * 0.006) * 4;
+            var bOff2 = Math.sin(Game.frame * 0.01 + 1.0) * 3;
+            var bOff3 = Math.sin(Game.frame * 0.008 + 2.5) * 5;
+            ctx.fillRect(0, 10 + bOff1, W, 14);
+            ctx.fillRect(0, 60 + bOff2, W, 18);
+            ctx.fillRect(0, 120 + bOff3, W, 12);
+            ctx.fillRect(0, 160 + Math.sin(Game.frame * 0.005 + 4.0) * 3, W, 10);
+        }
     }
 
     // =====================================================================
@@ -857,6 +908,10 @@
                         Dialogue.start('puzzle_scepter');
                     }
 
+                    // Relic pickup slow-motion + golden flash
+                    Game.slowMotion = 30;
+                    triggerScreenFlash('#FFD700', 10);
+
                     Audio.play('pickup');
                 }
             }
@@ -875,6 +930,10 @@
             if (distToStatue < 28 && Input.pressed['z']) {
                 Game.flags.puzzleSolved = true;
                 Audio.play('fanfare');
+                // Camera hold + slow motion for the big moment
+                Game.cameraHold = 60;
+                Game.slowMotion = 30;
+                triggerScreenFlash('#FFD700', 12);
                 Dialogue.start('statue_complete', function () {
                     // Animate boulders rolling away
                     Game.bouldersClearing = true;
@@ -1006,6 +1065,162 @@
                 }
             }
         }
+    }
+
+    // =====================================================================
+    // CRUMBLING FLOOR HAZARD (tile ID 30 = CRACKED)
+    // =====================================================================
+
+    function updateCrumblingTiles() {
+        if (!Game.player || !Game.currentRoom) return;
+
+        // Check if player is standing on a CRACKED tile
+        var cx = Math.floor((Game.player.x + Game.player.w / 2) / TILE);
+        var cy = Math.floor((Game.player.y + Game.player.h / 2) / TILE);
+        var tileId = Maps.getTile(Game.currentRoom, cx, cy);
+
+        if (tileId === 30) { // CRACKED tile
+            // Check if this tile is already tracked
+            var alreadyTracked = false;
+            for (var c = 0; c < Game.crumblingTiles.length; c++) {
+                if (Game.crumblingTiles[c].col === cx && Game.crumblingTiles[c].row === cy) {
+                    alreadyTracked = true;
+                    break;
+                }
+            }
+            if (!alreadyTracked) {
+                Game.crumblingTiles.push({ col: cx, row: cy, timer: 60, triggered: false });
+            }
+        }
+
+        // Update crumbling tile timers
+        for (var ct = Game.crumblingTiles.length - 1; ct >= 0; ct--) {
+            var tile = Game.crumblingTiles[ct];
+            tile.timer--;
+
+            if (tile.timer <= 0 && !tile.triggered) {
+                tile.triggered = true;
+                // Deal 1 damage if player is still on the tile
+                var pcx = Math.floor((Game.player.x + Game.player.w / 2) / TILE);
+                var pcy = Math.floor((Game.player.y + Game.player.h / 2) / TILE);
+                if (pcx === tile.col && pcy === tile.row && Game.player.invincible <= 0) {
+                    Game.player.hp -= 1;
+                    Game.player.invincible = 20;
+                    Game.player._wasHurt = true;
+                    Audio.play('spike');
+                    spawnFloatingText(Game.player.x + 2, Game.player.y - 4, 1, C.red);
+                }
+                // Particle effect
+                Particles.burst(tile.col * TILE + 8, tile.row * TILE + 8, 8, '#8a7a6a');
+                Audio.play('explosion');
+            }
+
+            // Remove after triggered + 30 extra frames
+            if (tile.triggered && tile.timer < -30) {
+                Game.crumblingTiles.splice(ct, 1);
+            }
+        }
+    }
+
+    function renderCrumblingTiles(ctx) {
+        for (var ct = 0; ct < Game.crumblingTiles.length; ct++) {
+            var tile = Game.crumblingTiles[ct];
+            var tx = tile.col * TILE;
+            var ty = tile.row * TILE;
+
+            if (!tile.triggered) {
+                // Draw increasing visual cracks as timer decreases
+                var crackProgress = 1 - (tile.timer / 60); // 0 to 1
+                ctx.fillStyle = '#2a2020';
+                ctx.globalAlpha = crackProgress * 0.8;
+                // Crack line 1
+                ctx.fillRect(tx + 3, ty + 4, 6, 1);
+                if (crackProgress > 0.3) {
+                    // Crack line 2
+                    ctx.fillRect(tx + 8, ty + 8, 1, 5);
+                }
+                if (crackProgress > 0.6) {
+                    // Crack line 3
+                    ctx.fillRect(tx + 2, ty + 10, 5, 1);
+                }
+                ctx.globalAlpha = 1;
+
+                // Flash warning when about to collapse
+                if (tile.timer < 15 && Math.floor(Game.frame / 4) % 2 === 0) {
+                    ctx.fillStyle = 'rgba(200,60,30,0.25)';
+                    ctx.fillRect(tx, ty, TILE, TILE);
+                }
+            } else {
+                // After triggered: show broken floor (dark hole)
+                ctx.fillStyle = '#1a1010';
+                ctx.globalAlpha = 0.6;
+                ctx.fillRect(tx + 2, ty + 2, TILE - 4, TILE - 4);
+                ctx.globalAlpha = 1;
+            }
+        }
+    }
+
+    // =====================================================================
+    // POISON MUSHROOM HAZARD (tile ID 29 = MUSHROOM)
+    // =====================================================================
+
+    function updatePoisonMushroom() {
+        if (!Game.player || !Game.currentRoom || !Game.currentRoom.tiles) return;
+
+        // Check if player is within 12px of any MUSHROOM tile
+        var px = Game.player.x + Game.player.w / 2;
+        var py = Game.player.y + Game.player.h / 2;
+        var nearMushroom = false;
+
+        // Check surrounding tiles (3x3 grid around player)
+        for (var dy = -1; dy <= 1; dy++) {
+            for (var dx = -1; dx <= 1; dx++) {
+                var checkCol = Math.floor(px / TILE) + dx;
+                var checkRow = Math.floor(py / TILE) + dy;
+                if (checkCol < 0 || checkCol >= COLS || checkRow < 0 || checkRow >= ROWS) continue;
+                var tid = Maps.getTile(Game.currentRoom, checkCol, checkRow);
+                if (tid === 29) { // MUSHROOM tile
+                    var mx = checkCol * TILE + TILE / 2;
+                    var my = checkRow * TILE + TILE / 2;
+                    var dist = Math.sqrt((px - mx) * (px - mx) + (py - my) * (py - my));
+                    if (dist < 12) {
+                        nearMushroom = true;
+                        // Green cloud particle puff
+                        if (Game.frame % 20 === 0) {
+                            Particles.add(mx + (Math.random() - 0.5) * 6, my - 4, {
+                                vx: (Math.random() - 0.5) * 0.3,
+                                vy: -(0.2 + Math.random() * 0.3),
+                                life: 25,
+                                color: '#40a040',
+                                size: 2,
+                                gravity: -0.01
+                            });
+                        }
+                        break;
+                    }
+                }
+            }
+            if (nearMushroom) break;
+        }
+
+        if (nearMushroom) {
+            if (Game._poisonMushroomCD <= 0) {
+                // Deal poison damage every 90 frames
+                var poisonDmg = 1;
+                if (Game.difficulty === 0) poisonDmg = 0; // Adventurer: no poison damage
+                if (poisonDmg > 0 && Game.player.invincible <= 0) {
+                    Game.player.hp -= poisonDmg;
+                    Game.player.invincible = 15;
+                    Game.player._wasHurt = true;
+                    spawnFloatingText(Game.player.x + 2, Game.player.y - 4, poisonDmg, '#40a040');
+                    // Green poison puff
+                    Particles.burst(Game.player.x + 8, Game.player.y + 4, 6, '#40a040');
+                }
+                Game._poisonMushroomCD = 90;
+            }
+        }
+
+        if (Game._poisonMushroomCD > 0) Game._poisonMushroomCD--;
     }
 
     // =====================================================================
@@ -1265,7 +1480,7 @@
         var py = Game.player.y + Game.player.h / 2;
 
         // Check proximity to torch tiles
-        if (Game.currentRoom.tiles && Game.player._moving) {
+        if (Game.currentRoom.tiles && Game.player.moving) {
             var torches = getTorchPositions(Game.currentRoom);
             for (var i = 0; i < torches.length; i++) {
                 var t = torches[i];
@@ -1430,7 +1645,7 @@
         }
 
         // Pass 3D: Terrain-specific footsteps (every 12 frames while moving)
-        if (Game.player && Game.player._moving && Game.frame % 12 === 0) {
+        if (Game.player && Game.player.moving && Game.frame % 12 === 0) {
             var charId = Game.player.characterId;
             var terrain = getTerrainType(roomId);
             // Pass 8C: Character-specific pitch
@@ -1488,8 +1703,20 @@
 
             if (d < 14) {
                 // Heal 1 heart (2 HP)
+                var hpBefore = Game.player.hp;
                 if (Game.player.hp < Game.player.maxHp) {
                     Game.player.hp = Math.min(Game.player.hp + 2, Game.player.maxHp);
+                }
+                // Trigger heal animation timer for the affected heart index
+                if (Game.player.hp > hpBefore) {
+                    var healedHeartIdx = Math.floor(hpBefore / 2);
+                    while (Game._healAnimTimers.length <= healedHeartIdx + 1) {
+                        Game._healAnimTimers.push(0);
+                    }
+                    Game._healAnimTimers[healedHeartIdx] = 15;
+                    if (healedHeartIdx + 1 < Game._healAnimTimers.length) {
+                        Game._healAnimTimers[healedHeartIdx + 1] = 15;
+                    }
                 }
                 Audio.play('pickup');
                 Particles.sparkle(hd.x + 4, hd.y + 4, C.lightRed);
@@ -2267,6 +2494,20 @@
             } else {
                 safeDraw(ctx, 'item_heart_empty', hx, hy);
             }
+
+            // Heal animation: green overlay wipe from bottom to top
+            if (Game._healAnimTimers && Game._healAnimTimers[i] > 0) {
+                var healT = Game._healAnimTimers[i];
+                var healProgress = 1 - (healT / 15); // 0 to 1 as timer counts down
+                var greenH = Math.floor(TILE * (1 - healProgress)); // shrinks from full to 0
+                if (greenH > 0) {
+                    ctx.fillStyle = '#40c040';
+                    ctx.globalAlpha = 0.45;
+                    ctx.fillRect(hx, hy + (TILE - greenH), TILE, greenH);
+                    ctx.globalAlpha = 1;
+                }
+                Game._healAnimTimers[i]--;
+            }
         }
 
         // Special ability cooldown bar under hearts with label
@@ -2404,6 +2645,27 @@
                 // Unvisited: dim
                 ctx.fillStyle = 'rgba(60,60,60,0.4)';
                 ctx.fillRect(rx, ry, cellW - 1, cellH - 1);
+            }
+
+            // Special room indicators (NPC, boss, puzzle)
+            if (Game.visitedRooms[mr.id]) {
+                var dotCX = rx + Math.floor((cellW - 1) / 2);
+                var dotCY = ry + Math.floor((cellH - 1) / 2);
+                // NPC rooms: blue dot
+                if (mr.id === 'ebon_vale_square' || mr.id === 'ebon_vale_market' || mr.id === 'ebon_forest_entry') {
+                    ctx.fillStyle = '#4488ff';
+                    ctx.fillRect(dotCX, dotCY, 1, 1);
+                }
+                // Boss room: red dot
+                if (mr.id === 'temple_boss') {
+                    ctx.fillStyle = '#ff3333';
+                    ctx.fillRect(dotCX, dotCY, 1, 1);
+                }
+                // Puzzle room: gold dot
+                if (mr.id === 'temple_puzzle') {
+                    ctx.fillStyle = '#ffcc33';
+                    ctx.fillRect(dotCX, dotCY, 1, 1);
+                }
             }
 
             // Current room: blinking border
@@ -3723,7 +3985,12 @@
         // Draw pixel art scene based on current dialogue's scene property
         var scene = Dialogue.getScene();
         if (scene && cutsceneRenderers[scene]) {
+            // Subtle parallax: apply a gentle sine-wave offset to foreground elements
+            var parallaxOffset = Math.sin(Game.frame * 0.02) * 2;
+            ctx.save();
+            ctx.translate(parallaxOffset, 0);
             cutsceneRenderers[scene](ctx);
+            ctx.restore();
             // Dim overlay so text is readable
             ctx.fillStyle = 'rgba(0,0,0,0.3)';
             ctx.fillRect(0, 0, W, H);
@@ -3818,6 +4085,23 @@
         if (Game.transition.active) {
             updateTransition();
             return;
+        }
+
+        // Slow motion: skip entity updates every other frame
+        if (Game.slowMotion > 0) {
+            Game.slowMotion--;
+            if (Game.frame % 2 === 0) {
+                // Skip entity updates this frame (effectively halving game speed)
+                updateFloatingTexts();
+                updateScreenFlash();
+                Particles.update();
+                return;
+            }
+        }
+
+        // Camera hold: freeze camera on current position
+        if (Game.cameraHold > 0) {
+            Game.cameraHold--;
         }
 
         // Normal gameplay update
@@ -3949,6 +4233,12 @@
         // Check spike trap hazards
         checkSpikeTraps();
 
+        // Crumbling floor hazard
+        updateCrumblingTiles();
+
+        // Poison mushroom hazard
+        updatePoisonMushroom();
+
         // Pass 4E: Check examine objects
         checkExamineObjects();
 
@@ -4001,8 +4291,14 @@
 
         if (!Game.currentRoom) return;
 
+        // Parallax background layer (subtle depth effect)
+        renderParallaxBG(ctx);
+
         // Render map tiles
         renderMap(ctx, Game.currentRoom);
+
+        // Crumbling floor tile overlay
+        renderCrumblingTiles(ctx);
 
         // Torch warm glow (drawn on top of map, under entities)
         renderTorchGlow(ctx, Game.currentRoom);
@@ -4041,13 +4337,20 @@
             }
         }
 
-        // Render heart drops
+        // Render heart drops (with scale-pulse animation)
         for (var h = 0; h < Game.heartDrops.length; h++) {
             var hd = Game.heartDrops[h];
             var bob = Math.sin((hd.bobTimer || 0) * 0.1) * 2;
             // Blink if about to despawn
             if (hd.life < 60 && Game.frame % 4 < 2) continue;
-            safeDraw(ctx, 'item_heart', hd.x, hd.y + bob);
+            // Scale pulse: oscillate between 0.9 and 1.1 using bobTimer
+            var hdPulse = Math.sin((hd.bobTimer || 0) * 0.15);
+            if (hdPulse > 0.5) {
+                // Draw 1px larger (shift draw by -1, -1)
+                safeDraw(ctx, 'item_heart', hd.x - 1, hd.y + bob - 1);
+            } else {
+                safeDraw(ctx, 'item_heart', hd.x, hd.y + bob);
+            }
         }
 
         // Sort enemies by Y for painter's algorithm, then render
@@ -4338,6 +4641,14 @@
                 Particles.ring(W / 2, H / 2, 80, 40, C.paleBlue);
             }
 
+            // Phase 4b: Bargnot reaches out (frames 75-89)
+            if (Game.bossDeathTimer >= 75 && Game.bossDeathTimer < 90) {
+                Game._bossReachOut = true;
+            }
+            if (Game.bossDeathTimer === 90) {
+                Game._bossReachOut = false;
+            }
+
             // Phase 5: Bargnot's last words (frame 90)
             if (Game.bossDeathTimer === 90) {
                 Game.bossDialogueStage = 1;
@@ -4364,6 +4675,9 @@
 
         if (!Game.currentRoom) return;
 
+        // Parallax background layer (subtle depth effect)
+        renderParallaxBG(ctx);
+
         // Render map tiles
         renderMap(ctx, Game.currentRoom);
 
@@ -4386,12 +4700,17 @@
             }
         }
 
-        // Render heart drops
+        // Render heart drops (with scale-pulse animation)
         for (var h = 0; h < Game.heartDrops.length; h++) {
             var hd = Game.heartDrops[h];
             var bob = Math.sin((hd.bobTimer || 0) * 0.1) * 2;
             if (hd.life < 60 && Game.frame % 4 < 2) continue;
-            safeDraw(ctx, 'item_heart', hd.x, hd.y + bob);
+            var hdPulse2 = Math.sin((hd.bobTimer || 0) * 0.15);
+            if (hdPulse2 > 0.5) {
+                safeDraw(ctx, 'item_heart', hd.x - 1, hd.y + bob - 1);
+            } else {
+                safeDraw(ctx, 'item_heart', hd.x, hd.y + bob);
+            }
         }
 
         // Render enemies (sorted by Y)
@@ -4405,6 +4724,25 @@
             }
         }
 
+        // Boss charge floor-tile telegraph
+        if (Game.boss && !Game.boss.dead && Game.boss.state === 'charge' && Game.boss.stateTimer > Game.boss._chargeWindup) {
+            // Telegraph phase: draw flashing red rectangles along the charge lane
+            var chargeAngle = Game.boss._chargeAngle || 0;
+            var bossCX = Game.boss.x + Game.boss.w / 2;
+            var bossCY = Game.boss.y + Game.boss.h / 2;
+            var flashVisible = Math.floor(Game.frame / 4) % 2 === 0;
+            if (flashVisible) {
+                ctx.fillStyle = 'rgba(200,40,40,0.35)';
+                for (var tStep = 1; tStep <= 12; tStep++) {
+                    var telegX = bossCX + Math.cos(chargeAngle) * tStep * TILE;
+                    var telegY = bossCY + Math.sin(chargeAngle) * tStep * TILE;
+                    // Clamp to screen
+                    if (telegX < -TILE || telegX > W + TILE || telegY < -TILE || telegY > H + TILE) break;
+                    ctx.fillRect(Math.floor(telegX - TILE * 1.5), Math.floor(telegY - TILE / 2), TILE * 3, TILE);
+                }
+            }
+        }
+
         // Render boss (with death animation effects)
         if (Game.boss && Game.boss.render) {
             if (Game.boss.dead && Game.bossDeathTimer > 0) {
@@ -4414,7 +4752,19 @@
                 var deathAlpha = Game.bossDeathTimer < 65 ? 1 : Math.max(0, 1 - (Game.bossDeathTimer - 65) / 25);
                 ctx.globalAlpha = deathAlpha;
                 if (!deathFlicker) {
-                    Game.boss.render(ctx);
+                    // Boss reaches out toward player during frames 75-89
+                    if (Game._bossReachOut && Game.player) {
+                        ctx.save();
+                        var reachDx = Game.player.x - Game.boss.x;
+                        var reachAngle = reachDx > 0 ? 0.15 : -0.15;
+                        ctx.translate(Game.boss.x + Game.boss.w / 2, Game.boss.y + Game.boss.h / 2);
+                        ctx.rotate(reachAngle);
+                        ctx.translate(-(Game.boss.x + Game.boss.w / 2), -(Game.boss.y + Game.boss.h / 2));
+                        Game.boss.render(ctx);
+                        ctx.restore();
+                    } else {
+                        Game.boss.render(ctx);
+                    }
                 }
                 ctx.globalAlpha = 1;
             } else {
@@ -5625,7 +5975,8 @@
         if (Game.flags.puzzleScepter) safeDraw(ctx, 'item_scepter', relicX + 24, relicY);
         else { ctx.fillStyle = 'rgba(60,60,80,0.5)'; ctx.fillRect(relicX + 24, relicY, 12, 12); }
 
-        // Menu items
+        // Menu items with icons
+        var pauseIconKeys = ['icon_resume', 'icon_controls', 'icon_bestiary', 'icon_quit'];
         var menuStartY = frameY + 78;
         for (var i = 0; i < PAUSE_MENU_ITEMS.length; i++) {
             var label = PAUSE_MENU_ITEMS[i];
@@ -5642,8 +5993,11 @@
                 Utils.drawText(ctx, '>', frameX + 10 + arrowBounce, itemY, C.gold, 1);
             }
 
+            // Draw 8x8 icon before label text
+            safeDraw(ctx, pauseIconKeys[i], frameX + 12, itemY - 1);
+
             var labelColor = isSelected ? C.white : C.lightGray;
-            Utils.drawText(ctx, label, frameX + 22, itemY, labelColor, 1);
+            Utils.drawText(ctx, label, frameX + 32, itemY, labelColor, 1);
         }
 
         // Play time
@@ -6015,6 +6369,13 @@
         Game.spikeTimer = 0;
         Game.torchReacts = [];
         Game.doorAnimTimer = 0;
+
+        // New feature resets
+        Game._healAnimTimers = [];
+        Game.crumblingTiles = [];
+        Game._poisonMushroomCD = 0;
+        Game.slowMotion = 0;
+        Game.cameraHold = 0;
 
         Particles.particles = [];
 

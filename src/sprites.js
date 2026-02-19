@@ -143,6 +143,28 @@
           '.ooo....ooo.'
         ];
 
+        // Attack wind-up: weapon pulls to LEFT side, body leans back
+        var downAtk1 = [
+          '....hhhh....',
+          '...hhhhhh...',
+          '..hhhhhhHH..',
+          '..hhshksHH..',
+          '..hhssssHH..',
+          '...ssmsss...',
+          'ww.aaaaaaa..',   // weapon on left side (wind-up)
+          'ww.aAbbAaa..',
+          '..aabbbbaa..',
+          '..aabbbbaa..',
+          '...aBBBBa...',
+          '...bbbbbb...',
+          '...dd..dd...',
+          '...dd..dd...',
+          '...dd..dd...',
+          '..ddd..ddd..',
+          '..ooo..ooo..',
+          '..ooo..ooo..'
+        ];
+
         // Attack: arm extended with weapon(w)
         var downAtk = [
           '....hhhh....',
@@ -156,6 +178,28 @@
           '..aabbbba...',
           '..aabbbba...',
           '...aBBBBa...',
+          '...bbbbbb...',
+          '...dd..dd...',
+          '...dd..dd...',
+          '...dd..dd...',
+          '..ddd..ddd..',
+          '..ooo..ooo..',
+          '..ooo..ooo..'
+        ];
+
+        // Attack recovery: weapon drops lower, arm returning to side
+        var downAtk2 = [
+          '....hhhh....',
+          '...hhhhhh...',
+          '..hhhhhhHH..',
+          '..hhshksHH..',
+          '..hhssssHH..',
+          '...ssmsss...',
+          '..aaaaaaa...',   // arm back near body
+          '..aaAbbAaa..',
+          '..aabbbbaa..',
+          '..aabbbbaww.',   // weapon lowered at side
+          '...aBBBBaww.',
           '...bbbbbb...',
           '...dd..dd...',
           '...dd..dd...',
@@ -208,6 +252,28 @@
           '.ooo....ooo.'
         ];
 
+        // Up attack wind-up: weapon pulls to left behind body
+        var upAtk1 = [
+          '....hhhh....',
+          '...hhhhhh...',
+          '..hhhhhhhh..',
+          '..hhhhhhhh..',
+          '..hhhhhhHH..',
+          '...hhhhhhH..',
+          'ww.aaaaaaa..',   // weapon on left side (wind-up)
+          'ww.aAaaAaa..',
+          '..aabbbba...',
+          '..aabbbba...',
+          '...aBBBBa...',
+          '...bbbbbb...',
+          '...dd..dd...',
+          '...dd..dd...',
+          '...dd..dd...',
+          '..ddd..ddd..',
+          '..ooo..ooo..',
+          '..ooo..ooo..'
+        ];
+
         var upAtk = [
           '....hhhh....',
           '...hhhhhh...',
@@ -220,6 +286,28 @@
           '..aabbbba...',
           '..aabbbba...',
           '...aBBBBa...',
+          '...bbbbbb...',
+          '...dd..dd...',
+          '...dd..dd...',
+          '...dd..dd...',
+          '..ddd..ddd..',
+          '..ooo..ooo..',
+          '..ooo..ooo..'
+        ];
+
+        // Up attack recovery: weapon lowered, arm returning
+        var upAtk2 = [
+          '....hhhh....',
+          '...hhhhhh...',
+          '..hhhhhhhh..',
+          '..hhhhhhhh..',
+          '..hhhhhhHH..',
+          '...hhhhhhH..',
+          '..aaaaaaa...',   // arm back near body
+          '..aaAaaAaa..',
+          '..aabbbba...',
+          '..aabbbbaww.',   // weapon lowered at side
+          '...aBBBBaww.',
           '...bbbbbb...',
           '...dd..dd...',
           '...dd..dd...',
@@ -272,6 +360,28 @@
           '..ooo...ooo.'
         ];
 
+        // Right attack wind-up: weapon pulled back behind body
+        var rightAtk1 = [
+          '.....hhhh...',
+          '....hhhhhh..',
+          '...hhhhhhhH.',
+          '...hhshkhsH.',
+          '...hhssssHH.',
+          '....ssmsss..',
+          'ww.aaaaaaa..',   // weapon behind body (wind-up)
+          'ww.aAbbbbaa.',
+          '..aabbbbbaa.',
+          '..aabbbbbaa.',
+          '...aBBBBa...',
+          '....bbbbb...',
+          '....dd.dd...',
+          '....dd.dd...',
+          '....dd.dd...',
+          '...ddd.ddd..',
+          '...ooo.ooo..',
+          '...ooo.ooo..'
+        ];
+
         // Attack right: arm + weapon extended
         var rightAtk = [
           '.....hhhh...',
@@ -294,11 +404,33 @@
           '...ooo.ooo..'
         ];
 
+        // Right attack recovery: weapon lowered, arm returning
+        var rightAtk2 = [
+          '.....hhhh...',
+          '....hhhhhh..',
+          '...hhhhhhhH.',
+          '...hhshkhsH.',
+          '...hhssssHH.',
+          '....ssmsss..',
+          '...aaaaaaa..',   // arm back near body
+          '..aaAbbbbaa.',
+          '..aabbbbbaa.',
+          '..aabbbbbaa.',
+          '...aBBBBa...',
+          '....bbbbbww.',   // weapon lowered at side
+          '....dd.ddww.',
+          '....dd.dd...',
+          '....dd.dd...',
+          '...ddd.ddd..',
+          '...ooo.ooo..',
+          '...ooo.ooo..'
+        ];
+
         // Build all frames
         var frames = {
-          down_0: down0, down_1: down1, down_atk: downAtk,
-          up_0: up0, up_1: up1, up_atk: upAtk,
-          right_0: right0, right_1: right1, right_atk: rightAtk
+          down_0: down0, down_1: down1, down_atk_1: downAtk1, down_atk: downAtk, down_atk_2: downAtk2,
+          up_0: up0, up_1: up1, up_atk_1: upAtk1, up_atk: upAtk, up_atk_2: upAtk2,
+          right_0: right0, right_1: right1, right_atk_1: rightAtk1, right_atk: rightAtk, right_atk_2: rightAtk2
         };
 
         for (var key in frames) {
@@ -622,6 +754,52 @@
         ctx.fillRect(12, 0, 3, 3);
       });
 
+      // Goblin attack wind-up (telegraph): club pulled back behind body
+      S.create('goblin_atk_1', 16, 16, function (ctx) {
+        dp(ctx, [
+          '....GGGG....',
+          '...GgGGgG...',
+          '...GrGGrG...',   // red eyes in dark face
+          '...GgggGG...',
+          '....gggg....',   // neck
+          '..bgggggb...',   // torso with arms
+          '..bgggggb...',
+          '...tBBBt....',   // belt/loincloth
+          '...tgggt....',
+          '....gg.gg...',   // legs
+          '....gg.gg...',
+          '...BBB.BBB..',   // boots
+        ], gPal, 2, 2);
+        // weapon: club pulled back to left (telegraph)
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(0, 4, 6, 2);
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(0, 3, 3, 3);
+      });
+
+      // Goblin attack recovery (slam): club slammed down low
+      S.create('goblin_atk_2', 16, 16, function (ctx) {
+        dp(ctx, [
+          '....GGGG....',
+          '...GgGGgG...',
+          '...GrGGrG...',   // red eyes
+          '...GgggGG...',
+          '....gggg....',   // neck
+          '..bgggggb...',   // torso
+          '..bgggggb...',
+          '...tBBBt....',   // belt
+          '...tgggt....',
+          '....gg.gg...',   // legs
+          '....gg.gg...',
+          '...BBB.BBB..',   // boots
+        ], gPal, 2, 2);
+        // weapon: club slammed down to ground level, arm returning
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(13, 10, 2, 5);
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(12, 14, 4, 2);
+      });
+
       // --- Spinecleaver (larger goblin warrior with blade) ---
       // Bulkier goblin with war paint, armor plates, and a large cleaver.
       var sPal = { g: P.darkGreen, G: P.black, r: P.red, b: P.darkBrown, w: P.white, k: P.darkGray, B: P.darkBrown, a: P.gray };
@@ -703,7 +881,9 @@
       // Aliases for enemy types that use goblin/spinecleaver base
       S.cache['goblin_lackey_0'] = S.cache['goblin_0'];
       S.cache['goblin_lackey_1'] = S.cache['goblin_1'];
+      S.cache['goblin_lackey_atk_1'] = S.cache['goblin_atk_1'];
       S.cache['goblin_lackey_atk'] = S.cache['goblin_atk'];
+      S.cache['goblin_lackey_atk_2'] = S.cache['goblin_atk_2'];
 
       // =================================================================
       // BOSS SPRITES (32x32 - Queen Bargnot)
@@ -905,6 +1085,28 @@
         ctx.fillStyle = P.lightGreen;
         ctx.fillRect(6, 3, 2, 1);
         ctx.fillRect(5, 4, 1, 1);
+      });
+
+      // Tree variant 1: slightly different canopy shape for variety
+      mt('tree_1', function (ctx) {
+        // Background grass
+        fill(ctx, P.lightGreen);
+        dots(ctx, P.green, 6);
+        // Trunk (centered, narrow)
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(6, 10, 4, 6);
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(7, 10, 2, 6);
+        // Canopy variant (wider, shifted, different layering)
+        circ(ctx, 8, 6, 6, P.darkGreen);
+        circ(ctx, 5, 6, 4, P.green);
+        circ(ctx, 11, 5, 3, P.green);
+        circ(ctx, 7, 3, 3, P.lightGreen);
+        circ(ctx, 10, 4, 2, P.lightGreen);
+        // Highlight shifted
+        ctx.fillStyle = P.lightGreen;
+        ctx.fillRect(5, 2, 2, 1);
+        ctx.fillRect(4, 3, 1, 1);
       });
 
       mt('bush', function (ctx) {
@@ -1123,6 +1325,50 @@
         ctx.fillRect(7, 2, 2, 3);
         ctx.fillStyle = P.white;
         ctx.fillRect(7, 3, 2, 1);
+      });
+
+      // Torch flame variant 1: flame leans left, taller
+      mt('torch_1', function (ctx) {
+        fill(ctx, P.darkStone);
+        ctx.fillStyle = P.darkGray;
+        for (var r = 0; r < 4; r++) ctx.fillRect(0, r * 4, 16, 1);
+        // Bracket
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(6, 7, 4, 2);
+        // Handle
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(7, 6, 2, 8);
+        // Flame leaning left, taller shape
+        ctx.fillStyle = P.red;
+        ctx.fillRect(5, 1, 4, 6);
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(5, 2, 4, 4);
+        ctx.fillStyle = P.yellow;
+        ctx.fillRect(6, 1, 2, 4);
+        ctx.fillStyle = P.white;
+        ctx.fillRect(6, 2, 2, 1);
+      });
+
+      // Torch flame variant 2: flame leans right, wider
+      mt('torch_2', function (ctx) {
+        fill(ctx, P.darkStone);
+        ctx.fillStyle = P.darkGray;
+        for (var r = 0; r < 4; r++) ctx.fillRect(0, r * 4, 16, 1);
+        // Bracket
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(6, 7, 4, 2);
+        // Handle
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(7, 6, 2, 8);
+        // Flame leaning right, wider shape
+        ctx.fillStyle = P.red;
+        ctx.fillRect(7, 2, 4, 5);
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(7, 3, 4, 3);
+        ctx.fillStyle = P.yellow;
+        ctx.fillRect(8, 2, 2, 3);
+        ctx.fillStyle = P.white;
+        ctx.fillRect(8, 3, 2, 1);
       });
 
       mt('chest', function (ctx) {
@@ -1679,6 +1925,77 @@
         ctx.globalAlpha = 1;
       });
 
+      // Fawks - worried expression: furrowed brow, downturned mouth
+      mp('fawks_worried', function (ctx) {
+        // Background
+        ctx.fillStyle = '#2a1a0a';
+        ctx.fillRect(0, 0, 32, 32);
+        // Shoulders/chest
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(6, 22, 20, 10);
+        ctx.fillStyle = P.lightBrown;
+        ctx.fillRect(10, 22, 12, 8); // apron
+        // Neck
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(13, 18, 6, 5);
+        // Face
+        circ(ctx, 16, 13, 7, P.skin);
+        circ(ctx, 16, 13, 6, P.paleSkin);
+        // Eyes - worried, slightly raised brows
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(13, 11, 2, 2);
+        ctx.fillRect(18, 11, 2, 2);
+        // Furrowed brows (angled inward)
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(13, 9, 3, 1);
+        ctx.fillRect(17, 9, 3, 1);
+        // Mouth - downturned frown
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(14, 17, 4, 1);
+        ctx.fillRect(13, 16, 1, 1);
+        ctx.fillRect(18, 16, 1, 1);
+        // Hair
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(10, 5, 12, 4);
+        ctx.fillRect(9, 7, 3, 4);
+        ctx.fillRect(20, 7, 3, 4);
+      });
+
+      // Helena - hopeful expression: wider eyes, slight smile, brighter face
+      mp('helena_hopeful', function (ctx) {
+        ctx.fillStyle = '#0a1a0a';
+        ctx.fillRect(0, 0, 32, 32);
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(6, 22, 20, 10);
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(14, 21, 4, 2); // chain of office
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(13, 18, 6, 5);
+        circ(ctx, 16, 13, 7, P.skin);
+        circ(ctx, 16, 13, 6, P.paleSkin);
+        // Eyes - wider, brighter (hopeful gleam)
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(12, 11, 3, 2);
+        ctx.fillRect(18, 11, 3, 2);
+        // Eye highlight (hopeful gleam)
+        ctx.fillStyle = P.white;
+        ctx.fillRect(13, 11, 1, 1);
+        ctx.fillRect(19, 11, 1, 1);
+        // Mouth - upturned smile
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(14, 16, 4, 1);
+        ctx.fillRect(13, 15, 1, 1);
+        ctx.fillRect(18, 15, 1, 1);
+        // Silver-streaked hair
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(9, 4, 14, 5);
+        ctx.fillRect(8, 7, 3, 6);
+        ctx.fillRect(21, 7, 3, 6);
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(11, 5, 2, 3);
+        ctx.fillRect(19, 5, 2, 3);
+      });
+
       // =================================================================
       // PASS 5B: TILE ART VARIANTS
       // =================================================================
@@ -1858,6 +2175,75 @@
         // Highlight
         ctx.fillStyle = P.lightBrown;
         ctx.fillRect(5, 6, 2, 4);
+      });
+
+      // =================================================================
+      // PAUSE MENU ICONS (8x8 each)
+      // =================================================================
+
+      // Resume icon - green play triangle pointing right
+      S.create('icon_resume', 8, 8, function (ctx) {
+        ctx.fillStyle = P.green;
+        ctx.beginPath();
+        ctx.moveTo(2, 1);
+        ctx.lineTo(7, 4);
+        ctx.lineTo(2, 7);
+        ctx.closePath();
+        ctx.fill();
+        // Highlight edge
+        ctx.fillStyle = P.lightGreen;
+        ctx.fillRect(2, 2, 1, 4);
+      });
+
+      // Controls icon - small gamepad outline
+      S.create('icon_controls', 8, 8, function (ctx) {
+        // Gamepad body
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(1, 2, 6, 4);
+        ctx.fillRect(0, 3, 8, 2);
+        // D-pad (left side)
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(2, 3, 1, 2);
+        ctx.fillRect(1, 4, 3, 1);
+        // Buttons (right side)
+        ctx.fillStyle = P.lightBlue;
+        ctx.fillRect(5, 3, 1, 1);
+        ctx.fillStyle = P.lightRed;
+        ctx.fillRect(6, 4, 1, 1);
+      });
+
+      // Bestiary icon - small book
+      S.create('icon_bestiary', 8, 8, function (ctx) {
+        // Book cover
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(1, 1, 6, 6);
+        // Pages
+        ctx.fillStyle = P.white;
+        ctx.fillRect(2, 2, 4, 4);
+        // Spine
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(1, 1, 1, 6);
+        // Text lines
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(3, 3, 3, 1);
+        ctx.fillRect(3, 5, 2, 1);
+      });
+
+      // Quit icon - small door
+      S.create('icon_quit', 8, 8, function (ctx) {
+        // Door frame
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(2, 0, 5, 8);
+        // Door panel
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(3, 1, 3, 6);
+        // Handle
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(5, 4, 1, 1);
+        // Arrow pointing out (exit)
+        ctx.fillStyle = P.red;
+        ctx.fillRect(0, 3, 3, 1);
+        ctx.fillRect(0, 2, 1, 3);
       });
     }
   };

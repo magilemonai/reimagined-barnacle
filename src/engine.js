@@ -588,6 +588,28 @@
           this._osc('square', 800 + Math.random() * 200, gain, t, t + 0.015);
           break;
 
+        // ---- Per-speaker dialogue pitch sounds ----
+        case 'dialogue_low':
+          gain = this._gain(0.06);
+          gain.gain.setValueAtTime(0.06 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.02);
+          this._osc('square', 500 + Math.random() * 100, gain, t, t + 0.02);
+          break;
+
+        case 'dialogue_deep':
+          gain = this._gain(0.05);
+          gain.gain.setValueAtTime(0.05 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.025);
+          this._osc('triangle', 300 + Math.random() * 80, gain, t, t + 0.025);
+          break;
+
+        case 'dialogue_soft':
+          gain = this._gain(0.04);
+          gain.gain.setValueAtTime(0.04 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.018);
+          this._osc('sine', 900 + Math.random() * 150, gain, t, t + 0.018);
+          break;
+
         // ---- Pass 8C: Boss phase transition boom ----
         case 'phase_boom':
           gain = this._gain(0.9);
@@ -851,6 +873,33 @@
           gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
           this._osc('square', 400, gain, t, t + 0.1);
           this._osc('square', 300, gain, t + 0.1, t + 0.2);
+          break;
+
+        // ---- Crumble: crumbling floor noise + low rumble (300ms) ----
+        case 'crumble':
+          gain = this._gain(0.25);
+          gain.gain.setValueAtTime(0.25 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+          this._noise(0.3, gain, t);
+          osc = this.ctx.createOscillator();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(100, t);
+          osc.frequency.exponentialRampToValueAtTime(40, t + 0.3);
+          var crumbleGain = this._gain(0.15);
+          crumbleGain.gain.setValueAtTime(0.15 * this.masterVolume, t);
+          crumbleGain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+          osc.connect(crumbleGain);
+          osc.start(t);
+          osc.stop(t + 0.3);
+          break;
+
+        // ---- Poison: mushroom poison effect (150ms) ----
+        case 'poison':
+          gain = this._gain(0.12);
+          gain.gain.setValueAtTime(0.12 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+          this._osc('sine', 200 + Math.random() * 50, gain, t, t + 0.08);
+          this._noise(0.15, gain, t);
           break;
 
         default:

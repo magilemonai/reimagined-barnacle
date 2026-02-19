@@ -167,13 +167,13 @@
     ],
 
     boss_phase3: [
-      { speaker: 'Bargnot', text: 'I can feel it... oh gods, I can feel it... this is too much... NO. I WILL NOT STOP.' },
+      { speaker: 'Bargnot', text: 'I can feel it... oh gods, I can feel it... this is too much... NO. I WILL NOT STOP.', speed: 1 },
       { speaker: 'Bargnot', text: 'THE SHADOW IS MINE TO COMMAND! MINE!' }
     ],
 
     boss_defeat: [
-      { speaker: 'Bargnot', text: 'The shadow... it\'s pulling me apart... I only wanted... my people to be safe...' },
-      { speaker: 'Bargnot', text: 'Was I wrong...?' }
+      { speaker: 'Bargnot', text: 'The shadow... it\'s pulling me apart... I only wanted... my people to be safe...', speed: 1, emotion: 'desperate' },
+      { speaker: 'Bargnot', text: 'Was I wrong...?', speed: 1, emotion: 'desperate' }
     ],
 
     // -----------------------------------------------------------------
@@ -190,7 +190,7 @@
       { speaker: 'Nitriti', text: 'I am Nitriti. I was the silence between stars, once. Before Bargnot broke what she could not understand.', scene: 'nitriti' },
       { speaker: 'Nitriti', text: 'She was not evil. Only desperate. Remember that, when you tell this story.', scene: 'darkness' },
       { speaker: 'Nitriti', text: 'But the Bonemoon rises. Smaldge was only a whisper of the true darkness gathering beyond the veil.', scene: 'darkness' },
-      { speaker: 'Nitriti', text: 'Seek the Eldspyre -- the source of all magic. You will need its light before the end.', scene: 'eldspyre' }
+      { speaker: 'Nitriti', text: 'Seek the Eldspyre -- the source of all magic. You will need its light before the end.', scene: 'eldspyre', speed: 1 }
     ],
 
     ending_final: [
@@ -555,6 +555,19 @@
       this._punctPause = 0;
       this._onComplete = onComplete || null;
       this.active = true;
+
+      // Per-speaker typewriter pitch
+      var firstSpeaker = data[0] ? data[0].speaker : '';
+      if (firstSpeaker === 'Bargnot') {
+        this._speakerPitch = 0.7;
+      } else if (firstSpeaker === 'Que\'Rubra') {
+        this._speakerPitch = 0.5;
+      } else if (firstSpeaker === '') {
+        this._speakerPitch = 1.2;
+      } else {
+        this._speakerPitch = 1.0;
+      }
+
       this._computeRows();
     },
 
@@ -673,7 +686,7 @@
       if (!line) return;
 
       // Fast-forward: holding Z doubles text speed
-      var speed = this.CHAR_SPEED;
+      var speed = line.speed || this.CHAR_SPEED;
       if (window.Input && window.Input.keys && window.Input.keys['z']) {
         speed = 1;
       }
@@ -689,7 +702,22 @@
             this.charTimer = 0;
             this.displayedChars++;
             if (this.displayedChars % 2 === 0 && window.GameAudio) {
-              window.GameAudio.play('dialogue');
+              // Per-speaker typewriter pitch: play oscillator tone at frequency based on speaker
+              // Bargnot = 0.7, Que'Rubra = 0.5, narrator = 1.2, default = 1.0
+              if (window.GameAudio.ctx) {
+                var pitch = this._speakerPitch || 1.0;
+                var osc = window.GameAudio.ctx.createOscillator();
+                var gain = window.GameAudio.ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.value = 800 * pitch;
+                gain.gain.value = 0.06;
+                osc.connect(gain);
+                gain.connect(window.GameAudio.ctx.destination);
+                osc.start();
+                osc.stop(window.GameAudio.ctx.currentTime + 0.015);
+              } else {
+                window.GameAudio.play('dialogue');
+              }
             }
 
             // Check for punctuation pauses after revealing a character
@@ -817,9 +845,18 @@
         ctx.lineWidth = 1;
         ctx.strokeRect(portraitX - 0.5, portraitY - 0.5, portraitSize + 1, portraitSize + 1);
 
-        // Look up portrait sprite by speaker name
+        // Look up portrait sprite by speaker name, with emotion variant support
         var portraitKey = PORTRAIT_MAP[line.speaker];
-        var portraitSprite = portraitKey && window.Sprites ? window.Sprites.get(portraitKey) : null;
+        var portraitSprite = null;
+        if (portraitKey && window.Sprites) {
+          if (line.emotion) {
+            var emotionKey = portraitKey + '_' + line.emotion;
+            portraitSprite = window.Sprites.get(emotionKey);
+          }
+          if (!portraitSprite) {
+            portraitSprite = window.Sprites.get(portraitKey);
+          }
+        }
 
         if (portraitSprite) {
           ctx.imageSmoothingEnabled = false;
@@ -872,11 +909,18 @@
         var visibleRow = rowText.substring(0, visibleLen);
         charsLeft = Math.max(0, charsLeft - rowText.length - 1);
 
+        // Loud text shake: if speaker is Bargnot and text has 3+ uppercase sequences,
+        // apply a sin-based y offset to simulate shaking
+        var rowY = textStartY + (r - pageStart) * ROW_HEIGHT;
+        if (line.speaker === 'Bargnot' && /[A-Z]{3,}/.test(visibleRow)) {
+          rowY += Math.sin(this._blinkTimer * 0.5) * 1;
+        }
+
         window.Utils.drawText(
           ctx,
           visibleRow,
           TEXT_X,
-          textStartY + (r - pageStart) * ROW_HEIGHT,
+          rowY,
           '#f0f0f0',
           1
         );

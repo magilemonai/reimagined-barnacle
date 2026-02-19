@@ -407,12 +407,12 @@
             [TW,  TF,  TF,  TW,  TF,  TF,  TF,  TF,  TF,  TF,  TF,  TF,  TW,  TF,  TF,  TW ],  // row 1
             [TW,  TF,  TF,  TW,  To,  TF,  TF,  TF,  TF,  TF,  TF,  To,  TW,  TF,  TF,  TW ],  // row 2  - top alcove (scepter)
             [TW,  TF,  Ch,  TW,  Pi,  TF,  TF,  TF,  TF,  TF,  TF,  Pi,  TW,  Ch,  TF,  TW ],  // row 3  - chests in side alcoves
-            [TW,  TF,  TF,  TW,  TW,  TW,  Pi,  TF,  TF,  Pi,  TW,  TW,  TW,  TF,  TF,  TW ],  // row 4  - alcove walls
-            [TW,  TF,  TF,  TW,  TW,  TF,  TF,  Cp,  Cp,  TF,  TF,  TW,  TW,  TF,  TF,  TW ],  // row 5  - carpet leads to statue
-            [TW,  TF,  TF,  TF,  TF,  To,  TF,  Cp,  Cp,  TF,  To,  TF,  TF,  TF,  TF,  TW ],  // row 6  - torches set back from statue
-            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Al,  Al,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 7  - STATUE PLATFORM: altar center, open approach
-            [TW,  TF,  TF,  TF,  TF,  To,  TF,  Cp,  Cp,  TF,  To,  TF,  TF,  TF,  TF,  TW ],  // row 8  - torches set back below
-            [TW,  To,  TF,  TF,  Pi,  TF,  TF,  Cp,  Cp,  TF,  TF,  Pi,  TF,  TF,  To,  TW ],  // row 9  - carpet continues south
+            [TW,  TF,  TF,  TW,  TW,  TW,  TF,  TF,  TF,  TF,  TW,  TW,  TW,  TF,  TF,  TW ],  // row 4  - alcove walls (no pillars blocking path)
+            [TW,  TF,  TF,  TW,  TW,  TF,  TF,  Cp,  Cp,  TF,  TF,  TW,  TW,  TF,  TF,  TW ],  // row 5  - carpet leads to altar
+            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 6  - wide open approach
+            [TW,  To,  TF,  TF,  TF,  TF,  TF,  Al,  Al,  TF,  TF,  TF,  TF,  TF,  To,  TW ],  // row 7  - ALTAR CENTER: torches at walls for atmosphere
+            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 8  - wide open below
+            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 9  - carpet continues south
             [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 10
             [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 11
             [TW,  TW,  TW,  TW,  TW,  TF,  TF,  Cp,  Cp,  TF,  TF,  TW,  TW,  TW,  TW,  TW ],  // row 12

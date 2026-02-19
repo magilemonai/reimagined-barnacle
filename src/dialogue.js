@@ -240,7 +240,7 @@
     // -----------------------------------------------------------------
 
     statue_interaction: [
-      { speaker: 'Statue', text: 'A weathered stone statue. The face has been defaced by goblin claws. It once depicted Nitriti.' }
+      { speaker: 'Statue', text: 'A weathered stone statue. The face has been defaced by goblin claws. The inscription reads: Izuriel Sakazarac.' }
     ],
 
     // -----------------------------------------------------------------
@@ -414,7 +414,7 @@
     ],
 
     examine_puzzle_statue: [
-      { speaker: '', text: 'The altar of Nitriti. Three gem-shaped slots are carved into the stone -- one for a crown, one for a cape, one for a scepter. Bring all three relics here.' }
+      { speaker: '', text: 'An ancient altar bearing the mark of Izuriel Sakazarac. Three gem-shaped slots are carved into the stone -- one for a crown, one for a cape, one for a scepter.' }
     ],
 
     examine_bones: [
@@ -459,7 +459,7 @@
     'Svana':       'portrait_svana',
     'Que\'Rubra':  'portrait_querubra',
     'Bargnot':     'portrait_bargnot',
-    'Rorik':       'portrait_braxon',  // Rorik reuses braxon portrait (dwarf)
+    'Rorik':       'portrait_rorik',
     'Nitriti':     'portrait_nitriti',
     'Statue':      'portrait_statue'
   };

@@ -1771,6 +1771,59 @@
         ctx.fillRect(9, 3, 14, 5);
       });
 
+      // Rorik - red-haired dwarf with a magnificent beard
+      mp('rorik', function (ctx) {
+        ctx.fillStyle = '#2a1008';
+        ctx.fillRect(0, 0, 32, 32);
+        // Broad shoulders - chain mail
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(4, 22, 24, 10);
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(6, 23, 20, 6); // chain mail detail
+        // Neck
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(13, 17, 6, 6);
+        // Head
+        circ(ctx, 16, 12, 8, P.skin);
+        circ(ctx, 16, 12, 7, P.paleSkin);
+        // Eyes — determined
+        ctx.fillStyle = '#204080';
+        ctx.fillRect(12, 10, 2, 2);
+        ctx.fillRect(18, 10, 2, 2);
+        // Thick red eyebrows
+        ctx.fillStyle = '#c03010';
+        ctx.fillRect(11, 8, 4, 1);
+        ctx.fillRect(17, 8, 4, 1);
+        // MASSIVE red beard — cascades down the chest
+        ctx.fillStyle = '#b03020';
+        ctx.fillRect(10, 14, 12, 8);  // main beard block
+        ctx.fillRect(9, 15, 14, 7);   // wider mid-section
+        ctx.fillRect(8, 17, 16, 4);   // widest part at bottom
+        // Beard highlights
+        ctx.fillStyle = '#d04830';
+        ctx.fillRect(11, 15, 10, 3);
+        ctx.fillRect(10, 17, 12, 2);
+        // Beard detail — braided strands
+        ctx.fillStyle = '#901810';
+        ctx.fillRect(12, 20, 2, 2);
+        ctx.fillRect(18, 20, 2, 2);
+        ctx.fillRect(15, 21, 2, 2);
+        // Red hair — wild and thick
+        ctx.fillStyle = '#b03020';
+        ctx.fillRect(8, 3, 16, 5);
+        ctx.fillRect(7, 5, 3, 5);
+        ctx.fillRect(22, 5, 3, 5);
+        // Hair highlights
+        ctx.fillStyle = '#d04830';
+        ctx.fillRect(10, 3, 4, 2);
+        ctx.fillRect(18, 3, 4, 2);
+        // Nose — broad dwarf nose
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(14, 12, 4, 2);
+        ctx.fillStyle = '#c8a088';
+        ctx.fillRect(15, 13, 2, 1);
+      });
+
       // Soren - tabaxi monk, cat features
       mp('soren', function (ctx) {
         ctx.fillStyle = '#1a1a2a';
@@ -2070,56 +2123,71 @@
         ctx.globalAlpha = 1;
       });
 
-      // Statue — weathered stone face, defaced by goblin claws. Cracked,
-      // ancient, with hollow eyes that still hold a faint violet glow.
+      // Statue — depicts Izuriel Sakazarac, the Sun-King. A regal elf face
+      // carved in stone, imperious and sharp-featured. Damaged by goblin claws
+      // but still imposing. Pointed ears, high cheekbones, narrow cold eyes.
       mp('statue', function (ctx) {
         // Dark stone background
         ctx.fillStyle = '#1a1a1a';
         ctx.fillRect(0, 0, 32, 32);
-        // Stone face shape
+        // Stone face shape — elven, angular
         ctx.fillStyle = P.darkGray;
-        ctx.fillRect(8, 3, 16, 20);
-        ctx.fillRect(10, 1, 12, 3);
+        ctx.fillRect(9, 2, 14, 20);
         circ(ctx, 16, 12, 8, P.gray);
         circ(ctx, 16, 12, 7, P.lightGray);
+        // High cheekbones — angular elven features
+        ctx.fillStyle = '#b0b0b8';
+        ctx.fillRect(10, 12, 4, 2);
+        ctx.fillRect(18, 12, 4, 2);
+        // Pointed ears — elven
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(7, 9, 3, 5);
+        ctx.fillRect(22, 9, 3, 5);
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(8, 10, 1, 3);
+        ctx.fillRect(23, 10, 1, 3);
+        // Eyes — narrow, imperious, with faint golden glow
+        ctx.fillStyle = '#1a1a2a';
+        ctx.fillRect(12, 10, 3, 2);
+        ctx.fillRect(18, 10, 3, 2);
+        ctx.fillStyle = '#a08020';
+        ctx.fillRect(13, 10, 1, 1);
+        ctx.fillRect(19, 10, 1, 1);
         // Claw damage — scratches across the face
         ctx.fillStyle = P.darkGray;
-        ctx.fillRect(10, 8, 1, 6);
-        ctx.fillRect(11, 9, 1, 5);
-        ctx.fillRect(20, 7, 1, 7);
-        ctx.fillRect(21, 8, 1, 5);
-        ctx.fillRect(14, 6, 1, 4);
-        // Eyes — hollow sockets with faint violet glow
-        ctx.fillStyle = '#1a1a2a';
-        ctx.fillRect(12, 10, 3, 3);
-        ctx.fillRect(18, 10, 3, 3);
-        // Faint violet glow deep in sockets
-        ctx.fillStyle = '#6040a0';
-        ctx.fillRect(13, 11, 1, 1);
-        ctx.fillRect(19, 11, 1, 1);
-        // Nose — broken/chipped
+        ctx.fillRect(10, 8, 1, 5);
+        ctx.fillRect(20, 7, 1, 6);
+        ctx.fillRect(14, 5, 1, 3);
+        // Nose — straight, patrician
         ctx.fillStyle = P.gray;
         ctx.fillRect(15, 13, 2, 2);
+        // Mouth — thin, cold line
         ctx.fillStyle = P.darkGray;
-        ctx.fillRect(16, 13, 1, 1);
-        // Mouth — carved line, partially damaged
-        ctx.fillStyle = P.darkGray;
-        ctx.fillRect(13, 17, 6, 1);
+        ctx.fillRect(14, 17, 4, 1);
+        // Crown remnant — sun-shaped diadem, partially broken
+        ctx.fillStyle = '#a08020';
+        ctx.fillRect(11, 2, 10, 2);
+        ctx.fillRect(14, 0, 4, 3);
+        ctx.fillRect(10, 3, 2, 2);
+        ctx.fillRect(20, 3, 2, 2);
+        // Sun ray fragments
+        ctx.fillStyle = '#806018';
+        ctx.fillRect(12, 1, 1, 2);
+        ctx.fillRect(19, 1, 1, 2);
         // Cracks radiating outward
         ctx.fillStyle = '#4a4a4a';
         ctx.fillRect(9, 14, 1, 1);
         ctx.fillRect(22, 13, 1, 1);
         ctx.fillRect(11, 19, 1, 1);
-        ctx.fillRect(20, 18, 1, 1);
         // Base/pedestal
         ctx.fillStyle = P.darkGray;
         ctx.fillRect(6, 22, 20, 4);
         ctx.fillStyle = P.gray;
         ctx.fillRect(8, 22, 16, 1);
-        // Faint glow emanating from base
-        ctx.globalAlpha = 0.15;
-        ctx.fillStyle = '#8060c0';
-        ctx.fillRect(6, 20, 20, 8);
+        // Faint golden glow from the sun crown
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#c0a040';
+        ctx.fillRect(8, 0, 16, 8);
         ctx.globalAlpha = 1;
       });
 

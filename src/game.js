@@ -1163,10 +1163,11 @@
     function updatePoisonMushroom() {
         if (!Game.player || !Game.currentRoom || !Game.currentRoom.tiles) return;
 
-        // Check if player is within 12px of any MUSHROOM tile
+        // Check if player is within 14px of any MUSHROOM tile
         var px = Game.player.x + Game.player.w / 2;
         var py = Game.player.y + Game.player.h / 2;
         var nearMushroom = false;
+        var closestMX = 0, closestMY = 0;
 
         // Check surrounding tiles (3x3 grid around player)
         for (var dy = -1; dy <= 1; dy++) {
@@ -1179,17 +1180,19 @@
                     var mx = checkCol * TILE + TILE / 2;
                     var my = checkRow * TILE + TILE / 2;
                     var dist = Math.sqrt((px - mx) * (px - mx) + (py - my) * (py - my));
-                    if (dist < 12) {
+                    if (dist < 14) {
                         nearMushroom = true;
-                        // Green cloud particle puff
-                        if (Game.frame % 20 === 0) {
-                            Particles.add(mx + (Math.random() - 0.5) * 6, my - 4, {
-                                vx: (Math.random() - 0.5) * 0.3,
-                                vy: -(0.2 + Math.random() * 0.3),
-                                life: 25,
-                                color: '#40a040',
-                                size: 2,
-                                gravity: -0.01
+                        closestMX = mx;
+                        closestMY = my;
+                        // Continuous spore cloud — much more visible
+                        if (Game.frame % 6 === 0) {
+                            Particles.add(mx + (Math.random() - 0.5) * 10, my - 2, {
+                                vx: (Math.random() - 0.5) * 0.5,
+                                vy: -(0.3 + Math.random() * 0.4),
+                                life: 35,
+                                color: Utils.choice(['#40a040', '#60c060', '#308030']),
+                                size: Utils.choice([1, 2, 2]),
+                                gravity: -0.02
                             });
                         }
                         break;
@@ -1200,6 +1203,9 @@
         }
 
         if (nearMushroom) {
+            // Warning: green tint overlay while near mushroom
+            Game._poisonNear = true;
+
             if (Game._poisonMushroomCD <= 0) {
                 // Deal poison damage every 90 frames
                 var poisonDmg = 1;
@@ -1208,15 +1214,22 @@
                     Game.player.hp -= poisonDmg;
                     Game.player.invincible = 15;
                     Game.player._wasHurt = true;
+                    Audio.play('poison');
                     spawnFloatingText(Game.player.x + 2, Game.player.y - 4, poisonDmg, '#40a040');
-                    // Green poison puff
-                    Particles.burst(Game.player.x + 8, Game.player.y + 4, 6, '#40a040');
+                    // Bigger green poison puff
+                    Particles.burst(Game.player.x + 8, Game.player.y + 4, 12, '#40a040');
+                    Particles.burst(closestMX, closestMY - 4, 8, '#60c060');
+                    // Green screen flash
+                    Game._poisonFlash = 8;
                 }
                 Game._poisonMushroomCD = 90;
             }
+        } else {
+            Game._poisonNear = false;
         }
 
         if (Game._poisonMushroomCD > 0) Game._poisonMushroomCD--;
+        if (Game._poisonFlash > 0) Game._poisonFlash--;
     }
 
     // =====================================================================
@@ -1393,32 +1406,47 @@
             ctx.globalAlpha = 1;
         }
 
-        // Gem slot indicators on the altar
-        var gemY = altarCY - 1;
-        var gemSize = 3;
-        var gemSpacing = 8;
-        var startGemX = altarCX - gemSpacing;
+        // Gem slot indicators on the altar — large and obvious
+        var gemSize = 6;
+        var gemSpacing = 10;
+        var startGemX = altarCX - gemSpacing - gemSize / 2;
+        var gemY = altarCY - gemSize / 2;
         var relics = [
-            { flag: 'puzzleCrown',   filledColor: C.gold },
-            { flag: 'puzzleCape',    filledColor: C.purple },
-            { flag: 'puzzleScepter', filledColor: C.lightGray }
+            { flag: 'puzzleCrown',   filledColor: C.gold,     emptyColor: '#3a3020' },
+            { flag: 'puzzleCape',    filledColor: C.purple,   emptyColor: '#2a1a3a' },
+            { flag: 'puzzleScepter', filledColor: C.lightGray, emptyColor: '#2a2a30' }
         ];
         for (var gi = 0; gi < relics.length; gi++) {
             var gx = startGemX + gi * gemSpacing;
             if (Game.flags[relics[gi].flag]) {
+                // Filled gem: bright with glow halo
+                ctx.globalAlpha = 0.3;
+                ctx.fillStyle = relics[gi].filledColor;
+                ctx.fillRect(gx - 2, gemY - 2, gemSize + 4, gemSize + 4);
+                ctx.globalAlpha = 1;
                 ctx.fillStyle = relics[gi].filledColor;
                 ctx.fillRect(gx, gemY, gemSize, gemSize);
-                if (Game.frame % 20 < 3) {
+                // Sparkle highlight
+                if (Game.frame % 20 < 4) {
                     ctx.fillStyle = C.white;
-                    ctx.fillRect(gx + 1, gemY - 1, 1, 1);
+                    ctx.fillRect(gx + 1, gemY, 2, 1);
+                    ctx.fillRect(gx + gemSize - 2, gemY + gemSize - 1, 1, 1);
                 }
+                // Border
+                ctx.strokeStyle = C.white;
+                ctx.lineWidth = 1;
+                ctx.strokeRect(gx - 0.5, gemY - 0.5, gemSize + 1, gemSize + 1);
             } else {
-                // Empty slot: dark with pulsing outline to hint at placement
-                ctx.fillStyle = C.darkGray;
+                // Empty slot: visible hollow with pulsing border
+                ctx.fillStyle = relics[gi].emptyColor;
                 ctx.fillRect(gx, gemY, gemSize, gemSize);
-                var slotPulse = 0.3 + Math.sin(flickerSeed * 1.5 + gi * 2) * 0.2;
+                // Dark inner border
+                ctx.fillStyle = '#111118';
+                ctx.fillRect(gx + 1, gemY + 1, gemSize - 2, gemSize - 2);
+                // Pulsing bright border
+                var slotPulse = 0.4 + Math.sin(flickerSeed * 1.5 + gi * 2.1) * 0.25;
                 ctx.globalAlpha = slotPulse;
-                ctx.strokeStyle = '#8060c0';
+                ctx.strokeStyle = '#b090e0';
                 ctx.lineWidth = 1;
                 ctx.strokeRect(gx - 0.5, gemY - 0.5, gemSize + 1, gemSize + 1);
                 ctx.globalAlpha = 1;
@@ -4390,6 +4418,21 @@
         // Screen flash overlay (impact moments)
         renderScreenFlash(ctx);
 
+        // Poison flash overlay (green tint when mushroom damages player)
+        if (Game._poisonFlash && Game._poisonFlash > 0) {
+            ctx.fillStyle = 'rgba(40,160,40,' + (Game._poisonFlash / 12) + ')';
+            ctx.fillRect(0, 0, W, H);
+        }
+        // Subtle green vignette while standing near poison mushrooms
+        if (Game._poisonNear) {
+            var vingAlpha = 0.04 + Math.sin(Game.frame * 0.1) * 0.02;
+            ctx.fillStyle = 'rgba(30,120,30,' + vingAlpha + ')';
+            ctx.fillRect(0, 0, W, 3);
+            ctx.fillRect(0, H - 3, W, 3);
+            ctx.fillRect(0, 0, 3, H);
+            ctx.fillRect(W - 3, 0, 3, H);
+        }
+
         // Render HUD
         renderHUD(ctx);
 
@@ -4641,14 +4684,15 @@
                 Particles.burst(sparkX, sparkY, 4, Utils.choice([C.red, C.purple, C.darkPurple, C.gold]));
             }
 
-            // === PHASE 3: "IT'S FINALLY OVER" FAKE-OUT (frames 85-120) ===
+            // === PHASE 3: "IT'S FINALLY OVER" FAKE-OUT (frames 85-180) ===
             // Things calm down... the sparks stop... a gentle beat...
+            // 90 full frames of silence for maximum comedy
             if (t === 90) {
                 Particles.ring(bx, by, 50, 30, C.paleBlue);
             }
 
-            // === PHASE 4: NOPE, EVEN BIGGER (frames 120-180) ===
-            if (t === 120) {
+            // === PHASE 4: NOPE, EVEN BIGGER (frames 180-240) ===
+            if (t === 180) {
                 Game.shake = 16;
                 Audio.play('explosion');
                 Audio.play('explosion');
@@ -4657,35 +4701,35 @@
                 Particles.ring(bx, by, 60, 35, C.white);
                 triggerScreenFlash('#FF4400', 10);
             }
-            if (t === 132) {
+            if (t === 192) {
                 Game.shake = 12;
                 Audio.play('explosion');
                 Particles.burst(bx - 25, by, 30, C.purple);
                 Particles.burst(bx + 25, by, 30, C.red);
                 Particles.confetti(bx, by - 20, 15);
             }
-            if (t === 144) {
+            if (t === 204) {
                 Game.shake = 14;
                 Audio.play('explosion');
                 Particles.ring(bx, by, 45, 30, C.gold);
                 Particles.burst(bx, by - 10, 35, C.lightRed);
             }
-            if (t === 155) {
+            if (t === 215) {
                 Game.shake = 10;
                 Audio.play('explosion');
                 Particles.burst(bx + 15, by - 15, 25, C.white);
                 Particles.burst(bx - 15, by + 15, 25, C.gold);
             }
             // Rapid fire sparks
-            if (t > 120 && t < 170 && t % 3 === 0) {
+            if (t > 180 && t < 230 && t % 3 === 0) {
                 var sx2 = bx + (Math.random() - 0.5) * 50;
                 var sy2 = by + (Math.random() - 0.5) * 40;
                 Particles.burst(sx2, sy2, 6, Utils.choice([C.red, C.gold, C.white, C.purple]));
                 if (t % 6 === 0) Audio.play('explosion');
             }
 
-            // === PHASE 5: ANOTHER CALM... (frames 180-210) ===
-            if (t === 180) {
+            // === PHASE 5: ANOTHER CALM... (frames 240-270) ===
+            if (t === 240) {
                 triggerScreenFlash('#FFFFFF', 12);
                 Game.shake = 18;
                 Audio.play('explosion');
@@ -4693,36 +4737,36 @@
                 Particles.ring(bx, by, 70, 40, C.gold);
             }
 
-            // === PHASE 6: RIDICULOUS GRAND FINALE (frames 210-300) ===
+            // === PHASE 6: RIDICULOUS GRAND FINALE (frames 270-360) ===
             // Explosions start chaining across the whole room
-            if (t === 215) {
+            if (t === 275) {
                 Game.shake = 14;
                 Audio.play('explosion');
                 Particles.burst(3 * TILE, 4 * TILE, 25, C.red);
                 Particles.burst(12 * TILE, 4 * TILE, 25, C.gold);
             }
-            if (t === 225) {
+            if (t === 285) {
                 Game.shake = 16;
                 Audio.play('explosion');
                 Particles.burst(5 * TILE, 9 * TILE, 30, C.purple);
                 Particles.burst(10 * TILE, 3 * TILE, 30, C.red);
                 Particles.ring(bx, by, 55, 30, C.lightPurple);
             }
-            if (t === 235) {
+            if (t === 295) {
                 Game.shake = 12;
                 Audio.play('explosion');
                 Particles.burst(2 * TILE, 7 * TILE, 20, C.gold);
                 Particles.burst(13 * TILE, 8 * TILE, 20, C.red);
                 Particles.confetti(bx, by - 10, 20);
             }
-            if (t === 245) {
+            if (t === 305) {
                 Game.shake = 18;
                 Audio.play('explosion');
                 Particles.burst(bx, by, 45, C.gold);
                 Particles.burst(7 * TILE, 2 * TILE, 25, C.white);
                 Particles.burst(8 * TILE, 10 * TILE, 25, C.purple);
             }
-            if (t === 255) {
+            if (t === 315) {
                 Game.shake = 14;
                 Audio.play('explosion');
                 // Ring from every corner
@@ -4731,14 +4775,14 @@
                 Particles.ring(0, H, 30, 15, C.purple);
                 Particles.ring(W, H, 30, 15, C.white);
             }
-            if (t === 265) {
+            if (t === 325) {
                 Game.shake = 20;
                 Audio.play('explosion');
                 Particles.burst(bx, by, 60, C.red);
                 Particles.ring(bx, by, 80, 50, C.gold);
                 triggerScreenFlash('#FF2200', 10);
             }
-            if (t === 275) {
+            if (t === 335) {
                 Game.shake = 16;
                 Audio.play('explosion');
                 Particles.confetti(bx - 30, by, 15);
@@ -4747,14 +4791,14 @@
                 Particles.burst(bx, by, 40, C.lightPurple);
             }
             // Constant chaos during finale
-            if (t > 210 && t < 285 && t % 3 === 0) {
+            if (t > 270 && t < 345 && t % 3 === 0) {
                 var fx = Math.random() * W;
                 var fy = Math.random() * H;
                 Particles.burst(fx, fy, 8, Utils.choice([C.red, C.gold, C.purple, C.white, C.lightRed, C.lightPurple]));
             }
 
-            // === PHASE 7: THE ACTUAL FINAL EXPLOSION (frames 290-320) ===
-            if (t === 290) {
+            // === PHASE 7: THE ACTUAL FINAL EXPLOSION (frames 350-380) ===
+            if (t === 350) {
                 Game.shake = 25;
                 Audio.play('explosion');
                 Audio.play('explosion');
@@ -4768,22 +4812,22 @@
                 Particles.confetti(bx - 40, by, 20);
                 Particles.confetti(bx + 40, by, 20);
             }
-            if (t === 305) {
+            if (t === 365) {
                 // Room brightens - the darkness finally lifts
                 Particles.ring(W / 2, H / 2, 90, 50, C.paleBlue);
                 Particles.ring(W / 2, H / 2, 60, 30, C.white);
             }
 
-            // === PHASE 8: BARGNOT REACHES OUT (frames 310-349) ===
-            if (t >= 310 && t < 350) {
+            // === PHASE 8: BARGNOT REACHES OUT (frames 370-409) ===
+            if (t >= 370 && t < 410) {
                 Game._bossReachOut = true;
             }
-            if (t === 350) {
+            if (t === 410) {
                 Game._bossReachOut = false;
             }
 
-            // === PHASE 9: BARGNOT'S LAST WORDS (frame 350) ===
-            if (t === 350) {
+            // === PHASE 9: BARGNOT'S LAST WORDS (frame 410) ===
+            if (t === 410) {
                 Game.bossDialogueStage = 1;
                 Dialogue.start('boss_defeat', function () {
                     // Rorik rescue dialogue
@@ -4881,10 +4925,10 @@
             if (Game.boss.dead && Game.bossDeathTimer > 0) {
                 var dt = Game.bossDeathTimer;
                 // Flicker during explosions, speed up flickering as it goes on
-                var flickerRate = dt < 120 ? 3 : dt < 210 ? 2 : 1;
-                var deathFlicker = dt < 290 && Math.floor(dt / flickerRate) % 2 === 0;
+                var flickerRate = dt < 180 ? 3 : dt < 270 ? 2 : 1;
+                var deathFlicker = dt < 350 && Math.floor(dt / flickerRate) % 2 === 0;
                 // Fade out during the final explosion
-                var deathAlpha = dt < 290 ? 1 : Math.max(0, 1 - (dt - 290) / 40);
+                var deathAlpha = dt < 350 ? 1 : Math.max(0, 1 - (dt - 350) / 40);
                 ctx.globalAlpha = deathAlpha;
                 if (!deathFlicker) {
                     // Boss reaches out toward player during final frames
@@ -4919,9 +4963,9 @@
         Particles.render(ctx);
 
         // Temple darkness overlay (lighten during boss death)
-        if (Game.boss && Game.boss.dead && Game.bossDeathTimer > 180) {
+        if (Game.boss && Game.boss.dead && Game.bossDeathTimer > 240) {
             // Room gradually brightens - the darkness lifts after the chaos
-            var brightAlpha = Math.min(1, (Game.bossDeathTimer - 180) / 80);
+            var brightAlpha = Math.min(1, (Game.bossDeathTimer - 240) / 80);
             ctx.fillStyle = 'rgba(200,200,255,' + (brightAlpha * 0.08) + ')';
             ctx.fillRect(0, 0, W, H);
         } else {
@@ -4929,8 +4973,8 @@
         }
 
         // White flash at the moment of the grand final explosion
-        if (Game.boss && Game.boss.dead && Game.bossDeathTimer > 288 && Game.bossDeathTimer < 310) {
-            var flashAlpha = Math.max(0, 1 - (Game.bossDeathTimer - 288) / 22);
+        if (Game.boss && Game.boss.dead && Game.bossDeathTimer > 348 && Game.bossDeathTimer < 370) {
+            var flashAlpha = Math.max(0, 1 - (Game.bossDeathTimer - 348) / 22);
             ctx.fillStyle = 'rgba(255,255,255,' + flashAlpha + ')';
             ctx.fillRect(0, 0, W, H);
         }

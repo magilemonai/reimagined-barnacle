@@ -1860,26 +1860,26 @@
             var barW = 80;
             var barH = 4;
             var barX = W / 2 - barW / 2;
-            var barY = 4;
+            var barY = 14;
 
             // Death animation: diagonal/wonky bar that fades after final explosion
             var deathTimer = (window.Game && window.Game.bossDeathTimer) || 0;
             if (this.dead && deathTimer > 0) {
-                // After the final explosion (frame 290), fade out over 30 frames
-                if (deathTimer > 290) {
-                    var fadeAlpha = Math.max(0, 1 - (deathTimer - 290) / 30);
+                // After the final explosion (frame 350), fade out over 30 frames
+                if (deathTimer > 350) {
+                    var fadeAlpha = Math.max(0, 1 - (deathTimer - 350) / 30);
                     if (fadeAlpha <= 0) return; // fully faded
                     ctx.globalAlpha = fadeAlpha;
                 }
 
                 // Wonky transform: tilts and jitters, gets worse over time
-                var wonkIntensity = Math.min(1, deathTimer / 120);
+                var wonkIntensity = Math.min(1, deathTimer / 180);
                 var tiltAngle = Math.sin(deathTimer * 0.12) * 0.15 * wonkIntensity;
                 // Add jitter that increases with each explosion phase
                 var jitterX = Math.sin(deathTimer * 0.7) * 3 * wonkIntensity;
                 var jitterY = Math.cos(deathTimer * 0.9) * 2 * wonkIntensity;
                 // Big jolts on explosion frames
-                if (deathTimer % 12 < 3 && deathTimer < 290) {
+                if (deathTimer % 12 < 3 && deathTimer < 350) {
                     jitterX += (Math.random() - 0.5) * 6 * wonkIntensity;
                     jitterY += (Math.random() - 0.5) * 4 * wonkIntensity;
                 }
@@ -1909,12 +1909,12 @@
 
                 // Flickering label — glitches during death
                 var labelAlpha = 0.5 + Math.sin(deathTimer * 0.3) * 0.3;
-                ctx.globalAlpha = (deathTimer > 290) ? ctx.globalAlpha * labelAlpha : labelAlpha;
+                ctx.globalAlpha = (deathTimer > 350) ? ctx.globalAlpha * labelAlpha : labelAlpha;
                 Utils.drawText(ctx, 'QUEEN BARGNOT', barX, barY - 8, C.gold, 1);
                 ctx.globalAlpha = 1;
 
                 ctx.restore();
-                if (deathTimer > 290) ctx.globalAlpha = 1;
+                if (deathTimer > 350) ctx.globalAlpha = 1;
                 return;
             }
 

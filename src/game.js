@@ -203,9 +203,7 @@
         deathCounts: {},    // roomId -> death count
         playerHasDied: false,
 
-        // --- Pass 8A-8D: World details, micro-animations, camera ---
-        cameraZoom: 1.0,
-        cameraZoomTarget: 1.0,
+        // --- Pass 8A-8D: World details, micro-animations ---
         grassBends: [],     // {x, y, dir, timer}
         waterRipples: [],   // {x, y, radius, life}
         npcTalkedFirst: null, // tracks which NPC player talked to first
@@ -561,8 +559,6 @@
         // Mark room as visited for minimap
         Game.visitedRooms[roomId] = true;
 
-        // Pass 8D: Room enter zoom effect
-        triggerRoomEnterZoom();
 
         // Track safe rooms (town rooms)
         if (roomId === 'ebon_vale_square' || roomId === 'ebon_vale_market' || roomId === 'ebon_vale_north') {
@@ -658,20 +654,42 @@
         if (!Game.transition.active) return;
 
         var half = Math.floor(Game.transition.maxTime / 2);
-        var alpha;
+        var progress; // 0 = fully open, 1 = fully closed
 
         if (Game.transition.timer > half) {
-            // Fading to black
-            alpha = 1 - (Game.transition.timer - half) / half;
+            // Closing: diamonds shrink to cover screen
+            progress = 1 - (Game.transition.timer - half) / half;
         } else {
-            // Fading from black
-            alpha = Game.transition.timer / half;
+            // Opening: diamonds grow to reveal screen
+            progress = Game.transition.timer / half;
         }
 
-        ctx.globalAlpha = alpha;
+        // Diamond wipe: draw a grid of diamond-shaped masks
+        var diamondSize = 20; // size of each diamond cell
+        var cols = Math.ceil(W / diamondSize) + 1;
+        var rows = Math.ceil(H / diamondSize) + 1;
+
         ctx.fillStyle = C.black;
-        ctx.fillRect(0, 0, W, H);
-        ctx.globalAlpha = 1;
+        ctx.beginPath();
+
+        for (var row = -1; row < rows; row++) {
+            for (var col = -1; col < cols; col++) {
+                var cx = col * diamondSize + diamondSize / 2;
+                var cy = row * diamondSize + diamondSize / 2;
+                var r = progress * diamondSize * 0.75;
+
+                if (r > 0.5) {
+                    // Draw a diamond (rotated square)
+                    ctx.moveTo(cx, cy - r);
+                    ctx.lineTo(cx + r, cy);
+                    ctx.lineTo(cx, cy + r);
+                    ctx.lineTo(cx - r, cy);
+                    ctx.closePath();
+                }
+            }
+        }
+
+        ctx.fill();
     }
 
     // =====================================================================
@@ -1860,7 +1878,6 @@
                 Game.state = 'boss_intro';
                 Game.bossDialogueStage = 0;
                 Game.encounteredEnemies['boss'] = true; // Bestiary
-                triggerBossZoomIn(); // Pass 8D
                 if (Music) Music.stop();
                 Dialogue.start('boss_intro', function () {
                     // Spawn boss at center of room
@@ -1869,7 +1886,6 @@
                     } catch (e) {
                         console.warn('Error creating boss:', e);
                     }
-                    triggerBossZoomReset(); // Pass 8D
                     Game.state = 'boss';
                     if (Music) Music.play('boss');
                 });
@@ -4228,8 +4244,6 @@
         // Pass 8B: Micro-animations
         updateMicroAnimations();
 
-        // Pass 8D: Camera zoom
-        updateCameraZoom();
 
         // Check room exits
         checkRoomExits();
@@ -6205,30 +6219,6 @@
     // PASS 8D: CAMERA ZOOM SYSTEM
     // =====================================================================
 
-    function updateCameraZoom() {
-        // Smooth zoom toward target
-        var diff = Game.cameraZoomTarget - Game.cameraZoom;
-        if (Math.abs(diff) > 0.001) {
-            Game.cameraZoom += diff * 0.08;
-        } else {
-            Game.cameraZoom = Game.cameraZoomTarget;
-        }
-    }
-
-    // Room enter: subtle zoom from 0.98x to 1.0x
-    function triggerRoomEnterZoom() {
-        Game.cameraZoom = 0.98;
-        Game.cameraZoomTarget = 1.0;
-    }
-
-    // Boss intro: slow push in
-    function triggerBossZoomIn() {
-        Game.cameraZoomTarget = 1.04;
-    }
-
-    function triggerBossZoomReset() {
-        Game.cameraZoomTarget = 1.0;
-    }
 
     // =====================================================================
     // PASS 7E: DIFFICULTY SELECTION
@@ -6316,8 +6306,6 @@
         Game.gameOverMenuIndex = 0;
         Game.deathCounts = {};
         Game.playerHasDied = false;
-        Game.cameraZoom = 1.0;
-        Game.cameraZoomTarget = 1.0;
         Game.grassBends = [];
         Game.waterRipples = [];
         Game.npcTalkedFirst = null;
@@ -6408,19 +6396,7 @@
         }
         display.clearRect(0, 0, display.canvas.width, display.canvas.height);
 
-        // Pass 8D: Apply camera zoom
-        var zoom = Game.cameraZoom || 1.0;
-        if (Math.abs(zoom - 1.0) > 0.001) {
-            var dw = display.canvas.width;
-            var dh = display.canvas.height;
-            var zw = dw * zoom;
-            var zh = dh * zoom;
-            var zx = (dw - zw) / 2 + sx * 3;
-            var zy = (dh - zh) / 2 + sy * 3;
-            display.drawImage(buf.canvas, zx, zy, zw, zh);
-        } else {
-            display.drawImage(buf.canvas, sx * 3, sy * 3, display.canvas.width, display.canvas.height);
-        }
+        display.drawImage(buf.canvas, sx * 3, sy * 3, display.canvas.width, display.canvas.height);
 
         // Clear pressed keys for next frame
         Input.update();

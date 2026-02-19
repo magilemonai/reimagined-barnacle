@@ -322,6 +322,46 @@
   };
 
   // =========================================================================
+  // EPILOGUE: "Between Stars"
+  // Ethereal, fragile, bittersweet. A delicate melody over sustained pads
+  // that evokes the vastness of the void and a spirit finally at peace.
+  // Nitriti's theme — neither triumphant nor mournful, but something
+  // in-between: the quiet after a storm. E minor with lydian touches.
+  // 32-beat loop at 72 BPM (~26.7 seconds per cycle)
+  // =========================================================================
+  THEMES.epilogue = {
+    bpm: 72,
+    tracks: [
+      // BASS — deep, slow, grounding. Sustained root notes with gentle movement
+      { wave: 'sine', volume: 0.10, notes: [
+        ['E2', 4], ['G2', 4],                                   // i → III
+        ['C3', 4], ['B2', 4],                                   // VI → V
+        ['E2', 4], ['A2', 4],                                   // i → iv
+        ['D3', 2], ['C3', 2], ['B2', 4]                         // VII → VI → V
+      ]},
+      // MELODY — a lone voice, like starlight. Sparse, breathing, human
+      { wave: 'triangle', volume: 0.06, notes: [
+        ['B4', 2], ['E5', 2], ['D5', 1], ['B4', 1], [null, 2], // opening sigh
+        ['G4', 1], ['A4', 1], ['B4', 3], [null, 3],             // answering phrase
+        ['E5', 2], ['F#5', 1], ['E5', 1], ['D5', 2], ['B4', 2],// reaching higher
+        ['A4', 1], ['G4', 1], ['E4', 2], [null, 4]              // falling to rest
+      ]},
+      // PAD — sustained chords, very soft, like breathing in the void
+      { wave: 'sine', volume: 0.04, notes: [
+        ['B3', 8], ['D4', 8],
+        ['E4', 8], ['D4', 8]
+      ]},
+      // SPARKLE — high, delicate notes like distant stars appearing
+      { wave: 'sine', volume: 0.025, notes: [
+        [null, 3], ['B5', 0.5], [null, 4.5],                    // lone star
+        [null, 2], ['E6', 0.5], [null, 5.5],                    // another
+        [null, 4], ['G5', 0.5], [null, 3.5],                    // closer
+        ['F#5', 0.5], [null, 7.5]                                // fading
+      ]}
+    ]
+  };
+
+  // =========================================================================
   // VICTORY: "Dawn Returns"
   // Triumphant, emotional, resolved. Opens with a fanfare-like rising figure
   // before settling into a warm, soaring melody. The harmonic language is

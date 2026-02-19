@@ -1245,8 +1245,8 @@
             { tx: 7,  ty: 4,  key: 'examine_tapestry' }
         ],
         temple_puzzle: [
-            { tx: 7,  ty: 5,  key: 'examine_puzzle_statue' },
-            { tx: 8,  ty: 5,  key: 'examine_puzzle_statue' },
+            { tx: 7,  ty: 7,  key: 'examine_puzzle_statue' },
+            { tx: 8,  ty: 7,  key: 'examine_puzzle_statue' },
             { tx: 3,  ty: 3,  key: 'examine_pillar' },
             { tx: 12, ty: 3,  key: 'examine_pillar' },
             { tx: 2,  ty: 8,  key: 'examine_rubble' },
@@ -1380,51 +1380,68 @@
             ctx.fillRect(ax - coreR, ay - coreR, coreR * 2, coreR * 2);
         }
 
-        // Central statue gem slots: show filled gems as relics are placed
-        var statueX = 7 * TILE + TILE / 2;
-        var statueY = 5 * TILE + 4;
+        // Altar pedestal glow: pulsing violet light draws eye to the central altar
+        var altarCX = 7 * TILE + TILE;  // center of the 2 altar tiles
+        var altarCY = 7 * TILE + TILE / 2;
+
+        if (!Game.flags.puzzleSolved) {
+            // Always show a subtle pedestal glow on the altar
+            var pedestalAlpha = 0.08 + Math.sin(flickerSeed * 0.6) * 0.04;
+            ctx.globalAlpha = pedestalAlpha;
+            ctx.fillStyle = '#8060c0';
+            ctx.fillRect(7 * TILE - 2, 7 * TILE - 2, TILE * 2 + 4, TILE + 4);
+            ctx.globalAlpha = 1;
+        }
+
+        // Gem slot indicators on the altar
+        var gemY = altarCY - 1;
         var gemSize = 3;
-        var gemSpacing = 6;
-        var startGemX = statueX - (gemSpacing * 1); // center 3 gems
-
-        // Crown gem (gold)
-        if (Game.flags.puzzleCrown) {
-            ctx.fillStyle = C.gold;
-            ctx.fillRect(startGemX, statueY, gemSize, gemSize);
-            // Sparkle
-            if (Game.frame % 20 < 3) {
-                ctx.fillStyle = C.white;
-                ctx.fillRect(startGemX + 1, statueY - 1, 1, 1);
+        var gemSpacing = 8;
+        var startGemX = altarCX - gemSpacing;
+        var relics = [
+            { flag: 'puzzleCrown',   filledColor: C.gold },
+            { flag: 'puzzleCape',    filledColor: C.purple },
+            { flag: 'puzzleScepter', filledColor: C.lightGray }
+        ];
+        for (var gi = 0; gi < relics.length; gi++) {
+            var gx = startGemX + gi * gemSpacing;
+            if (Game.flags[relics[gi].flag]) {
+                ctx.fillStyle = relics[gi].filledColor;
+                ctx.fillRect(gx, gemY, gemSize, gemSize);
+                if (Game.frame % 20 < 3) {
+                    ctx.fillStyle = C.white;
+                    ctx.fillRect(gx + 1, gemY - 1, 1, 1);
+                }
+            } else {
+                // Empty slot: dark with pulsing outline to hint at placement
+                ctx.fillStyle = C.darkGray;
+                ctx.fillRect(gx, gemY, gemSize, gemSize);
+                var slotPulse = 0.3 + Math.sin(flickerSeed * 1.5 + gi * 2) * 0.2;
+                ctx.globalAlpha = slotPulse;
+                ctx.strokeStyle = '#8060c0';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(gx - 0.5, gemY - 0.5, gemSize + 1, gemSize + 1);
+                ctx.globalAlpha = 1;
             }
-        } else {
-            ctx.fillStyle = C.darkGray;
-            ctx.fillRect(startGemX, statueY, gemSize, gemSize);
         }
 
-        // Cape gem (purple)
-        if (Game.flags.puzzleCape) {
-            ctx.fillStyle = C.purple;
-            ctx.fillRect(startGemX + gemSpacing, statueY, gemSize, gemSize);
-            if (Game.frame % 20 < 3) {
-                ctx.fillStyle = C.white;
-                ctx.fillRect(startGemX + gemSpacing + 1, statueY - 1, 1, 1);
+        // When all relics collected but not placed: strong "come here" glow on altar
+        if (Game.flags.puzzleCrown && Game.flags.puzzleCape && Game.flags.puzzleScepter && !Game.flags.puzzleSolved) {
+            var beckAlpha = 0.15 + Math.sin(flickerSeed * 0.8) * 0.08;
+            var beckR = 20 + Math.sin(flickerSeed * 1.2) * 4;
+            var grad2 = ctx.createRadialGradient(altarCX, altarCY, 0, altarCX, altarCY, beckR);
+            grad2.addColorStop(0, 'rgba(180,140,255,' + (beckAlpha + 0.1) + ')');
+            grad2.addColorStop(0.6, 'rgba(120,80,200,' + beckAlpha + ')');
+            grad2.addColorStop(1, 'rgba(80,40,160,0)');
+            ctx.fillStyle = grad2;
+            ctx.fillRect(altarCX - beckR, altarCY - beckR, beckR * 2, beckR * 2);
+            // Rising sparkle particles from altar
+            if (Game.frame % 12 === 0) {
+                Particles.add(altarCX + (Math.random() - 0.5) * 20, altarCY + 4, {
+                    vx: (Math.random() - 0.5) * 0.2, vy: -0.4,
+                    life: 30, color: '#b090e0', size: 1, gravity: -0.01
+                });
             }
-        } else {
-            ctx.fillStyle = C.darkGray;
-            ctx.fillRect(startGemX + gemSpacing, statueY, gemSize, gemSize);
-        }
-
-        // Scepter gem (white/silver)
-        if (Game.flags.puzzleScepter) {
-            ctx.fillStyle = C.lightGray;
-            ctx.fillRect(startGemX + gemSpacing * 2, statueY, gemSize, gemSize);
-            if (Game.frame % 20 < 3) {
-                ctx.fillStyle = C.white;
-                ctx.fillRect(startGemX + gemSpacing * 2 + 1, statueY - 1, 1, 1);
-            }
-        } else {
-            ctx.fillStyle = C.darkGray;
-            ctx.fillRect(startGemX + gemSpacing * 2, statueY, gemSize, gemSize);
         }
     }
 
@@ -4927,25 +4944,7 @@
         // HUD
         renderHUD(ctx);
 
-        // Boss health bar at top center
-        if (Game.boss && !Game.boss.dead) {
-            var bossBarW = 120;
-            var bossBarH = 6;
-            var bossBarX = Math.floor((W - bossBarW) / 2);
-            var bossBarY = 4;
-
-            // Background
-            ctx.fillStyle = C.darkGray;
-            ctx.fillRect(bossBarX - 1, bossBarY - 1, bossBarW + 2, bossBarH + 2);
-
-            // Health
-            var bossHPRatio = Math.max(0, Game.boss.hp / (Game.boss.maxHp || 1));
-            ctx.fillStyle = bossHPRatio > 0.3 ? C.red : C.darkRed;
-            ctx.fillRect(bossBarX, bossBarY, Math.floor(bossBarW * bossHPRatio), bossBarH);
-
-            // Label
-            Utils.drawText(ctx, 'Queen Bargnot', bossBarX, bossBarY + bossBarH + 2, C.lightRed, 1);
-        }
+        // Boss health bar: rendered by boss entity (renderHPBar) during both alive and death states
 
         // Dialogue
         Dialogue.render(ctx);
@@ -5085,6 +5084,8 @@
         Game.epilogueTimer++;
 
         if (!Dialogue.isActive() && Game.epilogueTimer === 1) {
+            // Start ethereal music for Nitriti's monologue
+            if (Music) Music.play('epilogue');
             Dialogue.start('ending_nitriti', function () {
                 Game.flags.bossDefeated = true;
                 // Unlock lore entries from the ending
@@ -5932,7 +5933,7 @@
     ];
 
     var BESTIARY_LORE = [
-        { id: 'lore_nitriti', name: 'Temple of Nitriti', desc: 'She Who Guards the veil between worlds.' },
+        { id: 'lore_nitriti', name: 'Temple of Nitriti', desc: 'They Who Guard the veil between worlds.' },
         { id: 'lore_smaldge', name: 'Smaldge', desc: 'A spirit of hunger and shadow, bound by ancient pacts.' },
         { id: 'lore_bonemoon', name: 'The Bonemoon', desc: 'An omen of darkness gathering beyond the veil.' },
         { id: 'lore_eldspyre', name: 'The Eldspyre', desc: 'Source of all magic. A mountain that burns with starlight.' },

@@ -409,9 +409,9 @@
             [TW,  TF,  Ch,  TW,  Pi,  TF,  TF,  TF,  TF,  TF,  TF,  Pi,  TW,  Ch,  TF,  TW ],  // row 3  - chests in side alcoves
             [TW,  TF,  TF,  TW,  TW,  TW,  Pi,  TF,  TF,  Pi,  TW,  TW,  TW,  TF,  TF,  TW ],  // row 4  - alcove walls
             [TW,  TF,  TF,  TW,  TW,  TF,  TF,  Cp,  Cp,  TF,  TF,  TW,  TW,  TF,  TF,  TW ],  // row 5  - carpet leads to statue
-            [TW,  TF,  TF,  TF,  TF,  TF,  To,  Cp,  Cp,  To,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 6  - torches flanking statue
-            [TW,  TF,  TF,  TF,  TF,  TF,  St,  Al,  Al,  St,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 7  - STATUE PLATFORM: altar center, statues flanking
-            [TW,  TF,  TF,  TF,  TF,  TF,  To,  Cp,  Cp,  To,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 8  - torches flanking below
+            [TW,  TF,  TF,  TF,  TF,  To,  TF,  Cp,  Cp,  TF,  To,  TF,  TF,  TF,  TF,  TW ],  // row 6  - torches set back from statue
+            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Al,  Al,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 7  - STATUE PLATFORM: altar center, open approach
+            [TW,  TF,  TF,  TF,  TF,  To,  TF,  Cp,  Cp,  TF,  To,  TF,  TF,  TF,  TF,  TW ],  // row 8  - torches set back below
             [TW,  To,  TF,  TF,  Pi,  TF,  TF,  Cp,  Cp,  TF,  TF,  Pi,  TF,  TF,  To,  TW ],  // row 9  - carpet continues south
             [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 10
             [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 11

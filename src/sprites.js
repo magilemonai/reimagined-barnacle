@@ -1996,6 +1996,133 @@
         ctx.fillRect(19, 5, 2, 3);
       });
 
+      // Nitriti — ethereal spirit between stars: pale luminous face floating
+      // in deep blue void, androgynous features, starlight in their hair,
+      // eyes like twin nebulae. Neither masculine nor feminine — cosmic.
+      mp('nitriti', function (ctx) {
+        // Deep void background with subtle starfield
+        ctx.fillStyle = '#050818';
+        ctx.fillRect(0, 0, 32, 32);
+        // Distant stars
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(3, 2, 1, 1);
+        ctx.fillRect(27, 5, 1, 1);
+        ctx.fillRect(8, 28, 1, 1);
+        ctx.fillRect(25, 22, 1, 1);
+        ctx.fillRect(1, 15, 1, 1);
+        ctx.fillRect(30, 14, 1, 1);
+        ctx.fillStyle = '#8ab8f0';
+        ctx.fillRect(5, 8, 1, 1);
+        ctx.fillRect(26, 26, 1, 1);
+        // Spectral glow around head
+        ctx.fillStyle = '#1a2a50';
+        ctx.fillRect(8, 3, 16, 22);
+        ctx.fillStyle = '#0f1d40';
+        ctx.fillRect(6, 5, 20, 18);
+        // Face — pale, luminous, smooth androgynous features
+        circ(ctx, 16, 13, 7, '#8aa8d0');
+        circ(ctx, 16, 13, 6, '#b0c8e8');
+        // Subtle cheek structure (neither angular nor round — in between)
+        ctx.fillStyle = '#c8d8f0';
+        ctx.fillRect(12, 12, 8, 4);
+        // Eyes — nebula-like: blue-purple glow, no harsh pupil
+        ctx.fillStyle = '#6080c0';
+        ctx.fillRect(12, 11, 3, 2);
+        ctx.fillRect(18, 11, 3, 2);
+        ctx.fillStyle = '#a0c0ff';
+        ctx.fillRect(13, 11, 1, 1);
+        ctx.fillRect(19, 11, 1, 1);
+        // Soft eye glow
+        ctx.globalAlpha = 0.4;
+        ctx.fillStyle = '#8ab8f0';
+        ctx.fillRect(11, 10, 5, 4);
+        ctx.fillRect(17, 10, 5, 4);
+        ctx.globalAlpha = 1;
+        // Nose — minimal, just a shadow line
+        ctx.fillStyle = '#90a8c8';
+        ctx.fillRect(15, 14, 2, 1);
+        // Mouth — gentle, closed
+        ctx.fillStyle = '#90a0c0';
+        ctx.fillRect(14, 17, 4, 1);
+        // Hair / starlight wisps — flows like aurora, not gendered
+        ctx.fillStyle = '#8ab8f0';
+        ctx.fillRect(9, 4, 14, 3);
+        ctx.fillRect(8, 5, 2, 5);
+        ctx.fillRect(22, 5, 2, 5);
+        // Starlight strands
+        ctx.fillStyle = '#a0d0ff';
+        ctx.fillRect(10, 4, 2, 1);
+        ctx.fillRect(18, 4, 3, 1);
+        ctx.fillRect(7, 7, 1, 3);
+        ctx.fillRect(24, 8, 1, 3);
+        // White highlights like starlight caught in hair
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(12, 4, 1, 1);
+        ctx.fillRect(20, 4, 1, 1);
+        // Neck/form fading into void — no clothing, just a spectral shape
+        ctx.fillStyle = '#6080a0';
+        ctx.fillRect(13, 19, 6, 3);
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = '#4060a0';
+        ctx.fillRect(11, 22, 10, 4);
+        ctx.globalAlpha = 0.25;
+        ctx.fillRect(10, 26, 12, 6);
+        ctx.globalAlpha = 1;
+      });
+
+      // Statue — weathered stone face, defaced by goblin claws. Cracked,
+      // ancient, with hollow eyes that still hold a faint violet glow.
+      mp('statue', function (ctx) {
+        // Dark stone background
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(0, 0, 32, 32);
+        // Stone face shape
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(8, 3, 16, 20);
+        ctx.fillRect(10, 1, 12, 3);
+        circ(ctx, 16, 12, 8, P.gray);
+        circ(ctx, 16, 12, 7, P.lightGray);
+        // Claw damage — scratches across the face
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(10, 8, 1, 6);
+        ctx.fillRect(11, 9, 1, 5);
+        ctx.fillRect(20, 7, 1, 7);
+        ctx.fillRect(21, 8, 1, 5);
+        ctx.fillRect(14, 6, 1, 4);
+        // Eyes — hollow sockets with faint violet glow
+        ctx.fillStyle = '#1a1a2a';
+        ctx.fillRect(12, 10, 3, 3);
+        ctx.fillRect(18, 10, 3, 3);
+        // Faint violet glow deep in sockets
+        ctx.fillStyle = '#6040a0';
+        ctx.fillRect(13, 11, 1, 1);
+        ctx.fillRect(19, 11, 1, 1);
+        // Nose — broken/chipped
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(15, 13, 2, 2);
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(16, 13, 1, 1);
+        // Mouth — carved line, partially damaged
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(13, 17, 6, 1);
+        // Cracks radiating outward
+        ctx.fillStyle = '#4a4a4a';
+        ctx.fillRect(9, 14, 1, 1);
+        ctx.fillRect(22, 13, 1, 1);
+        ctx.fillRect(11, 19, 1, 1);
+        ctx.fillRect(20, 18, 1, 1);
+        // Base/pedestal
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(6, 22, 20, 4);
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(8, 22, 16, 1);
+        // Faint glow emanating from base
+        ctx.globalAlpha = 0.15;
+        ctx.fillStyle = '#8060c0';
+        ctx.fillRect(6, 20, 20, 8);
+        ctx.globalAlpha = 1;
+      });
+
       // =================================================================
       // PASS 5B: TILE ART VARIANTS
       // =================================================================

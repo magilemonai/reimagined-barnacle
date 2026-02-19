@@ -1862,6 +1862,64 @@
             var barX = W / 2 - barW / 2;
             var barY = 4;
 
+            // Death animation: diagonal/wonky bar that fades after final explosion
+            var deathTimer = (window.Game && window.Game.bossDeathTimer) || 0;
+            if (this.dead && deathTimer > 0) {
+                // After the final explosion (frame 290), fade out over 30 frames
+                if (deathTimer > 290) {
+                    var fadeAlpha = Math.max(0, 1 - (deathTimer - 290) / 30);
+                    if (fadeAlpha <= 0) return; // fully faded
+                    ctx.globalAlpha = fadeAlpha;
+                }
+
+                // Wonky transform: tilts and jitters, gets worse over time
+                var wonkIntensity = Math.min(1, deathTimer / 120);
+                var tiltAngle = Math.sin(deathTimer * 0.12) * 0.15 * wonkIntensity;
+                // Add jitter that increases with each explosion phase
+                var jitterX = Math.sin(deathTimer * 0.7) * 3 * wonkIntensity;
+                var jitterY = Math.cos(deathTimer * 0.9) * 2 * wonkIntensity;
+                // Big jolts on explosion frames
+                if (deathTimer % 12 < 3 && deathTimer < 290) {
+                    jitterX += (Math.random() - 0.5) * 6 * wonkIntensity;
+                    jitterY += (Math.random() - 0.5) * 4 * wonkIntensity;
+                }
+                // Gradually drift downward as she loses control
+                var drift = Math.min(8, deathTimer * 0.02);
+
+                ctx.save();
+                ctx.translate(W / 2 + jitterX, barY + barH / 2 + jitterY + drift);
+                ctx.rotate(tiltAngle);
+                ctx.translate(-W / 2, -(barY + barH / 2));
+
+                // Draw the empty/broken bar
+                ctx.fillStyle = C.black;
+                ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
+                ctx.fillStyle = C.darkRed;
+                ctx.fillRect(barX, barY, barW, barH);
+
+                // All phase pips spent
+                var pipY = barY + barH + 2;
+                var pipW = 3;
+                var pipSpacing = 6;
+                var pipStartX = W / 2 - (pipSpacing * 3) / 2 + 1;
+                for (var p = 0; p < 3; p++) {
+                    ctx.fillStyle = C.darkGray;
+                    ctx.fillRect(pipStartX + p * pipSpacing, pipY, pipW, 2);
+                }
+
+                // Flickering label — glitches during death
+                var labelAlpha = 0.5 + Math.sin(deathTimer * 0.3) * 0.3;
+                ctx.globalAlpha = (deathTimer > 290) ? ctx.globalAlpha * labelAlpha : labelAlpha;
+                Utils.drawText(ctx, 'QUEEN BARGNOT', barX, barY - 8, C.gold, 1);
+                ctx.globalAlpha = 1;
+
+                ctx.restore();
+                if (deathTimer > 290) ctx.globalAlpha = 1;
+                return;
+            }
+
+            // --- Normal (alive) rendering ---
+
             // Background
             ctx.fillStyle = C.black;
             ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
@@ -1895,23 +1953,20 @@
             }
 
             // Phase pip indicators (below bar)
-            var pipY = barY + barH + 2;
-            var pipW = 3;
-            var pipSpacing = 6;
-            var pipStartX = W / 2 - (pipSpacing * 3) / 2 + 1;
+            var pipY2 = barY + barH + 2;
+            var pipW2 = 3;
+            var pipSpacing2 = 6;
+            var pipStartX2 = W / 2 - (pipSpacing2 * 3) / 2 + 1;
             for (var p = 1; p <= 3; p++) {
-                var px = pipStartX + (p - 1) * pipSpacing;
+                var px = pipStartX2 + (p - 1) * pipSpacing2;
                 if (p < this.phase) {
-                    // Past phase: dark/spent
                     ctx.fillStyle = C.darkGray;
                 } else if (p === this.phase) {
-                    // Current phase: bright, pulsing
                     ctx.fillStyle = barColor;
                 } else {
-                    // Future phase: dim outline
                     ctx.fillStyle = C.darkGray;
                 }
-                ctx.fillRect(px, pipY, pipW, 2);
+                ctx.fillRect(px, pipY2, pipW2, 2);
             }
 
             // Label

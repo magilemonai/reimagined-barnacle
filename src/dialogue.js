@@ -123,7 +123,7 @@
     // -----------------------------------------------------------------
 
     temple_inscription: [
-      { speaker: 'Inscription', text: 'Temple of Nitriti, Spirit of Night. She who guards the veil between worlds.' },
+      { speaker: 'Inscription', text: 'Temple of Nitriti, Spirit of Night. They who guard the veil between worlds.' },
       { speaker: 'Inscription', text: 'Three offerings open the inner path.' }
     ],
 
@@ -232,7 +232,7 @@
 
     sign_temple: [
       { speaker: 'Inscription', text: 'The stone is ancient. Most of the carving has been clawed away.' },
-      { speaker: 'Inscription', text: 'You can make out: "...Nitriti, She Who Guards... between worlds... speak only... truth..."' }
+      { speaker: 'Inscription', text: 'You can make out: "...Nitriti, They Who Guard... between worlds... speak only... truth..."' }
     ],
 
     // -----------------------------------------------------------------
@@ -398,7 +398,7 @@
     ],
 
     examine_tapestry: [
-      { speaker: '', text: 'A faded tapestry depicting Nitriti ascending beyond the veil. Moths have eaten through her face.' }
+      { speaker: '', text: 'A faded tapestry depicting Nitriti ascending beyond the veil. Moths have eaten through their face.' }
     ],
 
     examine_pillar: [
@@ -414,7 +414,7 @@
     ],
 
     examine_puzzle_statue: [
-      { speaker: '', text: 'The central statue of Nitriti. Three alcoves surround the base, each shaped to hold a sacred relic.' }
+      { speaker: '', text: 'The altar of Nitriti. Three gem-shaped slots are carved into the stone -- one for a crown, one for a cape, one for a scepter. Bring all three relics here.' }
     ],
 
     examine_bones: [
@@ -459,7 +459,9 @@
     'Svana':       'portrait_svana',
     'Que\'Rubra':  'portrait_querubra',
     'Bargnot':     'portrait_bargnot',
-    'Rorik':       'portrait_braxon'  // Rorik reuses braxon portrait (dwarf)
+    'Rorik':       'portrait_braxon',  // Rorik reuses braxon portrait (dwarf)
+    'Nitriti':     'portrait_nitriti',
+    'Statue':      'portrait_statue'
   };
 
   /** Speaker-name color palette */

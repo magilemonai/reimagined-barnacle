@@ -658,42 +658,20 @@
         if (!Game.transition.active) return;
 
         var half = Math.floor(Game.transition.maxTime / 2);
-        var progress; // 0 = fully open, 1 = fully closed
+        var alpha;
 
         if (Game.transition.timer > half) {
-            // Closing: diamonds shrink to cover screen
-            progress = 1 - (Game.transition.timer - half) / half;
+            // Fading to black
+            alpha = 1 - (Game.transition.timer - half) / half;
         } else {
-            // Opening: diamonds grow to reveal screen
-            progress = Game.transition.timer / half;
+            // Fading from black
+            alpha = Game.transition.timer / half;
         }
 
-        // Diamond wipe: draw a grid of diamond-shaped masks
-        var diamondSize = 20; // size of each diamond cell
-        var cols = Math.ceil(W / diamondSize) + 1;
-        var rows = Math.ceil(H / diamondSize) + 1;
-
+        ctx.globalAlpha = alpha;
         ctx.fillStyle = C.black;
-        ctx.beginPath();
-
-        for (var row = -1; row < rows; row++) {
-            for (var col = -1; col < cols; col++) {
-                var cx = col * diamondSize + diamondSize / 2;
-                var cy = row * diamondSize + diamondSize / 2;
-                var r = progress * diamondSize * 0.75;
-
-                if (r > 0.5) {
-                    // Draw a diamond (rotated square)
-                    ctx.moveTo(cx, cy - r);
-                    ctx.lineTo(cx + r, cy);
-                    ctx.lineTo(cx, cy + r);
-                    ctx.lineTo(cx - r, cy);
-                    ctx.closePath();
-                }
-            }
-        }
-
-        ctx.fill();
+        ctx.fillRect(0, 0, W, H);
+        ctx.globalAlpha = 1;
     }
 
     // =====================================================================
@@ -3985,12 +3963,7 @@
         // Draw pixel art scene based on current dialogue's scene property
         var scene = Dialogue.getScene();
         if (scene && cutsceneRenderers[scene]) {
-            // Subtle parallax: apply a gentle sine-wave offset to foreground elements
-            var parallaxOffset = Math.sin(Game.frame * 0.02) * 2;
-            ctx.save();
-            ctx.translate(parallaxOffset, 0);
             cutsceneRenderers[scene](ctx);
-            ctx.restore();
             // Dim overlay so text is readable
             ctx.fillStyle = 'rgba(0,0,0,0.3)';
             ctx.fillRect(0, 0, W, H);

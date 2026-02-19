@@ -580,9 +580,8 @@
       if (!line) { this._fullRows = []; return; }
 
       var hasPortrait = line.speaker && line.speaker.length > 0;
-      var maxChars = hasPortrait
-        ? Math.floor((BOX_W - BOX_PAD * 2) / 6)
-        : Math.floor((BOX_W - BOX_PAD * 2) / 6);
+      var portraitAreaW = hasPortrait ? 55 : 0; // portrait right edge + gap
+      var maxChars = Math.floor((BOX_W - portraitAreaW - BOX_PAD * 2) / 6);
       this._fullRows = this._wordWrap(line.text, maxChars);
       this._rowPage = 0;
     },
@@ -807,7 +806,7 @@
       ctx.fillRect(bx + bw - 3, by + bh - 1, 3, 1);
       ctx.fillRect(bx + bw - 1, by + bh - 3, 1, 3);
 
-      var nameColor, textStartY;
+      var nameColor, textStartY, textStartX;
 
       if (hasPortrait) {
         // --- Speaker name tab above the dialogue box ---
@@ -874,10 +873,12 @@
         }
 
         textStartY = TEXT_Y + slideOffset;
+        textStartX = portraitX + portraitSize + 5; // right of portrait + gap
       } else {
         // Narrator mode: no portrait, center text vertically in box
         nameColor = NARRATOR_COLOR;
         textStartY = by + 14;
+        textStartX = TEXT_X;
       }
 
       // Line progress dots
@@ -919,7 +920,7 @@
         window.Utils.drawText(
           ctx,
           visibleRow,
-          TEXT_X,
+          textStartX,
           rowY,
           '#f0f0f0',
           1

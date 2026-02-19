@@ -183,7 +183,32 @@
 
         // Puzzle item collection sparkle timers (Pass 6D)
         _puzzleSparkles: { crown: 0, cape: 0, scepter: 0 },
-        _prevPuzzleFlags: { puzzleCrown: false, puzzleCape: false, puzzleScepter: false }
+        _prevPuzzleFlags: { puzzleCrown: false, puzzleCape: false, puzzleScepter: false },
+
+        // --- Pass 6E: Pause menu overhaul + bestiary ---
+        pauseMenuIndex: 0,
+        pauseSubMenu: null, // null = main, 'controls', 'bestiary'
+        bestiaryTab: 0,     // 0 = Enemies, 1 = Characters, 2 = Lore
+        bestiaryScroll: 0,
+        // Track encountered enemies/NPCs for bestiary
+        encounteredEnemies: {},
+        metNPCs: {},
+        loreEntries: {},
+
+        // --- Pass 6F: Game over screen ---
+        gameOverMenuIndex: 0,
+        gameOverDesatTimer: 0,
+
+        // --- Pass 7E: Difficulty + adaptive ---
+        deathCounts: {},    // roomId -> death count
+        playerHasDied: false,
+
+        // --- Pass 8A-8D: World details, micro-animations, camera ---
+        cameraZoom: 1.0,
+        cameraZoomTarget: 1.0,
+        grassBends: [],     // {x, y, dir, timer}
+        waterRipples: [],   // {x, y, radius, life}
+        npcTalkedFirst: null // tracks which NPC player talked to first
     };
 
     window.Game = Game;
@@ -386,11 +411,13 @@
                 if (etype === 'goblin_archer') {
                     var archer = new Entities.GoblinArcher(eData.x, eData.y);
                     Game.enemies.push(archer);
+                    Game.encounteredEnemies['goblin_archer'] = true; // Bestiary tracking
                 } else {
                     // Normalize enemy type: maps use 'goblin_lackey', entity expects 'goblin'
                     if (etype === 'goblin_lackey') etype = 'goblin';
                     var enemy = new Entities.Enemy(etype, eData.x, eData.y);
-                    // Apply difficulty scaling
+                    // Apply difficulty scaling (Pass 7E)
+                    var roomDeaths = Game.deathCounts[roomId] || 0;
                     if (Game.difficulty === 0) { // Easy
                         enemy.speed *= 0.7;
                         enemy.damage = Math.max(1, enemy.damage - 1);
@@ -399,7 +426,17 @@
                         enemy.maxHp = Math.ceil(enemy.maxHp * 1.5);
                         enemy.hp = enemy.maxHp;
                     }
+                    // Adaptive difficulty: mercy after 3+ deaths in same room
+                    if (roomDeaths >= 3) {
+                        enemy.damage = Math.max(1, enemy.damage - 1);
+                        enemy.speed *= 0.85;
+                    }
+                    // Reward no-death players after temple entrance
+                    if (!Game.playerHasDied && Game.visitedRooms['temple_entrance']) {
+                        enemy.speed *= 1.1;
+                    }
                     Game.enemies.push(enemy);
+                    Game.encounteredEnemies[etype] = true; // Bestiary tracking
                 }
             }
         }
@@ -417,6 +454,9 @@
 
         // Mark room as visited for minimap
         Game.visitedRooms[roomId] = true;
+
+        // Pass 8D: Room enter zoom effect
+        triggerRoomEnterZoom();
 
         // Track safe rooms (town rooms)
         if (roomId === 'ebon_vale_square' || roomId === 'ebon_vale_market' || roomId === 'ebon_vale_north') {
@@ -558,6 +598,55 @@
     // NPC INTERACTION
     // =====================================================================
 
+    // --- Pass 4D: Context-sensitive dialogue selection ---
+    function getContextDialogue(npc) {
+        var id = npc.id || '';
+        var base = id.replace('npc_', '').replace('brother_', '');
+        var DD = window.DialogueData;
+
+        // Post-boss victory dialogue (highest priority)
+        if (Game.flags.bossDefeated && DD[base + '_victory']) {
+            return base + '_victory';
+        }
+
+        // Mid-game dialogue (after visiting forest)
+        if (Game.visitedRooms && Game.visitedRooms['ebon_forest'] && DD[base + '_midgame']) {
+            if (npc.interacted) {
+                return base + '_midgame';
+            }
+        }
+
+        // Return visit dialogue (already interacted once)
+        if (npc.interacted && DD[base + '_return']) {
+            // Pass 8A: Health-aware Que'Rubra
+            if (base === 'querubra' && Game.player) {
+                if (Game.player.hp < Game.player.maxHp && DD['querubra_return_hurt']) {
+                    return 'querubra_return_hurt';
+                } else if (Game.player.hp >= Game.player.maxHp && DD['querubra_return_healthy']) {
+                    return 'querubra_return_healthy';
+                }
+            }
+            return base + '_return';
+        }
+
+        // Pass 8A: Character-specific NPC reactions
+        if (!npc.interacted && Game.player) {
+            var charId = Game.player.characterId;
+            if (DD[base + '_greeting_' + charId]) {
+                return base + '_greeting_' + charId;
+            }
+        }
+
+        // Pass 8A: NPC memory — who player talked to first
+        if (!npc.interacted && Game.npcTalkedFirst) {
+            if (base === 'fawks' && Game.npcTalkedFirst !== 'fawks' && Game.npcTalkedFirst === 'helena') {
+                // Fawks knows you already met Helena
+            }
+        }
+
+        return null; // Use default dialogue
+    }
+
     function checkNPCInteraction() {
         if (!Game.player) return;
         Game.nearNPC = null;
@@ -571,7 +660,26 @@
 
             if (d < 24) {
                 Game.nearNPC = npc;
+
+                // Pass 8B: NPCs turn to face player when within range
+                if (Game.player) {
+                    var dx = Game.player.x - npc.x;
+                    var dy = Game.player.y - npc.y;
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        npc.facing = dx > 0 ? 'right' : 'left';
+                    } else {
+                        npc.facing = dy > 0 ? 'down' : 'up';
+                    }
+                }
+
                 if (Input.pressed['z'] && !Dialogue.isActive()) {
+                    // Bestiary: track met NPCs
+                    var npcBaseId = (npc.id || '').replace('npc_', '').replace('brother_', '');
+                    if (npcBaseId) Game.metNPCs[npcBaseId] = true;
+
+                    // Track first NPC talked to (Pass 8A)
+                    if (!Game.npcTalkedFirst) Game.npcTalkedFirst = npcBaseId;
+
                     // Special NPC interactions
                     if (npc.id === 'npc_braxon') {
                         if (npc.interacted) {
@@ -603,9 +711,15 @@
                             Audio.play('select');
                         }
                     } else {
-                        var dialogueId2 = npc.dialogueId || npc.dialogue;
+                        // Pass 4D: Context-sensitive dialogue tiers
+                        var dialogueId2 = getContextDialogue(npc) || npc.dialogueId || npc.dialogue;
                         if (dialogueId2) {
-                            npc.interact();
+                            if (typeof dialogueId2 === 'string' && window.DialogueData[dialogueId2]) {
+                                Dialogue.start(dialogueId2);
+                            } else {
+                                npc.interact();
+                            }
+                            Audio.play('select');
                         }
                     }
                 }
@@ -746,6 +860,13 @@
                     // Show sign text as dialogue
                     Dialogue.start(null, null, sign.text);
                     Audio.play('select');
+                    // Lore tracking for bestiary
+                    if (sign.dialogueId === 'sign_temple' || sign.text && sign.text.indexOf('Nitriti') >= 0) {
+                        Game.loreEntries['lore_nitriti'] = true;
+                    }
+                    if (sign.dialogueId === 'sign_warning' || sign.text && sign.text.indexOf('EBON') >= 0) {
+                        Game.loreEntries['lore_ebonvale'] = true;
+                    }
                 }
                 break;
             }
@@ -861,6 +982,8 @@
     }
 
     function spawnHeartDrop(x, y) {
+        // Pass 7E: Legend difficulty — no heart drops from enemies
+        if (Game.difficulty === 2) return;
         Game.heartDrops.push({
             x: x,
             y: y,
@@ -1011,6 +1134,8 @@
             if (Game.state === 'game') {
                 Game.state = 'boss_intro';
                 Game.bossDialogueStage = 0;
+                Game.encounteredEnemies['boss'] = true; // Bestiary
+                triggerBossZoomIn(); // Pass 8D
                 if (Music) Music.stop();
                 Dialogue.start('boss_intro', function () {
                     // Spawn boss at center of room
@@ -1019,6 +1144,7 @@
                     } catch (e) {
                         console.warn('Error creating boss:', e);
                     }
+                    triggerBossZoomReset(); // Pass 8D
                     Game.state = 'boss';
                     if (Music) Music.play('boss');
                 });
@@ -1035,7 +1161,10 @@
         if (Game.player.hp <= 0 && Game.state !== 'gameover') {
             Game.state = 'gameover';
             Game.gameOverTimer = 0;
+            Game.gameOverMenuIndex = 0;
             Audio.play('death');
+            // Pass 6F: Stop music for somber atmosphere
+            if (Music) Music.stop();
         }
     }
 
@@ -1966,8 +2095,12 @@
 
     function sorenBlessing() {
         if (!Game.player) return;
-        // Heal player to full
-        Game.player.hp = Game.player.maxHp;
+        // Heal player (Pass 7E: Legend difficulty only heals 2 HP)
+        if (Game.difficulty === 2) {
+            Game.player.hp = Math.min(Game.player.maxHp, Game.player.hp + 2);
+        } else {
+            Game.player.hp = Game.player.maxHp;
+        }
         // Temporary speed boost
         Game.sorenBlessing = true;
         Game.sorenBlessingTimer = 600; // 10 seconds
@@ -2519,12 +2652,13 @@
             Utils.drawText(ctx, descLines[l], lx, descY + l * 9, C.white, 0.8);
         }
 
-        // Bottom controls - single row for difficulty + speed run
+        // Bottom controls - single row for difficulty + speed run (Pass 7E names)
         var ctrlY = H - 28;
-        var diffNames = ['EASY', 'NORMAL', 'HARD'];
-        var diffColors = [C.lightGreen, C.yellow, C.red];
+        var diffNames = ['ADVENTURER', 'HERO', 'LEGEND'];
+        var diffDescs = ['+2 HP, less dmg', 'Standard', '+HP/spd enemies'];
+        var diffColors = [C.lightGreen, C.gold, C.red];
         Utils.drawText(ctx, diffNames[Game.difficulty], 10, ctrlY, diffColors[Game.difficulty], 0.8);
-        Utils.drawText(ctx, 'UP/DN', 10, ctrlY + 9, C.darkGray, 0.6);
+        Utils.drawText(ctx, diffDescs[Game.difficulty], 10, ctrlY + 9, C.darkGray, 0.6);
 
         var srText = Game.speedRunEnabled ? 'SPEED:ON' : 'SPEED:OFF';
         Utils.drawText(ctx, srText, W - 52, ctrlY, Game.speedRunEnabled ? C.gold : C.darkGray, 0.8);
@@ -2856,6 +2990,8 @@
         if (Input.pressed['p'] || Input.pressed['Escape']) {
             Game.pausedFromState = 'game';
             Game.state = 'paused';
+            Game.pauseMenuIndex = 0;
+            Game.pauseSubMenu = null;
             Audio.play('select');
             return;
         }
@@ -3016,6 +3152,12 @@
         // Ambient sounds
         updateAmbientSounds();
 
+        // Pass 8B: Micro-animations
+        updateMicroAnimations();
+
+        // Pass 8D: Camera zoom
+        updateCameraZoom();
+
         // Check room exits
         checkRoomExits();
 
@@ -3054,6 +3196,9 @@
 
         // Torch warm glow (drawn on top of map, under entities)
         renderTorchGlow(ctx, Game.currentRoom);
+
+        // Pass 8B: Micro-animations (grass bends, water ripples)
+        renderMicroAnimations(ctx);
 
         // Render general items (potions, etc.)
         renderItems(ctx);
@@ -3184,6 +3329,8 @@
         if (Input.pressed['p'] || Input.pressed['Escape']) {
             Game.pausedFromState = 'boss';
             Game.state = 'paused';
+            Game.pauseMenuIndex = 0;
+            Game.pauseSubMenu = null;
             Audio.play('select');
             return;
         }
@@ -3515,84 +3662,122 @@
     // GAME OVER SCREEN
     // =====================================================================
 
+    // --- Pass 6F: Cinematic game over screen ---
+
     function updateGameOver() {
         Game.gameOverTimer++;
 
-        if (Game.gameOverTimer > 60 && Input.pressed['Enter']) {
-            // Reset player HP and return to safe room
-            if (Game.player) {
-                Game.player.hp = Game.player.maxHp;
-                Game.player.dead = false;
-            }
-            Game.boss = null;
-            Game.bossDeathTimer = 0;
-            Game.bossDialogueStage = 0;
-            Game.state = 'game';
+        // Track death for adaptive difficulty (Pass 7E)
+        if (Game.gameOverTimer === 1) {
+            Game.playerHasDied = true;
+            var roomId = Game.currentRoom ? Game.currentRoom.id : 'unknown';
+            Game.deathCounts[roomId] = (Game.deathCounts[roomId] || 0) + 1;
+        }
 
-            loadRoom(Game.lastSafeRoom);
-            if (Game.player) {
-                Game.player.x = Game.lastSafeX * TILE;
-                Game.player.y = Game.lastSafeY * TILE;
+        // Menu appears after 50 frames
+        if (Game.gameOverTimer > 50) {
+            if (Input.pressed['ArrowUp'] || Input.pressed['ArrowDown']) {
+                Game.gameOverMenuIndex = Game.gameOverMenuIndex === 0 ? 1 : 0;
+                Audio.play('select');
+            }
+            if (Input.pressed['z'] || Input.pressed['Enter']) {
+                Audio.play('select');
+                if (Game.gameOverMenuIndex === 0) {
+                    // Continue: respawn at last safe room
+                    if (Game.player) {
+                        Game.player.hp = Game.player.maxHp;
+                        Game.player.dead = false;
+                    }
+                    Game.boss = null;
+                    Game.bossDeathTimer = 0;
+                    Game.bossDialogueStage = 0;
+                    Game.state = 'game';
+                    loadRoom(Game.lastSafeRoom);
+                    if (Game.player) {
+                        Game.player.x = Game.lastSafeX * TILE;
+                        Game.player.y = Game.lastSafeY * TILE;
+                    }
+                } else {
+                    // Quit to title
+                    fullReset();
+                }
             }
         }
     }
 
     function renderGameOver() {
         var ctx = buf;
+        var t = Game.gameOverTimer;
 
-        // Fade to dark red tint
-        ctx.fillStyle = C.black;
+        // Slow desaturation: render game scene, then overlay
+        if (Game.pausedFromState === 'boss') {
+            renderBoss();
+        } else if (t < 30) {
+            renderGame();
+        }
+
+        // Progressive darken + red tint
+        var desatAlpha = Math.min(t / 25, 1.0);
+        ctx.fillStyle = 'rgba(0,0,5,' + (desatAlpha * 0.85).toFixed(2) + ')';
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = 'rgba(60,5,5,' + (desatAlpha * 0.35).toFixed(2) + ')';
         ctx.fillRect(0, 0, W, H);
 
-        // Red tint overlay
-        ctx.fillStyle = 'rgba(80, 10, 10, 0.7)';
-        ctx.fillRect(0, 0, W, H);
-
-        // Character sprite lying down (rotated)
-        if (Game.player) {
+        // Player silhouette kneeling (after desaturation completes)
+        if (t > 15 && Game.player) {
             var charId = Game.player.characterId;
             var sprKey = charId + '_down_0';
             var sprCanvas = Sprites.get(sprKey);
             if (sprCanvas) {
+                var sprAlpha = Math.min((t - 15) / 20, 0.7);
                 ctx.save();
-                ctx.translate(W / 2, H / 2 - 40);
-                ctx.rotate(Math.PI / 2); // Lying on side
-                ctx.globalAlpha = 0.6;
+                ctx.globalAlpha = sprAlpha;
+                // Draw kneeling (rotated slightly)
+                ctx.translate(W / 2, H / 2 - 44);
+                ctx.rotate(0.3);
                 ctx.drawImage(sprCanvas, -8, -12);
-                ctx.globalAlpha = 1;
                 ctx.restore();
             }
         }
 
-        // "YOU HAVE FALLEN" text
-        var deathText = 'YOU HAVE FALLEN';
-        var dtX = centerTextX(deathText, 2);
-        Utils.drawText(ctx, deathText, dtX + 1, H / 2 - 15, C.darkRed, 2);
-        Utils.drawText(ctx, deathText, dtX, H / 2 - 16, C.red, 2);
+        // "GAME OVER" text fades in
+        if (t > 20) {
+            var textAlpha = Math.min((t - 20) / 20, 1.0);
+            ctx.globalAlpha = textAlpha;
+            var goText = 'GAME OVER';
+            var goX = centerTextX(goText, 2);
+            // Shadow
+            Utils.drawText(ctx, goText, goX + 1, H / 2 - 19, C.darkRed, 2);
+            Utils.drawText(ctx, goText, goX, H / 2 - 20, C.red, 2);
+            ctx.globalAlpha = 1;
+        }
 
-        // Run stats
-        var statsY = H / 2 + 8;
-        var playMins = Math.floor(Game.playTime / 3600);
-        var playSecs = Math.floor((Game.playTime % 3600) / 60);
-        var timeStr = 'TIME: ' + playMins + ':' + (playSecs < 10 ? '0' : '') + playSecs;
-        Utils.drawText(ctx, timeStr, centerTextX(timeStr, 1), statsY, C.lightGray, 1);
+        // Flavor text
+        if (t > 35) {
+            var flavorAlpha = Math.min((t - 35) / 20, 0.8);
+            ctx.globalAlpha = flavorAlpha;
+            var flavorText = 'The darkness claims another...';
+            Utils.drawText(ctx, flavorText, centerTextX(flavorText, 1), H / 2 - 2, C.lightGray, 1);
+            ctx.globalAlpha = 1;
+        }
 
-        var enemyStr = 'ENEMIES DEFEATED: ' + Game.enemiesDefeated;
-        Utils.drawText(ctx, enemyStr, centerTextX(enemyStr, 1), statsY + 12, C.lightGray, 1);
+        // Menu options appear after 50 frames
+        if (t > 50) {
+            var menuAlpha = Math.min((t - 50) / 15, 1.0);
+            ctx.globalAlpha = menuAlpha;
 
-        var teethStr = 'GOBLIN TEETH: ' + Game.goblinTeeth;
-        Utils.drawText(ctx, teethStr, centerTextX(teethStr, 1), statsY + 24, C.gold, 1);
+            var opts = ['Continue', 'Quit to Title'];
+            for (var i = 0; i < opts.length; i++) {
+                var oy = H / 2 + 24 + i * 16;
+                var isSel = (i === Game.gameOverMenuIndex);
 
-        // Difficulty indicator
-        var diffNames = ['EASY', 'NORMAL', 'HARD'];
-        var diffStr = 'DIFFICULTY: ' + diffNames[Game.difficulty];
-        Utils.drawText(ctx, diffStr, centerTextX(diffStr, 1), statsY + 36, C.gray, 1);
-
-        // "Press ENTER to Continue" blinking
-        if (Game.gameOverTimer > 60 && Math.floor(Game.frame / 30) % 2 === 0) {
-            var contText = 'Press ENTER to Continue';
-            var cX = centerTextX(contText, 1);
-            Utils.drawText(ctx, contText, cX, H - 20, C.white, 1);
+                if (isSel) {
+                    var bounce = Math.floor(Math.sin(Game.frame * 0.12) * 2);
+                    Utils.drawText(ctx, '>', centerTextX(opts[i], 1) - 10 + bounce, oy, C.gold, 1);
+                }
+                Utils.drawText(ctx, opts[i], centerTextX(opts[i], 1), oy, isSel ? C.white : C.gray, 1);
+            }
+            ctx.globalAlpha = 1;
         }
     }
 
@@ -3606,6 +3791,11 @@
         if (!Dialogue.isActive() && Game.epilogueTimer === 1) {
             Dialogue.start('ending_nitriti', function () {
                 Game.flags.bossDefeated = true;
+                // Unlock lore entries from the ending
+                Game.loreEntries['lore_nitriti'] = true;
+                Game.loreEntries['lore_smaldge'] = true;
+                Game.loreEntries['lore_bonemoon'] = true;
+                Game.loreEntries['lore_eldspyre'] = true;
                 Game.state = 'victory';
                 Game.victoryDialogueDone = false;
                 Game.creditsY = H + 20;
@@ -4342,7 +4532,14 @@
                 playTime: Game.playTime,
                 lastSafeRoom: Game.lastSafeRoom,
                 lastSafeX: Game.lastSafeX,
-                lastSafeY: Game.lastSafeY
+                lastSafeY: Game.lastSafeY,
+                encounteredEnemies: Game.encounteredEnemies,
+                metNPCs: Game.metNPCs,
+                loreEntries: Game.loreEntries,
+                deathCounts: Game.deathCounts,
+                playerHasDied: Game.playerHasDied,
+                difficulty: Game.difficulty,
+                npcTalkedFirst: Game.npcTalkedFirst
             };
             localStorage.setItem(SAVE_KEY, JSON.stringify(data));
         } catch (e) {
@@ -4379,6 +4576,13 @@
             Game.lastSafeRoom = data.lastSafeRoom || 'ebon_vale_square';
             Game.lastSafeX = data.lastSafeX || 7;
             Game.lastSafeY = data.lastSafeY || 7;
+            Game.encounteredEnemies = data.encounteredEnemies || {};
+            Game.metNPCs = data.metNPCs || {};
+            Game.loreEntries = data.loreEntries || {};
+            Game.deathCounts = data.deathCounts || {};
+            Game.playerHasDied = data.playerHasDied || false;
+            Game.difficulty = data.difficulty != null ? data.difficulty : 1;
+            Game.npcTalkedFirst = data.npcTalkedFirst || null;
 
             // Load the room
             loadRoom(data.roomId);
@@ -4409,83 +4613,486 @@
     // PAUSE MENU
     // =====================================================================
 
+    // --- Pass 6E: Pause menu overhaul with bestiary ---
+
+    var PAUSE_MENU_ITEMS = ['Resume', 'Controls', 'Bestiary', 'Save & Quit'];
+
+    // Bestiary data definitions
+    var BESTIARY_ENEMIES = [
+        { id: 'goblin', name: 'Goblin Lackey', desc: 'Desperate foot soldiers of Bargnot\'s horde.' },
+        { id: 'goblin_archer', name: 'Goblin Archer', desc: 'Cowardly snipers who flee when cornered.' },
+        { id: 'spinecleaver', name: 'Spinecleaver', desc: 'Armored brutes with unbreakable shields.' },
+        { id: 'boss', name: 'Queen Bargnot', desc: 'A desperate queen who bargained with shadow.' }
+    ];
+
+    var BESTIARY_CHARACTERS = [
+        { id: 'fawks', name: 'Fawks', desc: 'Tavern owner. Warm, gossipy, nervous.' },
+        { id: 'helena', name: 'Helena', desc: 'Mayor. Dignified and exhausted.' },
+        { id: 'elira', name: 'Elira Voss', desc: 'Guard Captain. Blunt, military, worried.' },
+        { id: 'braxon', name: 'Braxon', desc: 'Blacksmith. Gruff but fatherly.' },
+        { id: 'soren', name: 'Brother Soren', desc: 'Tabaxi monk. Serene with dry wit.' },
+        { id: 'svana', name: 'Svana Ironveil', desc: 'Dwarf refugee. Fierce, heartbroken.' },
+        { id: 'querubra', name: 'Que\'Rubra', desc: 'Ancient forest spirit. Cryptic and vast.' }
+    ];
+
+    var BESTIARY_LORE = [
+        { id: 'lore_nitriti', name: 'Temple of Nitriti', desc: 'She Who Guards the veil between worlds.' },
+        { id: 'lore_smaldge', name: 'Smaldge', desc: 'A spirit of hunger and shadow, bound by ancient pacts.' },
+        { id: 'lore_bonemoon', name: 'The Bonemoon', desc: 'An omen of darkness gathering beyond the veil.' },
+        { id: 'lore_eldspyre', name: 'The Eldspyre', desc: 'Source of all magic. A mountain that burns with starlight.' },
+        { id: 'lore_ebonvale', name: 'Ebon Vale', desc: 'Too small for kings to notice. Too stubborn to die.' }
+    ];
+
+    function drawPixelFrame(ctx, x, y, w, h, accentColor) {
+        // Consistent pixel art border matching dialogue box style (Pass 6C)
+        var borderColor = '#6a6a7a';
+        var innerColor = '#4a4a5a';
+        var cornerColor = accentColor || C.gold;
+
+        // Background
+        ctx.fillStyle = 'rgba(10, 10, 25, 0.92)';
+        ctx.fillRect(x, y, w, h);
+
+        // Noise texture
+        ctx.fillStyle = 'rgba(30, 30, 50, 0.4)';
+        for (var ny = y; ny < y + h; ny += 2) {
+            for (var nx = x; nx < x + w; nx += 2) {
+                if (((nx * 7 + ny * 13) % 8) === 0) {
+                    ctx.fillRect(nx, ny, 1, 1);
+                }
+            }
+        }
+
+        // Outer border
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+
+        // Inner border
+        ctx.strokeStyle = innerColor;
+        ctx.strokeRect(x + 2.5, y + 2.5, w - 5, h - 5);
+
+        // Corner ornaments
+        ctx.fillStyle = cornerColor;
+        ctx.fillRect(x, y, 3, 1); ctx.fillRect(x, y, 1, 3);
+        ctx.fillRect(x + w - 3, y, 3, 1); ctx.fillRect(x + w - 1, y, 1, 3);
+        ctx.fillRect(x, y + h - 1, 3, 1); ctx.fillRect(x, y + h - 3, 1, 3);
+        ctx.fillRect(x + w - 3, y + h - 1, 3, 1); ctx.fillRect(x + w - 1, y + h - 3, 1, 3);
+    }
+
     function updatePaused() {
-        if (Input.pressed['p'] || Input.pressed['Escape']) {
-            // Unpause
-            Game.state = Game.pausedFromState || 'game';
-            Game.pausedFromState = null;
-            Audio.play('select');
+        if (Game.pauseSubMenu === null) {
+            // Main pause menu navigation
+            if (Input.pressed['ArrowUp']) {
+                Game.pauseMenuIndex = (Game.pauseMenuIndex - 1 + PAUSE_MENU_ITEMS.length) % PAUSE_MENU_ITEMS.length;
+                Audio.play('select');
+            }
+            if (Input.pressed['ArrowDown']) {
+                Game.pauseMenuIndex = (Game.pauseMenuIndex + 1) % PAUSE_MENU_ITEMS.length;
+                Audio.play('select');
+            }
+            if (Input.pressed['z'] || Input.pressed['Enter']) {
+                Audio.play('select');
+                if (Game.pauseMenuIndex === 0) {
+                    // Resume
+                    Game.state = Game.pausedFromState || 'game';
+                    Game.pausedFromState = null;
+                } else if (Game.pauseMenuIndex === 1) {
+                    Game.pauseSubMenu = 'controls';
+                } else if (Game.pauseMenuIndex === 2) {
+                    Game.pauseSubMenu = 'bestiary';
+                    Game.bestiaryTab = 0;
+                    Game.bestiaryScroll = 0;
+                } else if (Game.pauseMenuIndex === 3) {
+                    // Save & Quit
+                    saveGame();
+                    fullReset();
+                }
+            }
+            if (Input.pressed['p'] || Input.pressed['Escape']) {
+                Game.state = Game.pausedFromState || 'game';
+                Game.pausedFromState = null;
+                Audio.play('select');
+            }
+        } else if (Game.pauseSubMenu === 'controls') {
+            if (Input.pressed['x'] || Input.pressed['Escape'] || Input.pressed['z']) {
+                Game.pauseSubMenu = null;
+                Audio.play('select');
+            }
+        } else if (Game.pauseSubMenu === 'bestiary') {
+            if (Input.pressed['x'] || Input.pressed['Escape']) {
+                Game.pauseSubMenu = null;
+                Audio.play('select');
+            }
+            if (Input.pressed['ArrowLeft']) {
+                Game.bestiaryTab = (Game.bestiaryTab - 1 + 3) % 3;
+                Game.bestiaryScroll = 0;
+                Audio.play('select');
+            }
+            if (Input.pressed['ArrowRight']) {
+                Game.bestiaryTab = (Game.bestiaryTab + 1) % 3;
+                Game.bestiaryScroll = 0;
+                Audio.play('select');
+            }
+            if (Input.pressed['ArrowDown']) {
+                Game.bestiaryScroll++;
+                Audio.play('select');
+            }
+            if (Input.pressed['ArrowUp'] && Game.bestiaryScroll > 0) {
+                Game.bestiaryScroll--;
+                Audio.play('select');
+            }
         }
     }
 
     function renderPaused() {
         var ctx = buf;
 
-        // Render the game scene underneath (frozen)
+        // Render game scene underneath (frozen + desaturated)
         if (Game.pausedFromState === 'boss') {
             renderBoss();
         } else {
             renderGame();
         }
 
-        // Semi-transparent overlay
-        ctx.fillStyle = 'rgba(0,0,15,0.7)';
+        // Dark tint overlay (desaturated feel)
+        ctx.fillStyle = 'rgba(0,0,15,0.75)';
         ctx.fillRect(0, 0, W, H);
+
+        if (Game.pauseSubMenu === 'controls') {
+            renderControlsScreen(ctx);
+            return;
+        }
+        if (Game.pauseSubMenu === 'bestiary') {
+            renderBestiary(ctx);
+            return;
+        }
+
+        // Main pause menu
+        var frameX = W / 2 - 70;
+        var frameY = 20;
+        var frameW = 140;
+        var frameH = 180;
+        drawPixelFrame(ctx, frameX, frameY, frameW, frameH, C.gold);
 
         // "PAUSED" title
         var pauseText = 'PAUSED';
-        var ptX = centerTextX(pauseText, 2);
-        Utils.drawText(ctx, pauseText, ptX, 30, C.gold, 2);
+        Utils.drawText(ctx, pauseText, centerTextX(pauseText, 2), frameY + 8, C.gold, 2);
 
         // Character info
         if (Game.player) {
             var charName = Game.charNames[Game.selectedChar] || '';
-            var charClass = Game.charClasses[Game.selectedChar] || '';
-            Utils.drawText(ctx, charName, centerTextX(charName, 1), 60, C.white, 1);
-            Utils.drawText(ctx, charClass, centerTextX(charClass, 1), 72, C.lightGray, 1);
-
-            // HP display
+            Utils.drawText(ctx, charName, centerTextX(charName, 1), frameY + 30, C.white, 1);
             var hpText = 'HP: ' + Game.player.hp + '/' + Game.player.maxHp;
-            Utils.drawText(ctx, hpText, centerTextX(hpText, 1), 90, C.red, 1);
+            Utils.drawText(ctx, hpText, centerTextX(hpText, 1), frameY + 42, C.red, 1);
         }
 
-        // Current room
-        if (Game.currentRoom) {
-            var roomText = Game.currentRoom.name || '';
-            Utils.drawText(ctx, roomText, centerTextX(roomText, 1), 108, C.paleBlue, 1);
+        // Collected relics
+        var relicY = frameY + 56;
+        var relicX = W / 2 - 20;
+        if (Game.flags.puzzleCrown) safeDraw(ctx, 'item_crown', relicX - 8, relicY);
+        else { ctx.fillStyle = 'rgba(60,60,80,0.5)'; ctx.fillRect(relicX - 8, relicY, 12, 12); }
+        if (Game.flags.puzzleCape) safeDraw(ctx, 'item_cape', relicX + 8, relicY);
+        else { ctx.fillStyle = 'rgba(60,60,80,0.5)'; ctx.fillRect(relicX + 8, relicY, 12, 12); }
+        if (Game.flags.puzzleScepter) safeDraw(ctx, 'item_scepter', relicX + 24, relicY);
+        else { ctx.fillStyle = 'rgba(60,60,80,0.5)'; ctx.fillRect(relicX + 24, relicY, 12, 12); }
+
+        // Menu items
+        var menuStartY = frameY + 78;
+        for (var i = 0; i < PAUSE_MENU_ITEMS.length; i++) {
+            var label = PAUSE_MENU_ITEMS[i];
+            var itemY = menuStartY + i * 18;
+            var isSelected = (i === Game.pauseMenuIndex);
+
+            if (isSelected) {
+                // Highlight bar
+                ctx.fillStyle = 'rgba(60, 60, 100, 0.6)';
+                ctx.fillRect(frameX + 6, itemY - 1, frameW - 12, 13);
+
+                // Animated arrow
+                var arrowBounce = Math.floor(Math.sin(Game.frame * 0.15) * 2);
+                Utils.drawText(ctx, '>', frameX + 10 + arrowBounce, itemY, C.gold, 1);
+            }
+
+            var labelColor = isSelected ? C.white : C.lightGray;
+            Utils.drawText(ctx, label, frameX + 22, itemY, labelColor, 1);
         }
-
-        // Stats
-        var statsY = 126;
-        var defeatedText = 'Enemies Defeated: ' + (Game.enemiesDefeated || 0);
-        Utils.drawText(ctx, defeatedText, centerTextX(defeatedText, 1), statsY, C.lightGray, 1);
-
-        var roomsText = 'Rooms Explored: ' + Object.keys(Game.visitedRooms || {}).length + '/8';
-        Utils.drawText(ctx, roomsText, centerTextX(roomsText, 1), statsY + 12, C.lightGray, 1);
-
-        // Collected items
-        var itemsY = statsY + 30;
-        if (Game.flags.puzzleCrown) safeDraw(ctx, 'item_crown', W/2 - 24, itemsY);
-        if (Game.flags.puzzleCape)  safeDraw(ctx, 'item_cape',  W/2 - 8, itemsY);
-        if (Game.flags.puzzleScepter) safeDraw(ctx, 'item_scepter', W/2 + 8, itemsY);
 
         // Play time
         var totalSeconds = Math.floor((Game.playTime || 0) / 60);
-        var minutes = Math.floor(totalSeconds / 60);
-        var seconds = totalSeconds % 60;
-        var timeText = 'Time: ' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
-        Utils.drawText(ctx, timeText, centerTextX(timeText, 1), statsY + 50, C.lightGray, 1);
+        var mins = Math.floor(totalSeconds / 60);
+        var secs = totalSeconds % 60;
+        var timeText = mins + ':' + (secs < 10 ? '0' : '') + secs;
+        Utils.drawText(ctx, timeText, centerTextX(timeText, 1), frameY + frameH - 20, C.lightGray, 1);
 
-        // Resume hint (blinking)
+        // Room name
+        if (Game.currentRoom) {
+            var rn = Game.currentRoom.name || '';
+            Utils.drawText(ctx, rn, centerTextX(rn, 1), frameY + frameH - 10, C.paleBlue, 1);
+        }
+    }
+
+    function renderControlsScreen(ctx) {
+        var fx = 16, fy = 16, fw = W - 32, fh = H - 32;
+        drawPixelFrame(ctx, fx, fy, fw, fh, C.paleBlue);
+
+        Utils.drawText(ctx, 'CONTROLS', centerTextX('CONTROLS', 2), fy + 10, C.paleBlue, 2);
+
+        var controls = [
+            ['Arrow Keys', 'Move'],
+            ['Z', 'Attack / Interact'],
+            ['X', 'Special Ability / Back'],
+            ['P / ESC', 'Pause / Menu'],
+            ['Enter', 'Confirm']
+        ];
+
+        var cy = fy + 38;
+        for (var i = 0; i < controls.length; i++) {
+            Utils.drawText(ctx, controls[i][0], fx + 16, cy + i * 16, C.gold, 1);
+            Utils.drawText(ctx, controls[i][1], fx + 96, cy + i * 16, C.lightGray, 1);
+        }
+
+        var specY = cy + controls.length * 16 + 12;
+        if (Game.player) {
+            var specNames = { daxon: 'Shield Barrier', luigi: 'Summon Brog', lirielle: 'Nature\'s Embrace' };
+            var specDesc = { daxon: 'Block incoming attacks', luigi: 'Send familiar to attack', lirielle: 'Heal over time' };
+            var cid = Game.player.characterId;
+            Utils.drawText(ctx, 'Special: ' + (specNames[cid] || ''), fx + 16, specY, C.lightPurple, 1);
+            Utils.drawText(ctx, specDesc[cid] || '', fx + 16, specY + 12, C.lightGray, 1);
+        }
+
         if (Math.floor(Game.frame / 30) % 2 === 0) {
-            var resumeText = 'Press P or ESC to Resume';
-            Utils.drawText(ctx, resumeText, centerTextX(resumeText, 1), H - 18, C.yellow, 1);
+            Utils.drawText(ctx, 'Press Z or X to return', centerTextX('Press Z or X to return', 1), fy + fh - 14, C.yellow, 1);
+        }
+    }
+
+    function renderBestiary(ctx) {
+        var fx = 8, fy = 8, fw = W - 16, fh = H - 16;
+        drawPixelFrame(ctx, fx, fy, fw, fh, C.lightPurple);
+
+        Utils.drawText(ctx, 'BESTIARY', centerTextX('BESTIARY', 2), fy + 8, C.gold, 2);
+
+        // Tabs
+        var tabNames = ['Enemies', 'NPCs', 'Lore'];
+        var tabW = 56;
+        var tabStartX = fx + (fw - tabW * 3) / 2;
+        for (var t = 0; t < 3; t++) {
+            var tx = tabStartX + t * tabW;
+            var isActiveTab = (t === Game.bestiaryTab);
+            if (isActiveTab) {
+                ctx.fillStyle = 'rgba(60, 50, 100, 0.7)';
+                ctx.fillRect(tx, fy + 26, tabW - 4, 12);
+            }
+            Utils.drawText(ctx, tabNames[t], tx + 4, fy + 28, isActiveTab ? C.white : C.gray, 1);
+        }
+
+        // Separator line
+        ctx.fillStyle = C.gray;
+        ctx.fillRect(fx + 6, fy + 40, fw - 12, 1);
+
+        // Content area
+        var contentY = fy + 46;
+        var contentH = fh - 56;
+        var lineH = 20;
+        var maxVisible = Math.floor(contentH / lineH);
+        var entries, discovered;
+
+        if (Game.bestiaryTab === 0) {
+            entries = BESTIARY_ENEMIES;
+            discovered = Game.encounteredEnemies;
+        } else if (Game.bestiaryTab === 1) {
+            entries = BESTIARY_CHARACTERS;
+            discovered = Game.metNPCs;
+        } else {
+            entries = BESTIARY_LORE;
+            discovered = Game.loreEntries;
+        }
+
+        // Clamp scroll
+        var maxScroll = Math.max(0, entries.length - maxVisible);
+        if (Game.bestiaryScroll > maxScroll) Game.bestiaryScroll = maxScroll;
+
+        for (var i = 0; i < maxVisible && (i + Game.bestiaryScroll) < entries.length; i++) {
+            var entry = entries[i + Game.bestiaryScroll];
+            var ey = contentY + i * lineH;
+            var known = discovered[entry.id];
+
+            if (known) {
+                Utils.drawText(ctx, entry.name, fx + 12, ey, C.white, 1);
+                Utils.drawText(ctx, entry.desc, fx + 12, ey + 9, C.lightGray, 1);
+            } else {
+                Utils.drawText(ctx, '???', fx + 12, ey, C.darkGray, 1);
+                Utils.drawText(ctx, 'Not yet discovered.', fx + 12, ey + 9, C.darkGray, 1);
+            }
+        }
+
+        // Scroll indicators
+        if (Game.bestiaryScroll > 0) {
+            Utils.drawText(ctx, '^', fx + fw - 16, contentY, C.gold, 1);
+        }
+        if (Game.bestiaryScroll < maxScroll) {
+            Utils.drawText(ctx, 'v', fx + fw - 16, contentY + contentH - 10, C.gold, 1);
+        }
+
+        // Navigation hint
+        if (Math.floor(Game.frame / 30) % 2 === 0) {
+            Utils.drawText(ctx, '</>: Tabs  X: Back', centerTextX('</>: Tabs  X: Back', 1), fy + fh - 12, C.yellow, 1);
         }
     }
 
     // =====================================================================
     // FULL GAME RESET
     // =====================================================================
+
+    // =====================================================================
+    // PASS 8B: MICRO-ANIMATIONS (grass bends, water ripples)
+    // =====================================================================
+
+    function updateMicroAnimations() {
+        if (!Game.player || !Game.currentRoom) return;
+
+        var px = Game.player.x;
+        var py = Game.player.y;
+        var room = Game.currentRoom;
+
+        // Grass bending: when player walks on grass tiles
+        if (Game.player._moving && room.tiles) {
+            var tileX = Math.floor((px + 8) / TILE);
+            var tileY = Math.floor((py + 12) / TILE);
+            if (tileX >= 0 && tileX < COLS && tileY >= 0 && tileY < ROWS) {
+                var tileId = room.tiles[tileY] ? room.tiles[tileY][tileX] : 0;
+                // Grass tiles are typically 1 or type 'grass'
+                if (tileId === 1 || tileId === 2) {
+                    // Check if there's already a bend here
+                    var hasBend = false;
+                    for (var b = 0; b < Game.grassBends.length; b++) {
+                        if (Game.grassBends[b].x === tileX && Game.grassBends[b].y === tileY) {
+                            hasBend = true;
+                            break;
+                        }
+                    }
+                    if (!hasBend) {
+                        var dir = Game.player.facing === 'left' ? -1 : 1;
+                        Game.grassBends.push({ x: tileX, y: tileY, dir: dir, timer: 12 });
+                    }
+                }
+
+                // Water ripples near water tiles
+                if (tileId === 5 || tileId === 6) { // water-like tiles
+                    if (Game.frame % 16 === 0) {
+                        Game.waterRipples.push({
+                            x: (tileX * TILE) + 8,
+                            y: (tileY * TILE) + 8,
+                            radius: 1,
+                            maxRadius: 8,
+                            life: 20
+                        });
+                    }
+                }
+            }
+        }
+
+        // Update grass bends (spring back)
+        for (var g = Game.grassBends.length - 1; g >= 0; g--) {
+            Game.grassBends[g].timer--;
+            if (Game.grassBends[g].timer <= 0) {
+                Game.grassBends.splice(g, 1);
+            }
+        }
+        // Cap grass bends
+        if (Game.grassBends.length > 20) {
+            Game.grassBends = Game.grassBends.slice(-20);
+        }
+
+        // Update water ripples
+        for (var w = Game.waterRipples.length - 1; w >= 0; w--) {
+            var rip = Game.waterRipples[w];
+            rip.life--;
+            rip.radius = rip.maxRadius * (1 - rip.life / 20);
+            if (rip.life <= 0) {
+                Game.waterRipples.splice(w, 1);
+            }
+        }
+        if (Game.waterRipples.length > 10) {
+            Game.waterRipples = Game.waterRipples.slice(-10);
+        }
+    }
+
+    function renderMicroAnimations(ctx) {
+        // Render grass bends
+        for (var g = 0; g < Game.grassBends.length; g++) {
+            var gb = Game.grassBends[g];
+            var gx = gb.x * TILE;
+            var gy = gb.y * TILE;
+            var bendOffset = Math.floor(gb.dir * (gb.timer / 12) * 2);
+            ctx.fillStyle = C.darkGreen;
+            ctx.globalAlpha = gb.timer / 12;
+            // Small grass tuft bending
+            ctx.fillRect(gx + 6 + bendOffset, gy + 10, 2, 3);
+            ctx.fillRect(gx + 10 + bendOffset, gy + 9, 2, 4);
+            ctx.globalAlpha = 1;
+        }
+
+        // Render water ripples
+        for (var w = 0; w < Game.waterRipples.length; w++) {
+            var rip = Game.waterRipples[w];
+            ctx.strokeStyle = C.white;
+            ctx.globalAlpha = rip.life / 20 * 0.4;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(Math.floor(rip.x), Math.floor(rip.y), Math.floor(rip.radius), 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    // =====================================================================
+    // PASS 8D: CAMERA ZOOM SYSTEM
+    // =====================================================================
+
+    function updateCameraZoom() {
+        // Smooth zoom toward target
+        var diff = Game.cameraZoomTarget - Game.cameraZoom;
+        if (Math.abs(diff) > 0.001) {
+            Game.cameraZoom += diff * 0.08;
+        } else {
+            Game.cameraZoom = Game.cameraZoomTarget;
+        }
+    }
+
+    // Room enter: subtle zoom from 0.98x to 1.0x
+    function triggerRoomEnterZoom() {
+        Game.cameraZoom = 0.98;
+        Game.cameraZoomTarget = 1.0;
+    }
+
+    // Boss intro: slow push in
+    function triggerBossZoomIn() {
+        Game.cameraZoomTarget = 1.04;
+    }
+
+    function triggerBossZoomReset() {
+        Game.cameraZoomTarget = 1.0;
+    }
+
+    // =====================================================================
+    // PASS 7E: DIFFICULTY SELECTION
+    // =====================================================================
+
+    // Difficulty is already tracked in Game.difficulty (0=Easy, 1=Normal, 2=Hard)
+    // and the select screen already has a difficulty menu.
+    // Adaptive difficulty is handled in loadRoom enemy scaling.
+    // Add explicit selection in the select screen.
+
+    function getDifficultyName() {
+        var names = ['Adventurer', 'Hero', 'Legend'];
+        return names[Game.difficulty] || 'Hero';
+    }
+
+    function getDifficultyColor() {
+        var colors = [C.lightGreen, C.gold, C.red];
+        return colors[Game.difficulty] || C.gold;
+    }
 
     function fullReset() {
         // Clear save data on full reset (after victory or explicit restart)
@@ -4543,6 +5150,23 @@
         Game._puzzleSparkles = { crown: 0, cape: 0, scepter: 0 };
         Game._prevPuzzleFlags = { puzzleCrown: false, puzzleCape: false, puzzleScepter: false };
 
+        // Pass 6E + 6F + 7E + 8A resets
+        Game.pauseMenuIndex = 0;
+        Game.pauseSubMenu = null;
+        Game.bestiaryTab = 0;
+        Game.bestiaryScroll = 0;
+        Game.encounteredEnemies = {};
+        Game.metNPCs = {};
+        Game.loreEntries = {};
+        Game.gameOverMenuIndex = 0;
+        Game.deathCounts = {};
+        Game.playerHasDied = false;
+        Game.cameraZoom = 1.0;
+        Game.cameraZoomTarget = 1.0;
+        Game.grassBends = [];
+        Game.waterRipples = [];
+        Game.npcTalkedFirst = null;
+
         Particles.particles = [];
 
         if (Dialogue.active) {
@@ -4587,7 +5211,7 @@
             case 'paused':     renderPaused();    break;
         }
 
-        // Blit offscreen buffer to display canvas (with variable-intensity screenshake)
+        // Blit offscreen buffer to display canvas (with screenshake + camera zoom)
         display.imageSmoothingEnabled = false;
         var sx = 0, sy = 0;
         if (Game.shake > 0) {
@@ -4600,7 +5224,20 @@
             }
         }
         display.clearRect(0, 0, display.canvas.width, display.canvas.height);
-        display.drawImage(buf.canvas, sx * 3, sy * 3, display.canvas.width, display.canvas.height);
+
+        // Pass 8D: Apply camera zoom
+        var zoom = Game.cameraZoom || 1.0;
+        if (Math.abs(zoom - 1.0) > 0.001) {
+            var dw = display.canvas.width;
+            var dh = display.canvas.height;
+            var zw = dw * zoom;
+            var zh = dh * zoom;
+            var zx = (dw - zw) / 2 + sx * 3;
+            var zy = (dh - zh) / 2 + sy * 3;
+            display.drawImage(buf.canvas, zx, zy, zw, zh);
+        } else {
+            display.drawImage(buf.canvas, sx * 3, sy * 3, display.canvas.width, display.canvas.height);
+        }
 
         // Clear pressed keys for next frame
         Input.update();

@@ -337,6 +337,52 @@
     querubra_progress: [
       { speaker: 'Que\'Rubra', text: 'The forest knows your progress. You have collected [X] of the three relics.' },
       { speaker: 'Que\'Rubra', text: 'Hurry. I can feel Nitriti\'s temple crying out. The walls themselves remember what they were.' }
+    ],
+
+    // -----------------------------------------------------------------
+    // Pass 4D: Context-Sensitive & Character-Specific Dialogue
+    // -----------------------------------------------------------------
+
+    // Pass 8A: Character-specific NPC reactions
+    soren_greeting_luigi: [
+      { speaker: 'Soren', text: 'Ah. A warlock. I can feel the pact energy on you -- dangerous, but powerful.' },
+      { speaker: 'Soren', text: 'I won\'t judge. The spirits certainly don\'t. They care about intent, not method.' },
+      { speaker: 'Soren', text: 'Come. Let me bless you. Even warlocks deserve the spirits\' protection.' }
+    ],
+
+    querubra_greeting_lirielle: [
+      { speaker: 'Que\'Rubra', text: '... A child of the Circle. The forest welcomes you differently than it welcomes the others.' },
+      { speaker: 'Que\'Rubra', text: 'You can feel it, can\'t you? The roots crying out. The canopy mourning.' },
+      { speaker: 'Que\'Rubra', text: 'The temple demands three offerings: the Crown, the Cape, the Scepter. You know what must be done.' },
+      { speaker: 'Que\'Rubra', text: 'Go, druid. The forest will shelter you where it can.' }
+    ],
+
+    // Pass 8A: Health-aware Que'Rubra
+    querubra_return_hurt: [
+      { speaker: 'Que\'Rubra', text: 'I smell blood on you. Be more careful, little mortal.' },
+      { speaker: 'Que\'Rubra', text: 'The temple will not show mercy. Neither will its queen.' }
+    ],
+
+    querubra_return_healthy: [
+      { speaker: 'Que\'Rubra', text: 'You are unscathed. Impressive. Perhaps there is hope after all.' },
+      { speaker: 'Que\'Rubra', text: 'The forest watches your progress with something approaching admiration.' }
+    ],
+
+    // Pass 4E: Environmental examine text
+    examine_bookshelf: [
+      { speaker: '', text: 'Dusty tomes. Most are water-damaged. One is titled "Goblin Cuisine: A Cautionary Tale."' }
+    ],
+
+    examine_torch: [
+      { speaker: '', text: 'The flame burns without fuel. Old magic, still holding on.' }
+    ],
+
+    examine_statue_face: [
+      { speaker: '', text: 'The statue\'s face has been clawed away. Only the eyes remain, watching.' }
+    ],
+
+    examine_altar: [
+      { speaker: '', text: 'Rorik is bound here, unconscious. Dark runes pulse on the stone beneath him.' }
     ]
   };
 

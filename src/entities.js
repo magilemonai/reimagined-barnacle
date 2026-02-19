@@ -1198,6 +1198,13 @@
             this.phase  = 1;    // 1, 2, or 3
             this.damage = 2;    // half-hearts per hit
 
+            // Per-phase HP boundaries for the segmented bar display
+            // Phase 1: 40→20, Phase 2: 20→10, Phase 3: 10→0
+            this._phaseHpCeil  = [0, 40, 20, 10]; // hp at start of each phase
+            this._phaseHpFloor = [0, 20, 10, 0];  // hp at end of each phase
+            this._barFillAnim  = 1.0; // 0→1 refill animation progress
+            this._barFillSpeed = 0;   // how fast the bar refills
+
             this.state      = 'idle';  // idle, chase, attack, summon, charge, hurt
             this.stateTimer = 0;
             this.frame      = 0;
@@ -1211,6 +1218,9 @@
             this.knockback  = null;
             this.flash      = 0;
             this.dead       = false;
+
+            // Shadow afterimage trail (phase 3)
+            this._afterimages = [];
 
             this.projectiles          = []; // boss projectiles
             this.actionQueue          = []; // sequence of actions
@@ -1235,8 +1245,25 @@
             if (this.phaseTransition) {
                 this.phaseTransitionTimer--;
                 this.flash = 2;
+                // Animate bar refill
+                if (this._barFillAnim < 1) {
+                    this._barFillAnim = Math.min(1, this._barFillAnim + this._barFillSpeed);
+                }
+                // Periodic bursts during transition
+                var cx = this.x + this.w / 2;
+                var cy = this.y + this.h / 2;
+                if (this.phaseTransitionTimer % 15 === 0 && this.phaseTransitionTimer > 20) {
+                    var burstColor = (this.phase === 3) ? C.purple : C.red;
+                    Particles.burst(
+                        cx + (Math.random() - 0.5) * 30,
+                        cy + (Math.random() - 0.5) * 20,
+                        8, burstColor
+                    );
+                    if (window.Game) window.Game.shake = 4;
+                }
                 if (this.phaseTransitionTimer <= 0) {
                     this.phaseTransition = false;
+                    this._barFillAnim = 1;
                 }
                 return;
             }
@@ -1293,45 +1320,86 @@
                 this.frame = 1 - this.frame;
                 this.frameTimer = 0;
             }
+
+            // Phase 2: breathing embers rise from body
+            if (this.phase === 2 && Math.random() < 0.25) {
+                Particles.add(
+                    this.x + Utils.randInt(0, this.w),
+                    this.y + this.h - 4,
+                    { vx: (Math.random() - 0.5) * 0.3, vy: -0.4 - Math.random() * 0.3,
+                      life: 25 + Utils.randInt(0, 10), color: Utils.choice([C.red, C.gold, C.darkRed]),
+                      size: 1, gravity: -0.02 }
+                );
+            }
+
+            // Phase 3: record afterimages while moving
+            if (this.phase === 3 && (this.state === 'chase' || this.state === 'charge' || this.state === 'teleport')) {
+                this._afterimages.push({ x: this.x, y: this.y, life: 12 });
+                if (this._afterimages.length > 5) this._afterimages.shift();
+            }
+            // Tick afterimage lifetimes
+            for (var ai = this._afterimages.length - 1; ai >= 0; ai--) {
+                this._afterimages[ai].life--;
+                if (this._afterimages[ai].life <= 0) this._afterimages.splice(ai, 1);
+            }
         }
 
         /* ----- phase management ------------------------------------- */
         enterPhase(phase) {
             this.phase = phase;
             this.phaseTransition = true;
-            this.phaseTransitionTimer = 90; // 1.5 s transition
-            this.invincible = 90;
+            this.phaseTransitionTimer = 100; // extended transition for dramatic refill
+            this.invincible = 100;
             this.speed += 0.15;
-            this.damage = 2; // consistent damage across phases (difficulty is in speed/patterns)
+            this.damage = 2;
+
+            // Trigger HP bar refill animation (starts empty, fills over ~40 frames)
+            this._barFillAnim = 0;
+            this._barFillSpeed = 0.025;
+
+            var cx = this.x + this.w / 2;
+            var cy = this.y + this.h / 2;
 
             if (phase === 2) {
                 Dialogue.start('boss_phase2');
-                // Signal game.js to spawn minions
                 this._requestMinions = true;
-                // Pass 3D: Dynamic music — tempo +10 BPM, aggressive counter-melody
                 if (window.Music) {
                     window.Music.adjustTempo(10);
                 }
+                // Phase 2 roar: ground slam shockwave
+                Audio.play('phase_boom');
+                Audio.play('explosion');
+                Particles.burst(cx, cy, 30, C.red);
+                Particles.ring(cx, cy, 40, 24, C.darkRed);
+                Particles.ring(cx, cy, 20, 12, C.gold);
+                if (window.Game) window.Game.shake = 12;
             } else if (phase === 3) {
                 Dialogue.start('boss_phase3');
-                // Pass 3D: Strip to bass + percussion for 4 bars, then full return
                 if (window.Music) {
-                    window.Music.soloTracks([0, 2]); // bass + percussion only
-                    // After ~4 bars (~6.3s at boss BPM), restore all tracks fortissimo
+                    window.Music.soloTracks([0, 2]);
                     setTimeout(function () {
                         if (window.Music) {
                             window.Music.unmuteAll();
-                            window.Music.adjustTempo(15); // even faster
+                            window.Music.adjustTempo(15);
                         }
                     }, 6300);
                 }
+                // Phase 3 shadow eruption: darkness explodes outward
+                Audio.play('phase_boom');
+                Audio.play('explosion');
+                Particles.burst(cx, cy, 35, C.darkPurple);
+                Particles.burst(cx, cy, 25, C.purple);
+                Particles.ring(cx, cy, 50, 30, C.purple);
+                // Shadow wisps in all directions
+                for (var sw = 0; sw < 12; sw++) {
+                    var a = (sw / 12) * Math.PI * 2;
+                    Particles.add(cx, cy, {
+                        vx: Math.cos(a) * 2, vy: Math.sin(a) * 2,
+                        life: 50, color: C.darkPurple, size: 2, gravity: -0.01
+                    });
+                }
+                if (window.Game) window.Game.shake = 16;
             }
-
-            Audio.play('phase_boom'); // Pass 8C: dramatic low boom
-            Particles.burst(
-                this.x + this.w / 2, this.y + this.h / 2, 20,
-                (phase === 3) ? C.purple : C.red
-            );
         }
 
         /* ----- AI --------------------------------------------------- */
@@ -1693,6 +1761,22 @@
                 spriteKey = 'bargnot_' + this.frame;
             }
 
+            // Phase 3: draw shadow afterimages before main sprite
+            if (this.phase === 3 && this._afterimages) {
+                for (var ai = 0; ai < this._afterimages.length; ai++) {
+                    var img = this._afterimages[ai];
+                    var imgAlpha = (img.life / 12) * 0.3;
+                    var imgX = Math.floor(img.x + this.w / 2 - this.spriteW / 2);
+                    var imgY = Math.floor(img.y + this.h - this.spriteH - 2 - Math.sin(Date.now() * 0.005) * 1.5);
+                    ctx.globalAlpha = imgAlpha;
+                    Sprites.draw(ctx, 'bargnot_shadow', imgX, imgY);
+                    // Tint purple
+                    ctx.fillStyle = C.darkPurple;
+                    ctx.fillRect(imgX, imgY, this.spriteW, this.spriteH);
+                    ctx.globalAlpha = 1;
+                }
+            }
+
             var sx = this.x + this.w / 2 - this.spriteW / 2;
             var sy = this.y + this.h - this.spriteH;
 
@@ -1786,11 +1870,49 @@
             ctx.fillStyle = C.darkRed;
             ctx.fillRect(barX, barY, barW, barH);
 
-            // Filled bar
-            var fillW = (this.hp / this.maxHp) * barW;
+            // Per-phase HP calculation
+            var ceil  = this._phaseHpCeil[this.phase];
+            var floor = this._phaseHpFloor[this.phase];
+            var phaseRange = ceil - floor;
+            var phaseHp = Math.max(0, this.hp - floor);
+            var rawFill = phaseRange > 0 ? phaseHp / phaseRange : 0;
+
+            // Apply refill animation (clamps display during transition)
+            var displayFill = Math.min(rawFill, this._barFillAnim);
+            var fillW = displayFill * barW;
+
+            // Bar color per phase
             var barColor = (this.phase === 3) ? C.purple : (this.phase === 2) ? C.red : C.lightRed;
             ctx.fillStyle = barColor;
             ctx.fillRect(barX, barY, fillW, barH);
+
+            // Bright edge highlight on refill
+            if (this._barFillAnim < 1 && fillW > 1) {
+                ctx.fillStyle = C.white;
+                ctx.globalAlpha = 0.6;
+                ctx.fillRect(barX + fillW - 1, barY, 1, barH);
+                ctx.globalAlpha = 1;
+            }
+
+            // Phase pip indicators (below bar)
+            var pipY = barY + barH + 2;
+            var pipW = 3;
+            var pipSpacing = 6;
+            var pipStartX = W / 2 - (pipSpacing * 3) / 2 + 1;
+            for (var p = 1; p <= 3; p++) {
+                var px = pipStartX + (p - 1) * pipSpacing;
+                if (p < this.phase) {
+                    // Past phase: dark/spent
+                    ctx.fillStyle = C.darkGray;
+                } else if (p === this.phase) {
+                    // Current phase: bright, pulsing
+                    ctx.fillStyle = barColor;
+                } else {
+                    // Future phase: dim outline
+                    ctx.fillStyle = C.darkGray;
+                }
+                ctx.fillRect(px, pipY, pipW, 2);
+            }
 
             // Label
             Utils.drawText(ctx, 'QUEEN BARGNOT', barX, barY - 8, C.gold, 1);

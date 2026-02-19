@@ -208,7 +208,32 @@
         cameraZoomTarget: 1.0,
         grassBends: [],     // {x, y, dir, timer}
         waterRipples: [],   // {x, y, radius, life}
-        npcTalkedFirst: null // tracks which NPC player talked to first
+        npcTalkedFirst: null, // tracks which NPC player talked to first
+
+        // --- Pass 6A: Title screen overhaul ---
+        titleLandscapeOffset: 0,    // scrolling landscape X offset
+        titleEmbers: [],             // falling ember particles from top
+        titleMenuAlpha: 0,           // menu fade-in alpha (0-1)
+        titleMenuFadeStart: false,   // whether menu fade has been triggered
+
+        // --- Pass 6B: Character select redesign ---
+        selectSlideOffset: 0,        // slide transition offset in pixels
+        selectSlideDir: 0,            // -1 = sliding left, 1 = sliding right, 0 = idle
+        selectSlideFrom: 0,           // character index sliding away
+        selectSlideTo: 0,             // character index sliding in
+        selectSlideTimer: 0,          // frames remaining in slide
+        selectConfirmTimer: 0,        // action pose countdown (20 frames)
+        selectConfirmChar: -1,        // which character was confirmed
+
+        // --- Pass 7A: Destructible objects (crates, barrels) ---
+        destructibles: [],
+
+        // --- Pass 7A: Spike trap timer ---
+        spikeTimer: 0,
+
+        // --- Pass 8B: Torch flame react + Door animation ---
+        torchReacts: [],   // {col, row, dir, timer} - torch lean-away
+        doorAnimTimer: 0   // frames remaining in door open animation
     };
 
     window.Game = Game;
@@ -351,7 +376,11 @@
     function renderMap(ctx, room) {
         if (!room || !room.tiles) return;
         var waterFrame = Math.floor(Game.frame / 30) % 2; // alternate every 30 frames
-        var spikePhase = Math.floor(Game.frame / 40) % 2; // spikes toggle
+        // Spike cycle: 40 frames up (damaging), 20 frames down (safe) = 60 frame cycle
+        var spikeCycle = Game.spikeTimer % 60;
+        var spikesUp = spikeCycle < 40;     // 0-39 = up, 40-59 = down
+        var spikeEmerge = spikeCycle < 4;   // first 4 frames: emerging
+        var spikeRetract = spikeCycle >= 37 && spikeCycle < 40; // frames 37-39: about to retract
         for (var row = 0; row < ROWS; row++) {
             for (var col = 0; col < COLS; col++) {
                 var tileId = Maps.getTile(room, col, row);
@@ -364,13 +393,39 @@
                     }
                     safeDraw(ctx, spriteKey, col * TILE, row * TILE);
 
-                    // Spike trap retracted state: draw floor-only when spikes are down
-                    if (tileId === window.T.SPIKE && spikePhase === 1) {
-                        // Draw a semi-transparent overlay to show spikes are retracted
-                        ctx.fillStyle = C.lightGray;
-                        ctx.globalAlpha = 0.4;
-                        ctx.fillRect(col * TILE + 2, row * TILE + 10, 12, 4);
-                        ctx.globalAlpha = 1;
+                    // Spike trap animation: emerging/retracting + retracted overlay
+                    if (tileId === window.T.SPIKE) {
+                        var sx = col * TILE;
+                        var sy = row * TILE;
+                        if (spikesUp) {
+                            // Emerging: first 4 frames show partial spikes rising
+                            if (spikeEmerge) {
+                                var emergeH = Math.floor((spikeCycle + 1) * 3); // 3,6,9,12
+                                ctx.fillStyle = C.lightGray;
+                                ctx.globalAlpha = 0.6;
+                                ctx.fillRect(sx + 3, sy + 12 - emergeH, 2, emergeH);
+                                ctx.fillRect(sx + 7, sy + 12 - emergeH, 2, emergeH);
+                                ctx.fillRect(sx + 11, sy + 12 - emergeH, 2, emergeH);
+                                ctx.globalAlpha = 1;
+                            } else if (spikeRetract) {
+                                // About to retract: flicker/dim spikes
+                                ctx.fillStyle = C.lightGray;
+                                ctx.globalAlpha = 0.3 + (39 - spikeCycle) * 0.1;
+                                ctx.fillRect(sx + 3, sy + 4, 2, 8);
+                                ctx.fillRect(sx + 7, sy + 4, 2, 8);
+                                ctx.fillRect(sx + 11, sy + 4, 2, 8);
+                                ctx.globalAlpha = 1;
+                            }
+                            // Normal up state: spikes are drawn by the sprite itself
+                        } else {
+                            // Spikes retracted: semi-transparent holes overlay
+                            ctx.fillStyle = C.darkGray;
+                            ctx.globalAlpha = 0.4;
+                            ctx.fillRect(sx + 3, sy + 10, 2, 3);
+                            ctx.fillRect(sx + 7, sy + 10, 2, 3);
+                            ctx.fillRect(sx + 11, sy + 10, 2, 3);
+                            ctx.globalAlpha = 1;
+                        }
                     }
                 }
             }
@@ -478,6 +533,38 @@
                 { x: 9 * TILE, y: 0 * TILE, vx: 0, vy: 0, active: true }
             ];
         }
+
+        // Pass 7A: Spawn destructible objects (crates/barrels in appropriate rooms)
+        Game.destructibles = [];
+        if (room.destructibles && room.destructibles.length > 0) {
+            for (var di = 0; di < room.destructibles.length; di++) {
+                var dData = room.destructibles[di];
+                Game.destructibles.push(new Entities.Destructible(dData.type, dData.x, dData.y));
+            }
+        } else {
+            // Default destructibles for certain rooms (forest/temple rooms)
+            if (roomId === 'ebon_forest_entry') {
+                Game.destructibles.push(new Entities.Destructible('crate', 3, 8));
+                Game.destructibles.push(new Entities.Destructible('barrel', 12, 6));
+            } else if (roomId === 'ebon_forest_deep') {
+                Game.destructibles.push(new Entities.Destructible('crate', 2, 10));
+                Game.destructibles.push(new Entities.Destructible('crate', 3, 10));
+                Game.destructibles.push(new Entities.Destructible('barrel', 13, 4));
+            } else if (roomId === 'temple_entrance') {
+                Game.destructibles.push(new Entities.Destructible('crate', 2, 9));
+                Game.destructibles.push(new Entities.Destructible('barrel', 13, 9));
+                Game.destructibles.push(new Entities.Destructible('barrel', 5, 6));
+            } else if (roomId === 'temple_puzzle') {
+                Game.destructibles.push(new Entities.Destructible('crate', 2, 10));
+                Game.destructibles.push(new Entities.Destructible('crate', 13, 10));
+            }
+        }
+
+        // Pass 8B: Door animation on room entry
+        Game.doorAnimTimer = 4;
+
+        // Pass 8B: Clear torch reacts on room transition
+        Game.torchReacts = [];
     }
 
     // =====================================================================
@@ -888,6 +975,10 @@
 
     function checkSpikeTraps() {
         if (!Game.player || !Game.currentRoom) return;
+
+        // Increment spike timer each frame
+        Game.spikeTimer++;
+
         if (Game.spikeCooldown > 0) { Game.spikeCooldown--; return; }
 
         // Check if player is standing on a spike tile
@@ -896,9 +987,10 @@
         var tileId = Maps.getTile(Game.currentRoom, cx, cy);
 
         if (tileId === window.T.SPIKE) {
-            // Spikes activate in a cycle: up for 40 frames, down for 40 frames
-            var spikePhase = Math.floor(Game.frame / 40) % 2;
-            if (spikePhase === 0) { // Spikes are up
+            // Spike cycle: 40 frames up (damaging), 20 frames down (safe) = 60 frame cycle
+            var spikeCycle = Game.spikeTimer % 60;
+            var spikesUp = spikeCycle < 40;
+            if (spikesUp) { // Spikes are up
                 var dmg = 1;
                 if (Game.difficulty === 2) dmg = 2; // Hard mode
                 if (Game.difficulty === 0) dmg = 0; // Easy mode - no spike damage
@@ -917,6 +1009,373 @@
     }
 
     // =====================================================================
+    // PASS 4E: EXAMINE OBJECTS SYSTEM
+    // =====================================================================
+
+    // Lookup by room ID: objects at tile positions with dialogue keys
+    var EXAMINE_OBJECTS = {
+        ebon_vale_market: [
+            { tx: 3,  ty: 5,  key: 'examine_market_stall' },
+            { tx: 12, ty: 5,  key: 'examine_market_stall' },
+            { tx: 7,  ty: 3,  key: 'examine_forge_anvil' }
+        ],
+        ebon_vale_square: [
+            { tx: 7,  ty: 7,  key: 'examine_well' },
+            { tx: 8,  ty: 7,  key: 'examine_well' }
+        ],
+        ebon_vale_north: [
+            { tx: 7,  ty: 3,  key: 'examine_fountain' }
+        ],
+        temple_entrance: [
+            { tx: 2,  ty: 2,  key: 'examine_bookshelf' },
+            { tx: 13, ty: 2,  key: 'examine_bookshelf' },
+            { tx: 4,  ty: 3,  key: 'examine_pillar' },
+            { tx: 11, ty: 3,  key: 'examine_pillar' },
+            { tx: 7,  ty: 4,  key: 'examine_tapestry' }
+        ],
+        temple_puzzle: [
+            { tx: 7,  ty: 5,  key: 'examine_puzzle_statue' },
+            { tx: 8,  ty: 5,  key: 'examine_puzzle_statue' },
+            { tx: 3,  ty: 3,  key: 'examine_pillar' },
+            { tx: 12, ty: 3,  key: 'examine_pillar' },
+            { tx: 2,  ty: 8,  key: 'examine_rubble' },
+            { tx: 13, ty: 8,  key: 'examine_rubble' }
+        ],
+        temple_boss: [
+            { tx: 7,  ty: 2,  key: 'examine_altar' },
+            { tx: 8,  ty: 2,  key: 'examine_altar' },
+            { tx: 3,  ty: 4,  key: 'examine_pillar' },
+            { tx: 12, ty: 4,  key: 'examine_pillar' },
+            { tx: 5,  ty: 7,  key: 'examine_goblin_banner' },
+            { tx: 10, ty: 7,  key: 'examine_goblin_banner' }
+        ],
+        ebon_forest_entry: [
+            { tx: 6,  ty: 3,  key: 'examine_bones' }
+        ],
+        ebon_forest_deep: [
+            { tx: 4,  ty: 6,  key: 'examine_bones' },
+            { tx: 11, ty: 4,  key: 'examine_rubble' }
+        ]
+    };
+
+    function checkExamineObjects() {
+        if (!Game.player || !Game.currentRoom) return;
+        if (Dialogue.isActive()) return;
+        if (!Input.pressed['z']) return;
+
+        // Don't trigger examine if near an NPC or enemy
+        if (Game.nearNPC) return;
+
+        var roomId = Game.currentRoom.id;
+        var examineList = EXAMINE_OBJECTS[roomId];
+        if (!examineList) return;
+
+        var px = Game.player.x + Game.player.w / 2;
+        var py = Game.player.y + Game.player.h / 2;
+
+        for (var i = 0; i < examineList.length; i++) {
+            var obj = examineList[i];
+            var ox = obj.tx * TILE + TILE / 2;
+            var oy = obj.ty * TILE + TILE / 2;
+            var dx = px - ox;
+            var dy = py - oy;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 20) {
+                // Check no enemy is in interaction range either
+                var enemyNear = false;
+                for (var e = 0; e < Game.enemies.length; e++) {
+                    if (Game.enemies[e].dead) continue;
+                    var ex = Game.enemies[e].x + Game.enemies[e].w / 2;
+                    var ey = Game.enemies[e].y + Game.enemies[e].h / 2;
+                    var eDist = Math.sqrt((px - ex) * (px - ex) + (py - ey) * (py - ey));
+                    if (eDist < 24) { enemyNear = true; break; }
+                }
+                if (enemyNear) return;
+
+                Dialogue.start(obj.key);
+                Audio.play('select');
+                return;
+            }
+        }
+
+        // Also check torch tiles for examine
+        if (Game.currentRoom.tiles) {
+            var tileX = Math.floor(px / TILE);
+            var tileY = Math.floor(py / TILE);
+            // Check tiles around player
+            for (var dy2 = -1; dy2 <= 1; dy2++) {
+                for (var dx2 = -1; dx2 <= 1; dx2++) {
+                    var checkX = tileX + dx2;
+                    var checkY = tileY + dy2;
+                    if (checkX < 0 || checkX >= COLS || checkY < 0 || checkY >= ROWS) continue;
+                    var checkTile = Maps.getTile(Game.currentRoom, checkX, checkY);
+                    if (checkTile === window.T.TORCH) {
+                        var torchCX = checkX * TILE + TILE / 2;
+                        var torchCY = checkY * TILE + TILE / 2;
+                        var tDist = Math.sqrt((px - torchCX) * (px - torchCX) + (py - torchCY) * (py - torchCY));
+                        if (tDist < 20) {
+                            Dialogue.start('examine_torch');
+                            Audio.play('select');
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // =====================================================================
+    // PASS 7B: PUZZLE ROOM VISUAL ENHANCEMENTS (alcove glows, gem slots)
+    // =====================================================================
+
+    function renderPuzzleRoomGlows(ctx) {
+        if (!Game.currentRoom || Game.currentRoom.id !== 'temple_puzzle') return;
+
+        var flickerSeed = Game.frame * 0.08;
+
+        // Crown alcove: gold pulsing glow (left side of puzzle room)
+        // Cape alcove: purple glow (right side)
+        // Scepter alcove: silver/white glow (center/back)
+        var alcoves = [
+            { tx: 3,  ty: 6,  flag: 'puzzleCrown',   color1: 'rgba(232,184,48,', color2: 'rgba(255,210,80,' },
+            { tx: 12, ty: 6,  flag: 'puzzleCape',     color1: 'rgba(122,58,170,', color2: 'rgba(170,106,218,' },
+            { tx: 7,  ty: 2,  flag: 'puzzleScepter',  color1: 'rgba(180,180,200,', color2: 'rgba(220,220,240,' }
+        ];
+
+        for (var i = 0; i < alcoves.length; i++) {
+            var alc = alcoves[i];
+            var ax = alc.tx * TILE + TILE / 2;
+            var ay = alc.ty * TILE + TILE / 2;
+
+            // If relic collected, extinguish glow
+            if (Game.flags[alc.flag]) continue;
+
+            // Pulsing glow alpha
+            var pulseAlpha = 0.2 + Math.sin(flickerSeed + i * 2.1) * 0.1;
+            var glowRadius = 14 + Math.sin(flickerSeed * 1.3 + i * 1.7) * 3;
+
+            // Outer glow
+            var grad = ctx.createRadialGradient(ax, ay, 0, ax, ay, glowRadius);
+            grad.addColorStop(0, alc.color2 + (pulseAlpha + 0.1) + ')');
+            grad.addColorStop(0.5, alc.color1 + pulseAlpha + ')');
+            grad.addColorStop(1, alc.color1 + '0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(ax - glowRadius, ay - glowRadius, glowRadius * 2, glowRadius * 2);
+
+            // Inner bright core
+            var coreR = 4 + Math.sin(flickerSeed * 2 + i * 3) * 1.5;
+            ctx.fillStyle = alc.color2 + '0.15)';
+            ctx.fillRect(ax - coreR, ay - coreR, coreR * 2, coreR * 2);
+        }
+
+        // Central statue gem slots: show filled gems as relics are placed
+        var statueX = 7 * TILE + TILE / 2;
+        var statueY = 5 * TILE + 4;
+        var gemSize = 3;
+        var gemSpacing = 6;
+        var startGemX = statueX - (gemSpacing * 1); // center 3 gems
+
+        // Crown gem (gold)
+        if (Game.flags.puzzleCrown) {
+            ctx.fillStyle = C.gold;
+            ctx.fillRect(startGemX, statueY, gemSize, gemSize);
+            // Sparkle
+            if (Game.frame % 20 < 3) {
+                ctx.fillStyle = C.white;
+                ctx.fillRect(startGemX + 1, statueY - 1, 1, 1);
+            }
+        } else {
+            ctx.fillStyle = C.darkGray;
+            ctx.fillRect(startGemX, statueY, gemSize, gemSize);
+        }
+
+        // Cape gem (purple)
+        if (Game.flags.puzzleCape) {
+            ctx.fillStyle = C.purple;
+            ctx.fillRect(startGemX + gemSpacing, statueY, gemSize, gemSize);
+            if (Game.frame % 20 < 3) {
+                ctx.fillStyle = C.white;
+                ctx.fillRect(startGemX + gemSpacing + 1, statueY - 1, 1, 1);
+            }
+        } else {
+            ctx.fillStyle = C.darkGray;
+            ctx.fillRect(startGemX + gemSpacing, statueY, gemSize, gemSize);
+        }
+
+        // Scepter gem (white/silver)
+        if (Game.flags.puzzleScepter) {
+            ctx.fillStyle = C.lightGray;
+            ctx.fillRect(startGemX + gemSpacing * 2, statueY, gemSize, gemSize);
+            if (Game.frame % 20 < 3) {
+                ctx.fillStyle = C.white;
+                ctx.fillRect(startGemX + gemSpacing * 2 + 1, statueY - 1, 1, 1);
+            }
+        } else {
+            ctx.fillStyle = C.darkGray;
+            ctx.fillRect(startGemX + gemSpacing * 2, statueY, gemSize, gemSize);
+        }
+    }
+
+    // =====================================================================
+    // PASS 7A: DESTRUCTIBLE OBJECTS UPDATE/RENDER
+    // =====================================================================
+
+    function updateDestructibles() {
+        for (var i = Game.destructibles.length - 1; i >= 0; i--) {
+            var d = Game.destructibles[i];
+            d.update();
+            if (d.dead) {
+                Game.destructibles.splice(i, 1);
+            }
+        }
+    }
+
+    function renderDestructibles(ctx) {
+        for (var i = 0; i < Game.destructibles.length; i++) {
+            Game.destructibles[i].render(ctx);
+        }
+    }
+
+    function checkDestructibleCombat() {
+        if (!Game.player || !Game.player.attacking || !Game.player.attackHitbox || Game.player.attackDealt) return;
+        for (var i = 0; i < Game.destructibles.length; i++) {
+            var d = Game.destructibles[i];
+            if (d.dead) continue;
+            var dBox = { x: d.x, y: d.y, w: d.w, h: d.h };
+            if (Utils.aabb(Game.player.attackHitbox, dBox)) {
+                var atkDmg = (Game.player.characterId === 'daxon') ? 3 : 2;
+                d.takeDamage(atkDmg, Game.player.x + Game.player.w / 2, Game.player.y + Game.player.h / 2);
+                Game.player.attackDealt = true;
+                Game.player.hitstop = 2;
+                Game.player._hitShake = 1;
+                break;
+            }
+        }
+    }
+
+    // =====================================================================
+    // PASS 8B: TORCH FLAME REACT
+    // =====================================================================
+
+    function updateTorchReacts() {
+        if (!Game.player || !Game.currentRoom) return;
+
+        var px = Game.player.x + Game.player.w / 2;
+        var py = Game.player.y + Game.player.h / 2;
+
+        // Check proximity to torch tiles
+        if (Game.currentRoom.tiles && Game.player._moving) {
+            var torches = getTorchPositions(Game.currentRoom);
+            for (var i = 0; i < torches.length; i++) {
+                var t = torches[i];
+                var dx = px - t.x;
+                var dy = py - t.y;
+                var dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 24) {
+                    // Check if this torch already has an active react
+                    var col = Math.floor(t.x / TILE);
+                    var row = Math.floor(t.y / TILE);
+                    var hasReact = false;
+                    for (var j = 0; j < Game.torchReacts.length; j++) {
+                        if (Game.torchReacts[j].col === col && Game.torchReacts[j].row === row) {
+                            hasReact = true;
+                            break;
+                        }
+                    }
+                    if (!hasReact) {
+                        // Direction: flame leans away from player
+                        var leanDir = dx > 0 ? -1 : 1;
+                        Game.torchReacts.push({
+                            col: col,
+                            row: row,
+                            dir: leanDir,
+                            timer: 12    // 6 frames lean + 6 frames spring back
+                        });
+                    }
+                }
+            }
+        }
+
+        // Update torch react timers
+        for (var k = Game.torchReacts.length - 1; k >= 0; k--) {
+            Game.torchReacts[k].timer--;
+            if (Game.torchReacts[k].timer <= 0) {
+                Game.torchReacts.splice(k, 1);
+            }
+        }
+
+        // Cap torch reacts
+        if (Game.torchReacts.length > 20) {
+            Game.torchReacts = Game.torchReacts.slice(-20);
+        }
+    }
+
+    function renderTorchReacts(ctx) {
+        for (var i = 0; i < Game.torchReacts.length; i++) {
+            var tr = Game.torchReacts[i];
+            var tx = tr.col * TILE;
+            var ty = tr.row * TILE;
+
+            // Calculate lean offset: first 6 frames lean, last 6 spring back
+            var leanAmount;
+            if (tr.timer > 6) {
+                // Leaning phase (frames 12-7): increasing lean
+                leanAmount = (12 - tr.timer) / 6;
+            } else {
+                // Spring back phase (frames 6-1): decreasing lean
+                leanAmount = tr.timer / 6;
+            }
+
+            var offsetX = Math.floor(tr.dir * leanAmount * 3);
+
+            // Draw flame lean overlay (orange/yellow shifted pixels)
+            ctx.fillStyle = '#ff9920';
+            ctx.globalAlpha = 0.5;
+            ctx.fillRect(tx + 5 + offsetX, ty + 1, 4, 4);
+            ctx.fillStyle = '#ffcc40';
+            ctx.globalAlpha = 0.4;
+            ctx.fillRect(tx + 6 + offsetX, ty + 2, 2, 2);
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    // =====================================================================
+    // PASS 8B: DOOR OPEN ANIMATION
+    // =====================================================================
+
+    function renderDoorAnimation(ctx) {
+        if (Game.doorAnimTimer <= 0) return;
+        Game.doorAnimTimer--;
+
+        // Find door tiles in the current room
+        if (!Game.currentRoom || !Game.currentRoom.tiles) return;
+
+        var openProgress = (4 - Game.doorAnimTimer) / 4; // 0 to 1 over 4 frames
+
+        for (var row = 0; row < ROWS; row++) {
+            for (var col = 0; col < COLS; col++) {
+                var tileId = Maps.getTile(Game.currentRoom, col, row);
+                if (tileId === window.T.WOOD_DOOR || tileId === window.T.TEMPLE_DOOR) {
+                    var dx = col * TILE;
+                    var dy = row * TILE;
+
+                    // Progressive door opening: draw dark overlay that slides open
+                    var doorHalf = Math.floor(TILE / 2 * (1 - openProgress));
+                    if (doorHalf > 0) {
+                        ctx.fillStyle = tileId === window.T.TEMPLE_DOOR ? '#2a2a35' : '#4a3020';
+                        // Left half closes from center
+                        ctx.fillRect(dx, dy, doorHalf, TILE);
+                        // Right half closes from center
+                        ctx.fillRect(dx + TILE - doorHalf, dy, doorHalf, TILE);
+                    }
+                }
+            }
+        }
+    }
+
+    // =====================================================================
     // AMBIENT SOUNDS
     // =====================================================================
 
@@ -924,23 +1383,81 @@
         if (!Game.currentRoom) return;
         var roomId = Game.currentRoom.id;
 
-        // Forest: occasional bird chirps
+        // Forest: occasional bird chirps + crickets
         if (roomId && roomId.indexOf('ebon_forest') === 0) {
             if (Game.frame % 180 === 0 && Math.random() < 0.5) {
                 Audio.play('bird');
             }
-            // Wind gusts
             if (Game.frame % 300 === 0 && Math.random() < 0.3) {
                 Audio.play('wind');
             }
+            // Pass 3D: Cricket ambient every ~4 seconds
+            if (Game.frame % 240 === 0 && Math.random() < 0.6) {
+                Audio.play('cricket');
+            }
         }
 
-        // Temple: water drips
+        // Temple: water drips (echo)
         if (roomId && roomId.indexOf('temple') === 0) {
             if (Game.frame % 120 === 0 && Math.random() < 0.4) {
                 Audio.play('drip');
             }
         }
+
+        // Town: crowd murmur ambient
+        if (roomId && roomId.indexOf('ebon_vale') === 0) {
+            if (Game.frame % 360 === 0 && Math.random() < 0.3) {
+                Audio.play('murmur');
+            }
+        }
+
+        // Pass 3D: Low health heartbeat (60 BPM = every 60 frames)
+        if (Game.player && Game.player.hp <= 2 && Game.player.hp > 0) {
+            if (Game.frame % 60 === 0) {
+                Audio.play('heartbeat');
+            }
+            // Dip music volume at low HP
+            if (Music && Game.frame % 60 === 0) {
+                Music.dipVolume(0.4, 0.3);
+            }
+        } else if (Game.player && Game.player.hp > 2) {
+            // Restore volume when healthy
+            if (Music && Game.frame % 120 === 0 && Game._lowHPMusicDipped) {
+                Music.restoreVolume();
+                Game._lowHPMusicDipped = false;
+            }
+            if (Game.player.hp <= 2) Game._lowHPMusicDipped = true;
+        }
+
+        // Pass 3D: Terrain-specific footsteps (every 12 frames while moving)
+        if (Game.player && Game.player._moving && Game.frame % 12 === 0) {
+            var charId = Game.player.characterId;
+            var terrain = getTerrainType(roomId);
+            // Pass 8C: Character-specific pitch
+            if (charId === 'daxon') {
+                Audio.play('footstep_heavy');
+            } else if (charId === 'luigi') {
+                Audio.play('footstep_shuffle');
+            } else if (charId === 'lirielle') {
+                Audio.play('footstep_light');
+            } else if (terrain === 'stone') {
+                Audio.play('footstep_stone');
+            } else if (terrain === 'wood') {
+                Audio.play('footstep_wood');
+            } else if (terrain === 'grass') {
+                Audio.play('footstep_grass');
+            } else {
+                Audio.play('footstep');
+            }
+        }
+    }
+
+    function getTerrainType(roomId) {
+        if (!roomId) return 'grass';
+        if (roomId.indexOf('temple') === 0) return 'stone';
+        if (roomId.indexOf('ebon_forest') === 0) return 'grass';
+        if (roomId.indexOf('ebon_vale_market') === 0) return 'wood';
+        return 'grass';
     }
 
     // =====================================================================
@@ -991,6 +1508,9 @@
             life: 300
         });
     }
+
+    // Expose spawnHeartDrop on Game for Destructible entities (Pass 7A)
+    Game.spawnHeartDrop = spawnHeartDrop;
 
     // =====================================================================
     // ENEMY DEATH & DROPS
@@ -1163,8 +1683,9 @@
             Game.gameOverTimer = 0;
             Game.gameOverMenuIndex = 0;
             Audio.play('death');
-            // Pass 6F: Stop music for somber atmosphere
+            // Pass 6F: Stop music, play mournful sting after brief pause
             if (Music) Music.stop();
+            setTimeout(function () { Audio.play('gameover_sting'); }, 400);
         }
     }
 
@@ -2291,6 +2812,20 @@
             }
         }
 
+        // Initialize falling embers once (6A)
+        if (Game.titleEmbers.length === 0) {
+            for (var ei = 0; ei < 6; ei++) {
+                Game.titleEmbers.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H * 0.5,
+                    vy: 0.3 + Math.random() * 0.4,
+                    swayPhase: Math.random() * Math.PI * 2,
+                    brightness: 0.4 + Math.random() * 0.5,
+                    size: 1
+                });
+            }
+        }
+
         // Update stars (parallax drift)
         for (var si2 = 0; si2 < Game.titleStars.length; si2++) {
             var star = Game.titleStars[si2];
@@ -2299,9 +2834,35 @@
             if (star.y > H) { star.y = 0; star.x = Math.random() * W; }
         }
 
+        // Update falling embers (6A)
+        for (var ei2 = 0; ei2 < Game.titleEmbers.length; ei2++) {
+            var ember = Game.titleEmbers[ei2];
+            ember.y += ember.vy;
+            ember.x += Math.sin(Game.frame * 0.03 + ember.swayPhase) * 0.3;
+            ember.brightness = 0.3 + Math.sin(Game.frame * 0.04 + ei2 * 1.7) * 0.3;
+            if (ember.y > H) {
+                ember.y = -2;
+                ember.x = Math.random() * W;
+            }
+            if (ember.x < 0) ember.x = W;
+            if (ember.x > W) ember.x = 0;
+        }
+
+        // Scroll landscape background (6A)
+        Game.titleLandscapeOffset = (Game.titleLandscapeOffset + 0.25) % 512;
+
         // Letter-by-letter subtitle reveal
         if (Game.subtitleReveal < 23) { // "Shadows of the Eldspyre" = 23 chars
             if (Game.frame % 4 === 0) Game.subtitleReveal++;
+        }
+
+        // Trigger menu fade-in after subtitle reveal completes (6A)
+        if (Game.subtitleReveal >= 23 && !Game.titleMenuFadeStart) {
+            Game.titleMenuFadeStart = true;
+            Game.titleMenuAlpha = 0;
+        }
+        if (Game.titleMenuFadeStart && Game.titleMenuAlpha < 1) {
+            Game.titleMenuAlpha = Math.min(1, Game.titleMenuAlpha + (1 / 30));
         }
 
         // Generate sparkle particles on title screen
@@ -2318,15 +2879,15 @@
 
         Particles.update();
 
-        // Menu navigation if save exists
-        if (Game.hasSaveData) {
+        // Menu navigation if save exists (only after fade-in starts)
+        if (Game.hasSaveData && Game.titleMenuAlpha > 0) {
             if (Input.pressed['ArrowUp'] || Input.pressed['ArrowDown']) {
                 Game.titleMenuIndex = 1 - Game.titleMenuIndex;
                 Audio.play('select');
             }
         }
 
-        if (Input.pressed['Enter']) {
+        if (Input.pressed['Enter'] && Game.titleMenuAlpha >= 1) {
             if (Game.hasSaveData && Game.titleMenuIndex === 0) {
                 // Continue from save
                 if (loadGame()) {
@@ -2347,6 +2908,76 @@
         }
     }
 
+    // --- 6A: Procedural landscape drawing (512px wide, seamless loop) ---
+    function drawTitleLandscape(ctx, offset) {
+        var lw = 512; // landscape width
+        // Draw two copies for seamless scrolling
+        for (var copy = 0; copy < 2; copy++) {
+            var baseX = -offset + copy * lw;
+            if (baseX > W) continue;
+            if (baseX + lw < 0) continue;
+
+            // Green hills silhouette at bottom
+            for (var hx = 0; hx < lw; hx++) {
+                var screenX = Math.floor(baseX + hx);
+                if (screenX < 0 || screenX >= W) continue;
+                // Varying hill heights using sine waves
+                var hillH = 28 + Math.sin(hx * 0.015) * 12
+                           + Math.sin(hx * 0.04 + 1.2) * 6
+                           + Math.sin(hx * 0.008 + 0.5) * 8;
+                var hillTop = Math.floor(H - hillH);
+                // Dark green hill fill
+                ctx.fillStyle = '#0e3a0e';
+                ctx.fillRect(screenX, hillTop, 1, H - hillTop);
+                // Slightly lighter top edge
+                ctx.fillStyle = '#16501a';
+                ctx.fillRect(screenX, hillTop, 1, 2);
+            }
+
+            // Tree silhouettes scattered on hills
+            var treePositions = [30, 80, 140, 200, 260, 330, 400, 460];
+            for (var ti = 0; ti < treePositions.length; ti++) {
+                var tx = Math.floor(baseX + treePositions[ti]);
+                if (tx < -10 || tx > W + 10) continue;
+                var thx = treePositions[ti];
+                var tHillH = 28 + Math.sin(thx * 0.015) * 12
+                            + Math.sin(thx * 0.04 + 1.2) * 6
+                            + Math.sin(thx * 0.008 + 0.5) * 8;
+                var tBaseY = Math.floor(H - tHillH);
+                // Trunk
+                ctx.fillStyle = '#1a2a0a';
+                ctx.fillRect(tx + 2, tBaseY - 10, 2, 10);
+                // Canopy (triangle-ish)
+                ctx.fillStyle = '#0a2a0a';
+                ctx.fillRect(tx, tBaseY - 16, 6, 4);
+                ctx.fillRect(tx + 1, tBaseY - 20, 4, 4);
+                ctx.fillRect(tx + 2, tBaseY - 22, 2, 2);
+            }
+
+            // Distant temple silhouette on right portion (around x=350-410)
+            var templeX = Math.floor(baseX + 365);
+            if (templeX > -50 && templeX < W + 50) {
+                var templeHillH = 28 + Math.sin(365 * 0.015) * 12
+                                 + Math.sin(365 * 0.04 + 1.2) * 6
+                                 + Math.sin(365 * 0.008 + 0.5) * 8;
+                var templeBaseY = Math.floor(H - templeHillH);
+                // Temple body
+                ctx.fillStyle = '#12241a';
+                ctx.fillRect(templeX, templeBaseY - 20, 24, 20);
+                // Temple roof / spire
+                ctx.fillRect(templeX + 2, templeBaseY - 26, 20, 6);
+                ctx.fillRect(templeX + 6, templeBaseY - 32, 12, 6);
+                ctx.fillRect(templeX + 10, templeBaseY - 36, 4, 4);
+                ctx.fillRect(templeX + 11, templeBaseY - 39, 2, 3);
+                // Temple pillars
+                ctx.fillStyle = '#1a3a2a';
+                ctx.fillRect(templeX + 2, templeBaseY - 18, 2, 18);
+                ctx.fillRect(templeX + 20, templeBaseY - 18, 2, 18);
+                ctx.fillRect(templeX + 11, templeBaseY - 18, 2, 18);
+            }
+        }
+    }
+
     function renderTitle() {
         var ctx = buf;
 
@@ -2357,12 +2988,29 @@
             ctx.fillRect(0, row, W, 1);
         }
 
+        // 6A: Scrolling landscape background (behind stars, above gradient)
+        drawTitleLandscape(ctx, Game.titleLandscapeOffset);
+
         // Render parallax star field
         for (var si = 0; si < Game.titleStars.length; si++) {
             var star = Game.titleStars[si];
             ctx.globalAlpha = Math.max(0, Math.min(1, star.brightness));
             ctx.fillStyle = C.white;
             ctx.fillRect(Math.floor(star.x), Math.floor(star.y), star.size, star.size);
+        }
+        ctx.globalAlpha = 1;
+
+        // 6A: Render falling embers
+        for (var ei = 0; ei < Game.titleEmbers.length; ei++) {
+            var ember = Game.titleEmbers[ei];
+            ctx.globalAlpha = Math.max(0, Math.min(1, ember.brightness));
+            ctx.fillStyle = C.gold;
+            ctx.fillRect(Math.floor(ember.x), Math.floor(ember.y), ember.size, ember.size);
+            // Tiny glow around ember
+            ctx.globalAlpha = Math.max(0, ember.brightness * 0.3);
+            ctx.fillStyle = C.yellow;
+            ctx.fillRect(Math.floor(ember.x) - 1, Math.floor(ember.y), 3, 1);
+            ctx.fillRect(Math.floor(ember.x), Math.floor(ember.y) - 1, 1, 3);
         }
         ctx.globalAlpha = 1;
 
@@ -2414,7 +3062,10 @@
             ctx.fillRect(cursorX, 58, 5, 7);
         }
 
-        // Menu options
+        // Menu options with fade-in (6A)
+        var menuAlpha = Math.max(0, Math.min(1, Game.titleMenuAlpha));
+        ctx.globalAlpha = menuAlpha;
+
         if (Game.hasSaveData) {
             // Two options: Continue and New Game
             var contOpt = 'Continue';
@@ -2423,25 +3074,30 @@
             var newX = centerTextX(newOpt, 1);
             var menuY = H - 46;
 
-            // Selection arrow
+            // Selection arrow and selected option bounce (6A)
             var arrowBob = Math.sin(Game.frame * 0.15) * 2;
+            var textBounce = Math.sin(Game.frame * 0.15) * 2; // extends to text itself
+
             if (Game.titleMenuIndex === 0) {
                 Utils.drawText(ctx, '>', contX - 10 + arrowBob, menuY, C.yellow, 1);
-                Utils.drawText(ctx, contOpt, contX, menuY, C.white, 1);
+                Utils.drawText(ctx, contOpt, contX + textBounce, menuY, C.white, 1);
                 Utils.drawText(ctx, newOpt, newX, menuY + 12, C.gray, 1);
             } else {
                 Utils.drawText(ctx, contOpt, contX, menuY, C.gray, 1);
                 Utils.drawText(ctx, '>', newX - 10 + arrowBob, menuY + 12, C.yellow, 1);
-                Utils.drawText(ctx, newOpt, newX, menuY + 12, C.white, 1);
+                Utils.drawText(ctx, newOpt, newX + textBounce, menuY + 12, C.white, 1);
             }
         } else {
-            // No save: just "Press ENTER to Start" blinking
-            if (Math.floor(Game.frame / 30) % 2 === 0) {
+            // No save: "Press ENTER to Start" with fade-in (no more blink gating on alpha)
+            if (Math.floor(Game.frame / 30) % 2 === 0 || menuAlpha < 1) {
                 var startText = 'Press ENTER to Start';
                 var stX = centerTextX(startText, 1);
-                Utils.drawText(ctx, startText, stX, H - 38, C.white, 1);
+                var startBounce = Math.sin(Game.frame * 0.15) * 2;
+                Utils.drawText(ctx, startText, stX + startBounce, H - 38, C.white, 1);
             }
         }
+
+        ctx.globalAlpha = 1;
 
         // Particles (sparkles floating up)
         Particles.render(ctx);
@@ -2469,12 +3125,80 @@
     // =====================================================================
 
     function updateSelect() {
+        // If confirm action pose is playing, count down and transition (6B)
+        if (Game.selectConfirmTimer > 0) {
+            Game.selectConfirmTimer--;
+            // Spawn action particles during confirm
+            var confirmChar = Game.characters[Game.selectConfirmChar];
+            var pcx = W / 2;
+            var pcy = 80;
+            if (confirmChar === 'daxon') {
+                // Sword swing sparkles (white) to his right
+                if (Game.selectConfirmTimer % 3 === 0) {
+                    Particles.add(pcx + 12 + Math.random() * 10, pcy - 10 + Math.random() * 20, {
+                        vx: 0.5 + Math.random() * 1, vy: (Math.random() - 0.5) * 0.8,
+                        life: 15, color: C.white, size: 1, gravity: 0
+                    });
+                }
+            } else if (confirmChar === 'luigi') {
+                // Energy particles (purple) around him
+                if (Game.selectConfirmTimer % 2 === 0) {
+                    var angle = Math.random() * Math.PI * 2;
+                    Particles.add(pcx + Math.cos(angle) * 14, pcy + Math.sin(angle) * 14, {
+                        vx: Math.cos(angle) * 0.5, vy: Math.sin(angle) * 0.5,
+                        life: 15, color: C.lightPurple, size: 1, gravity: 0
+                    });
+                }
+            } else if (confirmChar === 'lirielle') {
+                // Leaf particles (green) rising
+                if (Game.selectConfirmTimer % 3 === 0) {
+                    Particles.add(pcx - 8 + Math.random() * 16, pcy + 10, {
+                        vx: (Math.random() - 0.5) * 0.5, vy: -(0.5 + Math.random() * 0.8),
+                        life: 18, color: C.lightGreen, size: 1, gravity: -0.02
+                    });
+                }
+            }
+            Particles.update();
+            if (Game.selectConfirmTimer <= 0) {
+                Game.state = 'intro';
+            }
+            return;
+        }
+
+        // If slide transition is active, count down (6B)
+        if (Game.selectSlideTimer > 0) {
+            Game.selectSlideTimer--;
+            // Ease the slide: linear interpolation over 12 frames
+            var slideTotal = 12;
+            var progress = 1 - (Game.selectSlideTimer / slideTotal);
+            Game.selectSlideOffset = Math.floor(W * progress) * Game.selectSlideDir;
+            if (Game.selectSlideTimer <= 0) {
+                Game.selectedChar = Game.selectSlideTo;
+                Game.selectSlideOffset = 0;
+                Game.selectSlideDir = 0;
+            }
+            Particles.update();
+            return;
+        }
+
         if (Input.pressed['ArrowLeft']) {
-            Game.selectedChar = (Game.selectedChar + 2) % 3;
+            var prevChar = Game.selectedChar;
+            var nextChar = (Game.selectedChar + 2) % 3;
+            Game.selectSlideFrom = prevChar;
+            Game.selectSlideTo = nextChar;
+            Game.selectSlideDir = 1; // sliding right (new comes from left)
+            Game.selectSlideTimer = 12;
+            Game.selectSlideOffset = 0;
             Audio.play('select');
         }
         if (Input.pressed['ArrowRight']) {
-            Game.selectedChar = (Game.selectedChar + 1) % 3;
+            var prevChar2 = Game.selectedChar;
+            var nextChar2 = (Game.selectedChar + 1) % 3;
+            Game.selectSlideFrom = prevChar2;
+            Game.selectSlideTo = nextChar2;
+            Game.selectSlideDir = -1; // sliding left (new comes from right)
+            Game.selectSlideTimer = 12;
+            Game.selectSlideOffset = 0;
             Audio.play('select');
         }
         if (Input.pressed['ArrowUp']) {
@@ -2491,11 +3215,13 @@
             Audio.play('select');
         }
         if (Input.pressed['z']) {
-            // Confirm character selection
+            // Confirm character selection with action pose (6B)
             Audio.play('select');
-            Game.state = 'intro';
-            // Player will be created after intro
+            Game.selectConfirmTimer = 20;
+            Game.selectConfirmChar = Game.selectedChar;
         }
+
+        Particles.update();
     }
 
     // Character stats for select screen display
@@ -2521,6 +3247,121 @@
         return lines;
     }
 
+    // 6B helper: draw a single character's select display at given center x
+    function drawSelectCharacter(ctx, charIdx, centerX, showAnim) {
+        var charId = Game.characters[charIdx];
+        var stats = CHAR_STATS[charId];
+
+        // "Stage" underneath character (6B)
+        var stageY = 104;
+        if (charId === 'daxon') {
+            // Stone platform (gray rectangle)
+            ctx.fillStyle = C.stone;
+            ctx.fillRect(centerX - 18, stageY, 36, 6);
+            ctx.fillStyle = C.darkStone;
+            ctx.fillRect(centerX - 18, stageY + 4, 36, 2);
+        } else if (charId === 'luigi') {
+            // Mystical circle (purple circle/glow)
+            ctx.globalAlpha = 0.4;
+            ctx.fillStyle = C.purple;
+            ctx.beginPath();
+            ctx.arc(centerX, stageY + 2, 16, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 0.2;
+            ctx.fillStyle = C.lightPurple;
+            ctx.beginPath();
+            ctx.arc(centerX, stageY + 2, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        } else if (charId === 'lirielle') {
+            // Grass patch (green)
+            ctx.fillStyle = C.darkGreen;
+            ctx.fillRect(centerX - 18, stageY, 36, 6);
+            ctx.fillStyle = C.green;
+            // Little grass tufts
+            for (var gi = 0; gi < 8; gi++) {
+                ctx.fillRect(centerX - 16 + gi * 4, stageY - 2, 2, 3);
+            }
+        }
+
+        // Draw character at 2x scale (32x48 display) centered (6B)
+        var walkFrame = showAnim ? (Math.floor(Game.frame / 12) % 2) : 0;
+        var sprKey = charId + '_down_' + walkFrame;
+        var sprCanvas = Sprites.get(sprKey);
+        // Character sprite drawn at 2x: 32 wide, 48 tall (from 16x24 base)
+        var sprDrawW = 32;
+        var sprDrawH = 48;
+        var sprX = centerX - Math.floor(sprDrawW / 2);
+        var sprY = stageY - sprDrawH - 2;
+
+        if (sprCanvas) {
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(sprCanvas, sprX, sprY, sprCanvas.width * 2, sprCanvas.height * 2);
+        } else {
+            ctx.fillStyle = charIdx === 0 ? C.blue : (charIdx === 1 ? C.purple : C.lightGreen);
+            ctx.fillRect(sprX + 4, sprY + 4, 24, 40);
+        }
+
+        // Name
+        var name = Game.charNames[charIdx];
+        var nameScale = 1;
+        var nameCharW = 6;
+        if (name.length * nameCharW > 90) {
+            nameScale = 0.8;
+            nameCharW = 5;
+        }
+        var nameX = centerX - Math.floor(name.length * nameCharW / 2);
+        Utils.drawText(ctx, name, nameX, stageY + 10, C.white, nameScale);
+
+        // Class
+        var cls = Game.charClasses[charIdx];
+        var clsCharW = 4;
+        var clsScale = 0.7;
+        var clsX = centerX - Math.floor(cls.length * clsCharW / 2);
+        Utils.drawText(ctx, cls, clsX, stageY + 20, C.lightGray, clsScale);
+
+        // Stat bars centered
+        var statBarW = 60;
+        var barH = 3;
+        var statBaseX = centerX - Math.floor(statBarW / 2);
+        var statY = stageY + 30;
+
+        // HP bar
+        Utils.drawText(ctx, 'HP', statBaseX, statY, C.lightRed, 0.7);
+        ctx.fillStyle = C.darkGray;
+        ctx.fillRect(statBaseX + 16, statY + 1, statBarW - 16, barH);
+        ctx.fillStyle = C.red;
+        ctx.fillRect(statBaseX + 16, statY + 1, Math.floor((statBarW - 16) * stats.hp / 5), barH);
+
+        // ATK bar
+        statY += 9;
+        Utils.drawText(ctx, 'ATK', statBaseX, statY, C.gold, 0.7);
+        ctx.fillStyle = C.darkGray;
+        ctx.fillRect(statBaseX + 20, statY + 1, statBarW - 20, barH);
+        ctx.fillStyle = C.gold;
+        ctx.fillRect(statBaseX + 20, statY + 1, Math.floor((statBarW - 20) * stats.atk / 5), barH);
+
+        // SPD bar
+        statY += 9;
+        Utils.drawText(ctx, 'SPD', statBaseX, statY, C.teal, 0.7);
+        ctx.fillStyle = C.darkGray;
+        ctx.fillRect(statBaseX + 20, statY + 1, statBarW - 20, barH);
+        ctx.fillStyle = C.teal;
+        ctx.fillRect(statBaseX + 20, statY + 1, Math.floor((statBarW - 20) * stats.spd / 5), barH);
+
+        // Special ability
+        statY += 10;
+        var spcLabel = stats.spc + ': ' + stats.spcDesc;
+        var spcCharW = 4;
+        var spcX = centerX - Math.floor(spcLabel.length * spcCharW / 2);
+        Utils.drawText(ctx, spcLabel, spcX, statY, C.paleBlue, 0.7);
+
+        // Sparkle on character
+        if (showAnim && Game.frame % 15 === 0) {
+            Particles.sparkle(centerX, sprY + 20, C.gold);
+        }
+    }
+
     function renderSelect() {
         var ctx = buf;
 
@@ -2533,120 +3374,74 @@
         var titleX = centerTextX(titleText, 2);
         Utils.drawText(ctx, titleText, titleX, 8, C.gold, 2);
 
-        // Three panels - sized to avoid text overflow
-        var panelW = 76;
-        var panelGap = 6;
-        var panelH = 120;
-        var startX = Math.floor((W - panelW * 3 - panelGap * 2) / 2);
-        var panelY = 26;
+        // Gold border frame around character area
+        ctx.strokeStyle = C.gold;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(20, 28, W - 40, 140);
 
-        for (var i = 0; i < 3; i++) {
-            var px = startX + i * (panelW + panelGap);
-            var isSelected = (i === Game.selectedChar);
-            var charId = Game.characters[i];
-            var stats = CHAR_STATS[charId];
+        // 6B: Slide transition or static display
+        var isSliding = Game.selectSlideTimer > 0;
 
-            // Selected panel slides up slightly
-            var yOff = isSelected ? -2 : 0;
+        if (isSliding) {
+            // Draw the outgoing character sliding away
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(21, 29, W - 42, 138);
+            ctx.clip();
 
-            // Panel border (selected glows)
-            ctx.strokeStyle = isSelected ? C.gold : C.darkGray;
-            ctx.lineWidth = isSelected ? 2 : 1;
-            ctx.strokeRect(px + 0.5, panelY + yOff + 0.5, panelW - 1, panelH - 1);
+            var slideOffset = Game.selectSlideOffset;
+            drawSelectCharacter(ctx, Game.selectSlideFrom, W / 2 + slideOffset, false);
+            // Draw the incoming character sliding in from opposite side
+            drawSelectCharacter(ctx, Game.selectSlideTo, W / 2 + slideOffset - W * Game.selectSlideDir, true);
 
-            // Panel background
-            ctx.fillStyle = isSelected ? 'rgba(232,184,48,0.1)' : 'rgba(20,20,30,0.6)';
-            ctx.fillRect(px + 1, panelY + yOff + 1, panelW - 2, panelH - 2);
+            ctx.restore();
+        } else if (Game.selectConfirmTimer > 0) {
+            // During confirm, draw the confirmed character with flash
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(21, 29, W - 42, 138);
+            ctx.clip();
 
-            // Animated character sprite (walking cycle for selected)
-            var walkFrame = isSelected ? (Math.floor(Game.frame / 12) % 2) : 0;
-            var sprKey = charId + '_down_' + walkFrame;
-            var sprCanvas = Sprites.get(sprKey);
-            var sprX = px + Math.floor((panelW - 32) / 2);
-            var sprY = panelY + yOff + 4;
+            drawSelectCharacter(ctx, Game.selectConfirmChar, W / 2, true);
 
-            if (sprCanvas) {
-                ctx.imageSmoothingEnabled = false;
-                ctx.drawImage(sprCanvas, sprX, sprY, sprCanvas.width * 2, sprCanvas.height * 2);
-            } else {
-                ctx.fillStyle = i === 0 ? C.blue : (i === 1 ? C.purple : C.lightGreen);
-                ctx.fillRect(sprX + 4, sprY + 4, 24, 24);
+            // Flash overlay during confirm
+            if (Game.selectConfirmTimer < 5) {
+                ctx.globalAlpha = (5 - Game.selectConfirmTimer) / 5 * 0.6;
+                ctx.fillStyle = C.white;
+                ctx.fillRect(21, 29, W - 42, 138);
+                ctx.globalAlpha = 1;
             }
 
-            // Name - auto-scale to fit within panel
-            var name = Game.charNames[i];
-            var nameScale = 1;
-            var nameCharW = 6;
-            if (name.length * nameCharW > panelW - 6) {
-                nameScale = 0.8;
-                nameCharW = 5;
-            }
-            var nameX = px + Math.floor((panelW - name.length * nameCharW) / 2);
-            Utils.drawText(ctx, name, nameX, panelY + yOff + 54, isSelected ? C.white : C.gray, nameScale);
-
-            // Class - word-wrap at small scale to fit inside panel
-            var cls = Game.charClasses[i];
-            var clsCharW = 4;
-            var clsScale = 0.7;
-            var clsLines = wrapTextToWidth(cls, panelW - 8, clsCharW);
-            for (var cl = 0; cl < clsLines.length; cl++) {
-                var clX = px + Math.floor((panelW - clsLines[cl].length * clsCharW) / 2);
-                Utils.drawText(ctx, clsLines[cl], clX, panelY + yOff + 64 + cl * 8, C.lightGray, clsScale);
-            }
-
-            // Stat bars - positioned after class text
-            var statY = panelY + yOff + 64 + clsLines.length * 8 + 2;
-            var statBarW = panelW - 16;
-            var barH = 3;
-
-            // HP bar
-            Utils.drawText(ctx, 'HP', px + 4, statY, C.lightRed, 0.7);
-            ctx.fillStyle = C.darkGray;
-            ctx.fillRect(px + 16, statY + 1, statBarW - 12, barH);
-            ctx.fillStyle = C.red;
-            ctx.fillRect(px + 16, statY + 1, Math.floor((statBarW - 12) * stats.hp / 5), barH);
-
-            // ATK bar
-            statY += 9;
-            Utils.drawText(ctx, 'ATK', px + 4, statY, C.gold, 0.7);
-            ctx.fillStyle = C.darkGray;
-            ctx.fillRect(px + 20, statY + 1, statBarW - 16, barH);
-            ctx.fillStyle = C.gold;
-            ctx.fillRect(px + 20, statY + 1, Math.floor((statBarW - 16) * stats.atk / 5), barH);
-
-            // SPD bar
-            statY += 9;
-            Utils.drawText(ctx, 'SPD', px + 4, statY, C.teal, 0.7);
-            ctx.fillStyle = C.darkGray;
-            ctx.fillRect(px + 20, statY + 1, statBarW - 16, barH);
-            ctx.fillStyle = C.teal;
-            ctx.fillRect(px + 20, statY + 1, Math.floor((statBarW - 16) * stats.spd / 5), barH);
-
-            // Special ability - label then desc on next line
-            statY += 10;
-            var spcLabel = stats.spc;
-            var spcLabelX = px + Math.floor((panelW - spcLabel.length * 4) / 2);
-            Utils.drawText(ctx, spcLabel, spcLabelX, statY, C.paleBlue, 0.7);
-            var spcDesc = stats.spcDesc;
-            var spcDescCharW = 3.5;
-            var spcDescX = px + Math.floor((panelW - spcDesc.length * spcDescCharW) / 2);
-            Utils.drawText(ctx, spcDesc, Math.max(px + 2, spcDescX), statY + 7, C.darkGray, 0.6);
-
-            // Sparkle on selected
-            if (isSelected && Game.frame % 15 === 0) {
-                Particles.sparkle(sprX + 16, sprY + 16, C.gold);
-            }
+            ctx.restore();
+        } else {
+            // Static: draw selected character centered
+            drawSelectCharacter(ctx, Game.selectedChar, W / 2, true);
         }
 
-        Particles.update();
+        // Small character indicators at top (all three, highlight selected)
+        var indicatorY = 30;
+        for (var i = 0; i < 3; i++) {
+            var indX = W / 2 - 30 + i * 20;
+            var indCharId = Game.characters[i];
+            var isSel = (i === Game.selectedChar) && !isSliding;
+            ctx.fillStyle = isSel ? C.gold : C.darkGray;
+            ctx.fillRect(indX, indicatorY, 12, 2);
+            // Tiny character icon (colored dot)
+            var dotColor = indCharId === 'daxon' ? C.blue : (indCharId === 'luigi' ? C.purple : C.lightGreen);
+            ctx.fillStyle = isSel ? dotColor : C.gray;
+            ctx.fillRect(indX + 4, indicatorY + 4, 4, 4);
+        }
+
         Particles.render(ctx);
 
-        // Description text below panels - compact, max 2 lines
-        var desc = Game.charDescs[Game.selectedChar];
+        // Description text below character area
+        var activeChar = isSliding ? Game.selectSlideTo : Game.selectedChar;
+        if (Game.selectConfirmTimer > 0) activeChar = Game.selectConfirmChar;
+        var desc = Game.charDescs[activeChar];
         var descLines = wrapTextToWidth(desc, W - 20, 5);
         if (descLines.length > 2) descLines.length = 2;
 
-        var descY = panelY + panelH + 4;
+        var descY = 172;
         for (var l = 0; l < descLines.length; l++) {
             var lx = Math.floor((W - descLines[l].length * 5) / 2);
             Utils.drawText(ctx, descLines[l], lx, descY + l * 9, C.white, 0.8);
@@ -2664,16 +3459,21 @@
         Utils.drawText(ctx, srText, W - 52, ctrlY, Game.speedRunEnabled ? C.gold : C.darkGray, 0.8);
         Utils.drawText(ctx, 'X:TOGGLE', W - 52, ctrlY + 9, C.darkGray, 0.6);
 
-        // "Z to Confirm" blinking
-        if (Math.floor(Game.frame / 30) % 2 === 0) {
-            var confText = 'Z to Confirm';
-            var confX = centerTextX(confText, 1);
-            Utils.drawText(ctx, confText, confX, H - 10, C.yellow, 1);
+        // "Z to Confirm" blinking (hide during confirm)
+        if (Game.selectConfirmTimer <= 0) {
+            if (Math.floor(Game.frame / 30) % 2 === 0) {
+                var confText = 'Z to Confirm';
+                var confX = centerTextX(confText, 1);
+                Utils.drawText(ctx, confText, confX, H - 10, C.yellow, 1);
+            }
         }
-        // Arrow key hints
-        var arrowBob = Math.sin(Game.frame * 0.1) * 2;
-        Utils.drawText(ctx, '<', startX - 10 + arrowBob, panelY + panelH / 2, C.gold, 2);
-        Utils.drawText(ctx, '>', startX + panelW * 3 + panelGap * 2 + 2 - arrowBob, panelY + panelH / 2, C.gold, 2);
+
+        // Arrow key hints (hide during confirm)
+        if (Game.selectConfirmTimer <= 0) {
+            var arrowBob = Math.sin(Game.frame * 0.1) * 2;
+            Utils.drawText(ctx, '<', 10 + arrowBob, 90, C.gold, 2);
+            Utils.drawText(ctx, '>', W - 22 - arrowBob, 90, C.gold, 2);
+        }
     }
 
     // =====================================================================
@@ -3149,6 +3949,16 @@
         // Check spike trap hazards
         checkSpikeTraps();
 
+        // Pass 4E: Check examine objects
+        checkExamineObjects();
+
+        // Pass 7A: Update destructible objects
+        updateDestructibles();
+        checkDestructibleCombat();
+
+        // Pass 8B: Update torch flame reacts
+        updateTorchReacts();
+
         // Ambient sounds
         updateAmbientSounds();
 
@@ -3197,6 +4007,15 @@
         // Torch warm glow (drawn on top of map, under entities)
         renderTorchGlow(ctx, Game.currentRoom);
 
+        // Pass 8B: Torch flame react (lean-away animation)
+        renderTorchReacts(ctx);
+
+        // Pass 8B: Door open animation
+        renderDoorAnimation(ctx);
+
+        // Pass 7B: Puzzle room alcove glows + gem slots
+        renderPuzzleRoomGlows(ctx);
+
         // Pass 8B: Micro-animations (grass bends, water ripples)
         renderMicroAnimations(ctx);
 
@@ -3208,6 +4027,9 @@
 
         // Render boulders (temple puzzle entrance blockers)
         renderBoulders(ctx);
+
+        // Pass 7A: Render destructible objects (crates, barrels)
+        renderDestructibles(ctx);
 
         // Render NPCs
         for (var n = 0; n < Game.npcs.length; n++) {
@@ -3547,6 +4369,12 @@
 
         // Torch warm glow
         renderTorchGlow(ctx, Game.currentRoom);
+
+        // Pass 8B: Torch flame react
+        renderTorchReacts(ctx);
+
+        // Pass 8B: Door open animation
+        renderDoorAnimation(ctx);
 
         // Render NPCs
         for (var n = 0; n < Game.npcs.length; n++) {
@@ -5166,6 +5994,27 @@
         Game.grassBends = [];
         Game.waterRipples = [];
         Game.npcTalkedFirst = null;
+
+        // Pass 6A resets
+        Game.titleLandscapeOffset = 0;
+        Game.titleEmbers = [];
+        Game.titleMenuAlpha = 0;
+        Game.titleMenuFadeStart = false;
+
+        // Pass 6B resets
+        Game.selectSlideOffset = 0;
+        Game.selectSlideDir = 0;
+        Game.selectSlideFrom = 0;
+        Game.selectSlideTo = 0;
+        Game.selectSlideTimer = 0;
+        Game.selectConfirmTimer = 0;
+        Game.selectConfirmChar = -1;
+
+        // Pass 7A/8B resets
+        Game.destructibles = [];
+        Game.spikeTimer = 0;
+        Game.torchReacts = [];
+        Game.doorAnimTimer = 0;
 
         Particles.particles = [];
 

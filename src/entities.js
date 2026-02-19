@@ -1140,11 +1140,26 @@
                 Dialogue.start('boss_phase2');
                 // Signal game.js to spawn minions
                 this._requestMinions = true;
+                // Pass 3D: Dynamic music — tempo +10 BPM, aggressive counter-melody
+                if (window.Music) {
+                    window.Music.adjustTempo(10);
+                }
             } else if (phase === 3) {
                 Dialogue.start('boss_phase3');
+                // Pass 3D: Strip to bass + percussion for 4 bars, then full return
+                if (window.Music) {
+                    window.Music.soloTracks([0, 2]); // bass + percussion only
+                    // After ~4 bars (~6.3s at boss BPM), restore all tracks fortissimo
+                    setTimeout(function () {
+                        if (window.Music) {
+                            window.Music.unmuteAll();
+                            window.Music.adjustTempo(15); // even faster
+                        }
+                    }, 6300);
+                }
             }
 
-            Audio.play('explosion');
+            Audio.play('phase_boom'); // Pass 8C: dramatic low boom
             Particles.burst(
                 this.x + this.w / 2, this.y + this.h / 2, 20,
                 (phase === 3) ? C.purple : C.red
@@ -2080,6 +2095,78 @@
     }
 
     /* ===================================================================
+     *  Destructible  --  crates, barrels (Pass 7A)
+     * =================================================================*/
+    class Destructible {
+        constructor(type, x, y) {
+            this.type = type;           // 'crate' or 'barrel'
+            this.x = x * TILE;         // convert tile coords to pixels
+            this.y = y * TILE;
+            this.w = 16;
+            this.h = 16;
+            this.hp = 2;
+            this.dead = false;
+            this.flash = 0;             // white flash frames on hit
+        }
+
+        update() {
+            // Destructibles don't move (noop)
+            if (this.flash > 0) this.flash--;
+        }
+
+        takeDamage(amount, fromX, fromY) {
+            if (this.dead) return;
+            this.hp -= amount;
+            this.flash = 4;
+            Audio.play('hit');
+
+            if (this.hp <= 0) {
+                this.dead = true;
+                // Spawn wood particles (brown/tan colored burst, 6-8 particles)
+                var cx = this.x + this.w / 2;
+                var cy = this.y + this.h / 2;
+                var numParticles = 6 + Math.floor(Math.random() * 3);
+                for (var i = 0; i < numParticles; i++) {
+                    Particles.add(cx, cy, {
+                        vx: (Math.random() - 0.5) * 2.5,
+                        vy: -1 - Math.random() * 1.5,
+                        life: 20 + Math.floor(Math.random() * 15),
+                        color: Math.random() < 0.5 ? C.brown : C.tan,
+                        size: Math.random() < 0.3 ? 2 : 1,
+                        gravity: 0.04
+                    });
+                }
+                // 10% chance to spawn a heart drop
+                if (Math.random() < 0.1 && window.Game && typeof window.Game.spawnHeartDrop === 'function') {
+                    window.Game.spawnHeartDrop(this.x, this.y);
+                }
+            }
+        }
+
+        render(ctx) {
+            if (this.dead) return;
+
+            var drawX = Math.floor(this.x);
+            var drawY = Math.floor(this.y);
+
+            // White flash: skip normal sprite, draw white silhouette instead
+            if (this.flash > 0) {
+                ctx.fillStyle = '#ffffff';
+                ctx.globalAlpha = 0.8;
+                // Draw white rectangle matching the sprite footprint
+                ctx.fillRect(drawX + 1, drawY + 1, this.w - 2, this.h - 2);
+                ctx.globalAlpha = 1;
+            } else {
+                // Draw sprite normally
+                Sprites.draw(ctx, this.type, drawX, drawY);
+            }
+        }
+    }
+
+    // Export Destructible globally (Pass 7A)
+    window.Destructible = Destructible;
+
+    /* ===================================================================
      *  Combat Resolution  --  called from the main game loop each frame
      * =================================================================*/
     function resolveCombat(player, enemies, boss, projectiles) {
@@ -2240,6 +2327,7 @@
         Boss:          Boss,
         HeartDrop:     HeartDrop,
         Projectile:    Projectile,
+        Destructible:  Destructible,
         resolveCombat: resolveCombat
     };
 

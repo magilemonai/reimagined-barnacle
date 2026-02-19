@@ -383,6 +383,46 @@
 
     examine_altar: [
       { speaker: '', text: 'Rorik is bound here, unconscious. Dark runes pulse on the stone beneath him.' }
+    ],
+
+    examine_market_stall: [
+      { speaker: '', text: 'An abandoned market stall. Rotting vegetables and a sign: "Grob\'s Fresh Produce -- CLOSED INDEFINITELY."' }
+    ],
+
+    examine_forge_anvil: [
+      { speaker: '', text: 'Braxon\'s anvil. The metal is scarred with a thousand hammer-falls. It hums faintly when you touch it.' }
+    ],
+
+    examine_well: [
+      { speaker: '', text: 'The town well. The water is dark and smells of iron. Nobody drinks from it anymore.' }
+    ],
+
+    examine_tapestry: [
+      { speaker: '', text: 'A faded tapestry depicting Nitriti ascending beyond the veil. Moths have eaten through her face.' }
+    ],
+
+    examine_pillar: [
+      { speaker: '', text: 'Ancient stone pillar carved with spiraling runes. The carvings glow faintly purple in the torchlight.' }
+    ],
+
+    examine_rubble: [
+      { speaker: '', text: 'Collapsed stonework. Whatever stood here once was torn down with great force -- or great anger.' }
+    ],
+
+    examine_goblin_banner: [
+      { speaker: '', text: 'A crude goblin war banner. Painted in something reddish-brown you prefer not to identify.' }
+    ],
+
+    examine_puzzle_statue: [
+      { speaker: '', text: 'The central statue of Nitriti. Three alcoves surround the base, each shaped to hold a sacred relic.' }
+    ],
+
+    examine_bones: [
+      { speaker: '', text: 'A pile of old bones. Not human -- too small. Goblin, perhaps. They have been here a long time.' }
+    ],
+
+    examine_fountain: [
+      { speaker: '', text: 'A dry fountain. The basin is cracked. Water stains mark where it once overflowed with blessings.' }
     ]
   };
 
@@ -408,6 +448,19 @@
   var NAME_Y = BOX_Y + 6;
   var TEXT_X = BOX_X + BOX_PAD;
   var TEXT_Y = BOX_Y + 20;
+
+  /** Pass 5B: Portrait sprite map (speaker name -> sprite key) */
+  var PORTRAIT_MAP = {
+    'Fawks':       'portrait_fawks',
+    'Helena':      'portrait_helena',
+    'Elira':       'portrait_elira',
+    'Braxon':      'portrait_braxon',
+    'Soren':       'portrait_soren',
+    'Svana':       'portrait_svana',
+    'Que\'Rubra':  'portrait_querubra',
+    'Bargnot':     'portrait_bargnot',
+    'Rorik':       'portrait_braxon'  // Rorik reuses braxon portrait (dwarf)
+  };
 
   /** Speaker-name color palette */
   var SPEAKER_COLORS = {
@@ -750,20 +803,38 @@
         // Speaker name text in the tab
         window.Utils.drawText(ctx, line.speaker, tabX + 4, tabY - tabH + 4, '#f0f0f0', 1);
 
-        // --- Speaker portrait indicator ---
-        var portraitX = BOX_X + 4;
-        var portraitY = by + 4;
-        var portraitSize = 14;
+        // --- Pass 5B: Speaker portrait (32x32 scaled to fit) ---
+        var portraitX = BOX_X + 5;
+        var portraitY = by + 5;
+        var portraitSize = bh - 10;
 
+        // Portrait border
         ctx.fillStyle = nameColor;
-        ctx.globalAlpha = 0.3;
-        ctx.fillRect(portraitX, portraitY, portraitSize, portraitSize);
+        ctx.globalAlpha = 0.15;
+        ctx.fillRect(portraitX - 1, portraitY - 1, portraitSize + 2, portraitSize + 2);
         ctx.globalAlpha = 1;
         ctx.strokeStyle = nameColor;
-        ctx.strokeRect(portraitX + 0.5, portraitY + 0.5, portraitSize - 1, portraitSize - 1);
+        ctx.lineWidth = 1;
+        ctx.strokeRect(portraitX - 0.5, portraitY - 0.5, portraitSize + 1, portraitSize + 1);
 
-        var initial = line.speaker.charAt(0);
-        window.Utils.drawText(ctx, initial, portraitX + 4, portraitY + 3, nameColor, 1);
+        // Look up portrait sprite by speaker name
+        var portraitKey = PORTRAIT_MAP[line.speaker];
+        var portraitSprite = portraitKey && window.Sprites ? window.Sprites.get(portraitKey) : null;
+
+        if (portraitSprite) {
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(portraitSprite, portraitX, portraitY, portraitSize, portraitSize);
+        } else {
+          // Fallback: colored rectangle with initial
+          ctx.fillStyle = nameColor;
+          ctx.globalAlpha = 0.3;
+          ctx.fillRect(portraitX, portraitY, portraitSize, portraitSize);
+          ctx.globalAlpha = 1;
+          var initial = line.speaker.charAt(0);
+          var ix = portraitX + Math.floor(portraitSize / 2) - 3;
+          var iy = portraitY + Math.floor(portraitSize / 2) - 3;
+          window.Utils.drawText(ctx, initial, ix, iy, nameColor, 1);
+        }
 
         textStartY = TEXT_Y + slideOffset;
       } else {

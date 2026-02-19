@@ -603,6 +603,109 @@
       } catch (e) {
         // Silently handle errors (e.g. during context cleanup)
       }
+    },
+
+    // =====================================================================
+    // PASS 3D: DYNAMIC MUSIC SYSTEM
+    // =====================================================================
+
+    /**
+     * Adjust tempo for current theme (boss phase changes).
+     * @param {number} bpmDelta - BPM to add (e.g. +10 for phase 2)
+     */
+    adjustTempo: function (bpmDelta) {
+      if (!this._tracks || !this.currentTheme) return;
+      var theme = THEMES[this.currentTheme];
+      if (!theme) return;
+      var newBpm = theme.bpm + bpmDelta;
+      var newBeatDuration = 60.0 / newBpm;
+      for (var i = 0; i < this._tracks.length; i++) {
+        this._tracks[i].beatDuration = newBeatDuration;
+      }
+    },
+
+    /**
+     * Mute/unmute specific tracks by index (for phase 3 bass+percussion only).
+     * @param {Array<number>} trackIndices - indices to keep active
+     */
+    soloTracks: function (trackIndices) {
+      if (!this._tracks) return;
+      for (var i = 0; i < this._tracks.length; i++) {
+        this._tracks[i]._muted = true;
+      }
+      for (var j = 0; j < trackIndices.length; j++) {
+        var idx = trackIndices[j];
+        if (this._tracks[idx]) {
+          this._tracks[idx]._muted = false;
+        }
+      }
+    },
+
+    /**
+     * Unmute all tracks (restore after solo).
+     */
+    unmuteAll: function () {
+      if (!this._tracks) return;
+      for (var i = 0; i < this._tracks.length; i++) {
+        this._tracks[i]._muted = false;
+      }
+    },
+
+    /**
+     * Dip volume temporarily (for low health effect).
+     * @param {number} targetVolume - volume to dip to (0-1)
+     * @param {number} duration - seconds to ramp
+     */
+    dipVolume: function (targetVolume, duration) {
+      if (!this._masterGain || !this._ctx) return;
+      try {
+        this._masterGain.gain.cancelScheduledValues(this._ctx.currentTime);
+        this._masterGain.gain.setValueAtTime(this._masterGain.gain.value, this._ctx.currentTime);
+        this._masterGain.gain.linearRampToValueAtTime(
+          targetVolume * this.masterVolume,
+          this._ctx.currentTime + (duration || 0.5)
+        );
+      } catch (e) {}
+    },
+
+    /**
+     * Restore volume after dip.
+     */
+    restoreVolume: function () {
+      if (!this._masterGain || !this._ctx || this.muted) return;
+      try {
+        this._masterGain.gain.cancelScheduledValues(this._ctx.currentTime);
+        this._masterGain.gain.setValueAtTime(this._masterGain.gain.value, this._ctx.currentTime);
+        this._masterGain.gain.linearRampToValueAtTime(
+          this.masterVolume,
+          this._ctx.currentTime + 0.5
+        );
+      } catch (e) {}
+    }
+  };
+
+  // Patch _schedule to respect track muting
+  var _origSchedule = Music._schedule;
+  Music._schedule = function () {
+    if (!this._ctx || !this.currentTheme) return;
+    var now = this._ctx.currentTime;
+    for (var i = 0; i < this._tracks.length; i++) {
+      var track = this._tracks[i];
+      var def = track.def;
+      while (track.nextNoteTime < now + this._scheduleAhead) {
+        var noteData = def.notes[track.noteIndex];
+        var noteName = noteData[0];
+        var beats = noteData[1];
+        var duration = beats * track.beatDuration;
+        if (noteName !== null && !track._muted) {
+          var freq = NOTE[noteName];
+          if (freq) {
+            this._playNote(def.wave, freq, def.volume, track.nextNoteTime, duration);
+          }
+        }
+        track.nextNoteTime += duration;
+        track.noteIndex = (track.noteIndex + 1) % def.notes.length;
+      }
     }
   };
 

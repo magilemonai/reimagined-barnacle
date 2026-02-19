@@ -495,6 +495,181 @@
           this._noise(0.03, gain, t);
           break;
 
+        // ---- Pass 3D: Terrain-specific footsteps ----
+        case 'footstep_stone':
+          gain = this._gain(0.14);
+          gain.gain.setValueAtTime(0.14 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.04);
+          this._osc('square', 180 + Math.random() * 40, gain, t, t + 0.02);
+          this._noise(0.04, gain, t);
+          break;
+
+        case 'footstep_wood':
+          gain = this._gain(0.1);
+          gain.gain.setValueAtTime(0.1 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+          osc = this.ctx.createOscillator();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(120 + Math.random() * 30, t);
+          osc.frequency.exponentialRampToValueAtTime(60, t + 0.05);
+          osc.connect(gain);
+          osc.start(t);
+          osc.stop(t + 0.05);
+          break;
+
+        case 'footstep_grass':
+          gain = this._gain(0.08);
+          gain.gain.setValueAtTime(0.08 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.04);
+          this._noise(0.04, gain, t);
+          break;
+
+        // ---- Pass 8C: Character-specific footstep pitch ----
+        case 'footstep_heavy':
+          gain = this._gain(0.15);
+          gain.gain.setValueAtTime(0.15 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.04);
+          this._osc('triangle', 90 + Math.random() * 20, gain, t, t + 0.04);
+          this._noise(0.03, gain, t);
+          break;
+
+        case 'footstep_light':
+          gain = this._gain(0.07);
+          gain.gain.setValueAtTime(0.07 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.025);
+          this._noise(0.025, gain, t);
+          break;
+
+        case 'footstep_shuffle':
+          gain = this._gain(0.09);
+          gain.gain.setValueAtTime(0.09 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.035);
+          this._noise(0.035, gain, t);
+          osc = this.ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(150, t);
+          osc.frequency.exponentialRampToValueAtTime(80, t + 0.035);
+          var shuffGain = this._gain(0.05);
+          shuffGain.gain.setValueAtTime(0.05 * this.masterVolume, t);
+          shuffGain.gain.exponentialRampToValueAtTime(0.01, t + 0.035);
+          osc.connect(shuffGain);
+          osc.start(t);
+          osc.stop(t + 0.035);
+          break;
+
+        // ---- Pass 8C: Menu sounds ----
+        case 'menu_tick':
+          gain = this._gain(0.2);
+          gain.gain.setValueAtTime(0.2 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.02);
+          this._osc('square', 1200, gain, t, t + 0.02);
+          break;
+
+        case 'menu_confirm':
+          gain = this._gain(0.3);
+          gain.gain.setValueAtTime(0.3 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.12);
+          this._osc('square', 880, gain, t, t + 0.04);
+          this._osc('square', 1320, gain, t + 0.04, t + 0.12);
+          break;
+
+        case 'menu_back':
+          gain = this._gain(0.2);
+          gain.gain.setValueAtTime(0.2 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.06);
+          this._osc('triangle', 400, gain, t, t + 0.06);
+          break;
+
+        // ---- Pass 8C: Text typewriter click ----
+        case 'typewriter':
+          gain = this._gain(0.06);
+          gain.gain.setValueAtTime(0.06 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.015);
+          this._osc('square', 800 + Math.random() * 200, gain, t, t + 0.015);
+          break;
+
+        // ---- Pass 8C: Boss phase transition boom ----
+        case 'phase_boom':
+          gain = this._gain(0.9);
+          gain.gain.setValueAtTime(0.9 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+          this._noise(0.6, gain, t);
+          osc = this.ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(60, t);
+          osc.frequency.exponentialRampToValueAtTime(15, t + 0.6);
+          var boomGain = this._gain(0.6);
+          boomGain.gain.setValueAtTime(0.6 * this.masterVolume, t);
+          boomGain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+          osc.connect(boomGain);
+          osc.start(t);
+          osc.stop(t + 0.6);
+          break;
+
+        // ---- Pass 8C: Chest open creak + sparkle ----
+        case 'chest_open':
+          gain = this._gain(0.3);
+          gain.gain.setValueAtTime(0.3 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+          osc = this.ctx.createOscillator();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(80, t);
+          osc.frequency.exponentialRampToValueAtTime(200, t + 0.15);
+          osc.connect(gain);
+          osc.start(t);
+          osc.stop(t + 0.15);
+          // Sparkle chime on top
+          var sparkGain = this._gain(0.25);
+          sparkGain.gain.setValueAtTime(0.01, t);
+          sparkGain.gain.linearRampToValueAtTime(0.25 * this.masterVolume, t + 0.1);
+          sparkGain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+          this._osc('triangle', 1200, sparkGain, t + 0.1, t + 0.2);
+          this._osc('triangle', 1600, sparkGain, t + 0.15, t + 0.3);
+          break;
+
+        // ---- Pass 6F: Game over mournful sting (3-note descending) ----
+        case 'gameover_sting':
+          gain = this._gain(0.35);
+          gain.gain.setValueAtTime(0.35 * this.masterVolume, t);
+          gain.gain.setValueAtTime(0.35 * this.masterVolume, t + 0.8);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 1.0);
+          // Eb4 - Db4 - Ab3 (descending minor)
+          this._osc('triangle', 311, gain, t, t + 0.35);
+          this._osc('triangle', 277, gain, t + 0.35, t + 0.65);
+          this._osc('triangle', 208, gain, t + 0.65, t + 1.0);
+          break;
+
+        // ---- Pass 3D: Ambient cricket loop (soft, repeating) ----
+        case 'cricket':
+          gain = this._gain(0.04);
+          gain.gain.setValueAtTime(0.04 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+          this._osc('sine', 4200 + Math.random() * 800, gain, t, t + 0.03);
+          this._osc('sine', 4200 + Math.random() * 800, gain, t + 0.04, t + 0.07);
+          break;
+
+        // ---- Pass 3D: Crowd murmur (town ambient) ----
+        case 'murmur':
+          gain = this._gain(0.03);
+          gain.gain.setValueAtTime(0.01, t);
+          gain.gain.linearRampToValueAtTime(0.03 * this.masterVolume, t + 0.1);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.25);
+          this._noise(0.25, gain, t);
+          break;
+
+        // ---- Pass 3D: Low health heartbeat ----
+        case 'heartbeat':
+          gain = this._gain(0.25);
+          gain.gain.setValueAtTime(0.25 * this.masterVolume, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+          this._osc('sine', 50, gain, t, t + 0.15);
+          // Second thump
+          var hb2 = this._gain(0.18);
+          hb2.gain.setValueAtTime(0.18 * this.masterVolume, t + 0.2);
+          hb2.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+          this._osc('sine', 45, hb2, t + 0.2, t + 0.3);
+          break;
+
         // ---- Whoosh: room transition sweep (150ms) ----
         case 'whoosh':
           gain = this._gain(0.3);

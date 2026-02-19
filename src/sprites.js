@@ -1409,6 +1409,456 @@
         circ(ctx, 6, 4, 2.5, P.darkYellow);
         circ(ctx, 6, 4, 1.5, P.gold);
       });
+
+      // =================================================================
+      // PASS 5B: CHARACTER PORTRAITS (32x32, chest-up, for dialogue)
+      // =================================================================
+
+      function mp(name, fn) { S.create('portrait_' + name, 32, 32, fn); }
+
+      // Fawks - warm, round face, barkeep apron
+      mp('fawks', function (ctx) {
+        // Background
+        ctx.fillStyle = '#2a1a0a';
+        ctx.fillRect(0, 0, 32, 32);
+        // Shoulders/chest
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(6, 22, 20, 10);
+        ctx.fillStyle = P.lightBrown;
+        ctx.fillRect(10, 22, 12, 8); // apron
+        // Neck
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(13, 18, 6, 5);
+        // Face
+        circ(ctx, 16, 13, 7, P.skin);
+        circ(ctx, 16, 13, 6, P.paleSkin);
+        // Eyes
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(13, 11, 2, 2);
+        ctx.fillRect(18, 11, 2, 2);
+        // Mouth (smile)
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(14, 16, 4, 1);
+        // Hair
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(10, 5, 12, 4);
+        ctx.fillRect(9, 7, 3, 4);
+        ctx.fillRect(20, 7, 3, 4);
+      });
+
+      // Helena - dignified, silver-streaked hair
+      mp('helena', function (ctx) {
+        ctx.fillStyle = '#0a1a0a';
+        ctx.fillRect(0, 0, 32, 32);
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(6, 22, 20, 10);
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(14, 21, 4, 2); // chain of office
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(13, 18, 6, 5);
+        circ(ctx, 16, 13, 7, P.skin);
+        circ(ctx, 16, 13, 6, P.paleSkin);
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(13, 11, 2, 2);
+        ctx.fillRect(18, 11, 2, 2);
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(15, 16, 2, 1);
+        // Silver-streaked hair
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(9, 4, 14, 5);
+        ctx.fillRect(8, 7, 3, 6);
+        ctx.fillRect(21, 7, 3, 6);
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(11, 5, 2, 3);
+        ctx.fillRect(19, 5, 2, 3);
+      });
+
+      // Elira Voss - military, short hair, scar
+      mp('elira', function (ctx) {
+        ctx.fillStyle = '#1a1a2a';
+        ctx.fillRect(0, 0, 32, 32);
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(6, 22, 20, 10); // armor
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(8, 24, 2, 2); // shoulder plate
+        ctx.fillRect(22, 24, 2, 2);
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(13, 18, 6, 5);
+        circ(ctx, 16, 13, 7, P.darkSkin);
+        circ(ctx, 16, 13, 6, P.skin);
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(13, 11, 2, 2);
+        ctx.fillRect(18, 11, 2, 2);
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(15, 16, 2, 1);
+        // Short dark hair
+        ctx.fillStyle = P.black;
+        ctx.fillRect(10, 4, 12, 4);
+        // Scar
+        ctx.fillStyle = P.lightRed;
+        ctx.fillRect(19, 10, 1, 4);
+      });
+
+      // Braxon - gruff, broad, beard
+      mp('braxon', function (ctx) {
+        ctx.fillStyle = '#2a1a0a';
+        ctx.fillRect(0, 0, 32, 32);
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(4, 22, 24, 10); // broad shoulders
+        ctx.fillStyle = P.red;
+        ctx.fillRect(14, 24, 4, 4); // forge apron
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(13, 18, 6, 5);
+        circ(ctx, 16, 12, 8, P.skin);
+        circ(ctx, 16, 12, 7, P.paleSkin);
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(12, 10, 2, 2);
+        ctx.fillRect(18, 10, 2, 2);
+        // Big bushy beard
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(11, 14, 10, 6);
+        ctx.fillRect(10, 15, 12, 4);
+        ctx.fillStyle = P.lightBrown;
+        ctx.fillRect(12, 15, 8, 3);
+        // Bald/short hair
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(9, 3, 14, 5);
+      });
+
+      // Soren - tabaxi monk, cat features
+      mp('soren', function (ctx) {
+        ctx.fillStyle = '#1a1a2a';
+        ctx.fillRect(0, 0, 32, 32);
+        ctx.fillStyle = P.lightBlue;
+        ctx.fillRect(8, 22, 16, 10); // monk robes
+        ctx.fillStyle = P.lightBrown;
+        ctx.fillRect(13, 18, 6, 5);
+        circ(ctx, 16, 13, 7, P.lightBrown);
+        circ(ctx, 16, 13, 6, P.tan);
+        // Cat eyes (slitted)
+        ctx.fillStyle = P.yellow;
+        ctx.fillRect(12, 11, 3, 2);
+        ctx.fillRect(18, 11, 3, 2);
+        ctx.fillStyle = P.black;
+        ctx.fillRect(13, 11, 1, 2);
+        ctx.fillRect(19, 11, 1, 2);
+        // Nose
+        ctx.fillStyle = P.pink;
+        ctx.fillRect(15, 14, 2, 1);
+        // Cat ears
+        ctx.fillStyle = P.lightBrown;
+        ctx.fillRect(9, 3, 3, 5);
+        ctx.fillRect(20, 3, 3, 5);
+        ctx.fillStyle = P.pink;
+        ctx.fillRect(10, 5, 1, 2);
+        ctx.fillRect(21, 5, 1, 2);
+        // Whiskers
+        ctx.fillStyle = P.white;
+        ctx.fillRect(8, 13, 4, 1);
+        ctx.fillRect(20, 13, 4, 1);
+      });
+
+      // Svana Ironveil - dwarf, braids, fierce
+      mp('svana', function (ctx) {
+        ctx.fillStyle = '#2a1a2a';
+        ctx.fillRect(0, 0, 32, 32);
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(6, 20, 20, 12); // armor
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(8, 22, 3, 3); // plate
+        ctx.fillRect(21, 22, 3, 3);
+        ctx.fillStyle = P.paleSkin;
+        ctx.fillRect(13, 17, 6, 5);
+        circ(ctx, 16, 12, 7, P.paleSkin);
+        circ(ctx, 16, 12, 6, P.paleSkin);
+        ctx.fillStyle = P.blue;
+        ctx.fillRect(13, 10, 2, 2);
+        ctx.fillRect(18, 10, 2, 2);
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(15, 14, 2, 1);
+        // Red braids
+        ctx.fillStyle = P.red;
+        ctx.fillRect(8, 4, 16, 5);
+        ctx.fillRect(7, 8, 3, 12); // left braid
+        ctx.fillRect(22, 8, 3, 12); // right braid
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(7, 18, 3, 2); // braid clasps
+        ctx.fillRect(22, 18, 3, 2);
+      });
+
+      // Que'Rubra - ancient tree spirit, bark/leaf face
+      mp('querubra', function (ctx) {
+        ctx.fillStyle = '#0a1a0a';
+        ctx.fillRect(0, 0, 32, 32);
+        // Bark body
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(6, 18, 20, 14);
+        // Face - wooden, ancient
+        circ(ctx, 16, 14, 9, P.darkBrown);
+        circ(ctx, 16, 14, 7, P.brown);
+        // Glowing eyes
+        ctx.fillStyle = P.lightGreen;
+        ctx.fillRect(12, 12, 3, 2);
+        ctx.fillRect(19, 12, 3, 2);
+        ctx.fillStyle = P.paleGreen;
+        ctx.fillRect(13, 12, 1, 1);
+        ctx.fillRect(20, 12, 1, 1);
+        // Leaf crown
+        ctx.fillStyle = P.green;
+        ctx.fillRect(8, 2, 4, 6);
+        ctx.fillRect(14, 1, 4, 5);
+        ctx.fillRect(20, 2, 4, 6);
+        ctx.fillStyle = P.lightGreen;
+        ctx.fillRect(10, 3, 2, 3);
+        ctx.fillRect(16, 2, 2, 3);
+        ctx.fillRect(22, 3, 2, 3);
+        // Mouth line (grim)
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(13, 18, 6, 1);
+      });
+
+      // Bargnot portraits - 2 expressions: arrogant and desperate
+      mp('bargnot', function (ctx) {
+        ctx.fillStyle = '#1a0a1a';
+        ctx.fillRect(0, 0, 32, 32);
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(6, 22, 20, 10);
+        ctx.fillStyle = P.red;
+        ctx.fillRect(8, 22, 16, 8); // robes
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(13, 17, 6, 6);
+        circ(ctx, 16, 13, 7, P.darkGreen);
+        circ(ctx, 16, 13, 6, P.green);
+        // Eyes - fierce
+        ctx.fillStyle = P.red;
+        ctx.fillRect(12, 11, 3, 2);
+        ctx.fillRect(18, 11, 3, 2);
+        ctx.fillStyle = P.yellow;
+        ctx.fillRect(13, 11, 1, 1);
+        ctx.fillRect(19, 11, 1, 1);
+        // Crown
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(10, 3, 12, 3);
+        ctx.fillRect(11, 1, 2, 3);
+        ctx.fillRect(15, 0, 2, 4);
+        ctx.fillRect(19, 1, 2, 3);
+        // Purple gem
+        ctx.fillStyle = P.purple;
+        ctx.fillRect(15, 4, 2, 2);
+      });
+
+      mp('bargnot_desperate', function (ctx) {
+        ctx.fillStyle = '#1a0a1a';
+        ctx.fillRect(0, 0, 32, 32);
+        ctx.fillStyle = P.darkPurple;
+        ctx.fillRect(6, 22, 20, 10);
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(13, 17, 6, 6);
+        circ(ctx, 16, 13, 7, P.darkGreen);
+        circ(ctx, 16, 13, 6, P.green);
+        // Eyes - wide, desperate
+        ctx.fillStyle = P.lightPurple;
+        ctx.fillRect(11, 10, 4, 3);
+        ctx.fillRect(18, 10, 4, 3);
+        ctx.fillStyle = P.white;
+        ctx.fillRect(12, 11, 2, 1);
+        ctx.fillRect(19, 11, 2, 1);
+        // Open mouth
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(13, 16, 6, 3);
+        // Crown tilted/gone
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(17, 3, 8, 2);
+        ctx.fillRect(20, 1, 2, 3);
+        // Shadow tendrils
+        ctx.fillStyle = P.darkPurple;
+        ctx.globalAlpha = 0.6;
+        ctx.fillRect(5, 8, 2, 12);
+        ctx.fillRect(25, 6, 2, 14);
+        ctx.fillRect(8, 4, 2, 6);
+        ctx.globalAlpha = 1;
+      });
+
+      // =================================================================
+      // PASS 5B: TILE ART VARIANTS
+      // =================================================================
+
+      // Grass with flowers
+      mt('grass_flowers', function (ctx) {
+        fill(ctx, P.lightGreen);
+        dots(ctx, P.green, 10);
+        // Small flowers
+        ctx.fillStyle = P.yellow;
+        ctx.fillRect(4, 5, 2, 2);
+        ctx.fillStyle = P.red;
+        ctx.fillRect(11, 10, 2, 2);
+        ctx.fillStyle = P.paleBlue;
+        ctx.fillRect(7, 13, 2, 2);
+        // Stems
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(5, 7, 1, 2);
+        ctx.fillRect(12, 12, 1, 2);
+        ctx.fillRect(8, 15, 1, 1);
+      });
+
+      // Cracked stone floor
+      mt('stone_cracked', function (ctx) {
+        fill(ctx, P.stone);
+        dots(ctx, P.darkStone, 8);
+        // Cracks
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(3, 3, 1, 5);
+        ctx.fillRect(4, 7, 3, 1);
+        ctx.fillRect(7, 7, 1, 4);
+        ctx.fillRect(10, 2, 1, 3);
+        ctx.fillRect(10, 5, 4, 1);
+        // Moss in cracks (deeper temple)
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(4, 8, 1, 1);
+        ctx.fillRect(11, 3, 1, 1);
+      });
+
+      // Grass with tall tuft
+      mt('grass_tuft', function (ctx) {
+        fill(ctx, P.lightGreen);
+        dots(ctx, P.green, 8);
+        // Tall grass blades
+        ctx.fillStyle = P.green;
+        ctx.fillRect(6, 6, 1, 6);
+        ctx.fillRect(7, 5, 1, 7);
+        ctx.fillRect(8, 7, 1, 5);
+        ctx.fillRect(10, 6, 1, 5);
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(9, 6, 1, 6);
+      });
+
+      // Animated water frame 2
+      mt('water_frame2', function (ctx) {
+        fill(ctx, P.blue);
+        ctx.fillStyle = P.darkBlue;
+        ctx.fillRect(0, 2, 16, 2);
+        ctx.fillRect(0, 8, 16, 2);
+        ctx.fillRect(0, 14, 16, 2);
+        // Shifted highlights (different from frame 1)
+        ctx.fillStyle = P.lightBlue;
+        ctx.fillRect(6, 1, 3, 1);
+        ctx.fillRect(1, 5, 3, 1);
+        ctx.fillRect(10, 7, 4, 1);
+        ctx.fillRect(3, 11, 3, 1);
+        ctx.fillRect(12, 13, 3, 1);
+      });
+
+      // Torch flame variant frames
+      mt('torch_flame2', function (ctx) {
+        fill(ctx, P.stone);
+        dots(ctx, P.darkStone, 5);
+        // Torch base
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(6, 8, 4, 8);
+        // Flame variant 2
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(6, 4, 4, 5);
+        ctx.fillStyle = P.yellow;
+        ctx.fillRect(7, 2, 3, 4);
+        ctx.fillStyle = P.white;
+        ctx.fillRect(7, 4, 2, 2);
+      });
+
+      mt('torch_flame3', function (ctx) {
+        fill(ctx, P.stone);
+        dots(ctx, P.darkStone, 5);
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(6, 8, 4, 8);
+        // Flame variant 3 (leaning right)
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(7, 4, 4, 5);
+        ctx.fillStyle = P.yellow;
+        ctx.fillRect(8, 2, 3, 4);
+        ctx.fillStyle = P.white;
+        ctx.fillRect(8, 3, 2, 2);
+      });
+
+      // =================================================================
+      // PASS 5B: ENHANCED HEART DROP (chunky pixel heart with highlight)
+      // =================================================================
+
+      mi('heart_drop', function (ctx) {
+        var rows = [
+          '..rr.rr..',
+          '.rRRrRRr.',
+          'rRRRRRRRr',
+          'rRRRRRRRr',
+          '.rRRRRRr.',
+          '..rRRRr..',
+          '...rRr...',
+          '....r....',
+        ];
+        var hpal = {
+          'r': P.red, 'R': P.lightRed
+        };
+        dp(ctx, rows, hpal, 4, 4);
+        // Highlight
+        ctx.fillStyle = P.white;
+        ctx.fillRect(6, 5, 2, 2);
+      });
+
+      // =================================================================
+      // PASS 5C: PROJECTILE SPRITES
+      // =================================================================
+
+      S.create('projectile_purple', 8, 8, function (ctx) {
+        circ(ctx, 4, 4, 3, P.purple);
+        circ(ctx, 4, 4, 2, P.lightPurple);
+        ctx.fillStyle = P.white;
+        ctx.fillRect(3, 3, 2, 2);
+      });
+
+      S.create('projectile_purple_glow', 12, 12, function (ctx) {
+        ctx.globalAlpha = 0.3;
+        circ(ctx, 6, 6, 5, P.purple);
+        ctx.globalAlpha = 0.6;
+        circ(ctx, 6, 6, 3, P.lightPurple);
+        ctx.globalAlpha = 1;
+        circ(ctx, 6, 6, 2, P.white);
+      });
+
+      // Crate sprite for destructible objects
+      S.create('crate', 16, 16, function (ctx) {
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(1, 1, 14, 14);
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(0, 0, 16, 1);
+        ctx.fillRect(0, 15, 16, 1);
+        ctx.fillRect(0, 0, 1, 16);
+        ctx.fillRect(15, 0, 1, 16);
+        // Cross planks
+        ctx.fillStyle = P.lightBrown;
+        ctx.fillRect(2, 7, 12, 2);
+        ctx.fillRect(7, 2, 2, 12);
+        // Nails
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(3, 3, 1, 1);
+        ctx.fillRect(12, 3, 1, 1);
+        ctx.fillRect(3, 12, 1, 1);
+        ctx.fillRect(12, 12, 1, 1);
+      });
+
+      // Barrel sprite
+      S.create('barrel', 16, 16, function (ctx) {
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(3, 1, 10, 14);
+        ctx.fillRect(2, 3, 12, 10);
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(3, 0, 10, 1);
+        ctx.fillRect(3, 15, 10, 1);
+        // Metal bands
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(2, 4, 12, 1);
+        ctx.fillRect(2, 11, 12, 1);
+        // Highlight
+        ctx.fillStyle = P.lightBrown;
+        ctx.fillRect(5, 6, 2, 4);
+      });
     }
   };
 

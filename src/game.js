@@ -4557,87 +4557,216 @@
             Game.bossDeathTimer++;
             var bx = Game.boss.x + 8;
             var by = Game.boss.y + 8;
+            var t = Game.bossDeathTimer;
 
-            // Phase 1: Initial shock (frames 1-20)
-            if (Game.bossDeathTimer === 1) {
-                Game.shake = 10;
+            // === PHASE 1: INITIAL SHOCK (frames 1-30) ===
+            if (t === 1) {
+                Game.shake = 12;
                 Audio.play('explosion');
-                Particles.burst(bx, by, 30, C.red);
-                Particles.burst(bx, by, 20, C.darkPurple);
+                Particles.burst(bx, by, 40, C.red);
+                Particles.burst(bx, by, 25, C.darkPurple);
                 if (Music) Music.stop();
             }
-
-            // Phase 2: Shadow tendrils dissipate (frames 15-50)
-            if (Game.bossDeathTimer === 15) {
+            if (t === 12) {
+                Game.shake = 8;
+                Audio.play('explosion');
+                Particles.burst(bx - 12, by + 10, 20, C.gold);
+                Particles.burst(bx + 14, by - 6, 15, C.red);
+            }
+            if (t === 22) {
                 Game.shake = 6;
                 Audio.play('explosion');
-                Particles.burst(bx - 10, by + 12, 20, C.gold);
-            }
-            if (Game.bossDeathTimer === 25) {
-                // Shadow wisps flying outward from boss
-                for (var sw = 0; sw < 8; sw++) {
-                    var angle = (sw / 8) * Math.PI * 2;
+                // Shadow wisps flying outward
+                for (var sw = 0; sw < 10; sw++) {
+                    var angle = (sw / 10) * Math.PI * 2;
                     Particles.add(bx, by, {
                         vx: Math.cos(angle) * 1.5,
                         vy: Math.sin(angle) * 1.5,
-                        life: 40,
+                        life: 45,
                         color: C.darkPurple,
                         size: 2,
                         gravity: -0.02
                     });
                 }
-                Game.shake = 4;
-            }
-            if (Game.bossDeathTimer === 35) {
-                Game.shake = 8;
-                Audio.play('explosion');
-                Particles.burst(bx + 20, by - 5, 25, C.red);
-                Particles.burst(bx - 15, by + 12, 15, C.purple);
             }
 
-            // Phase 3: Flickering collapse (frames 40-70)
-            if (Game.bossDeathTimer === 45) {
-                Audio.play('explosion');
-                Particles.ring(bx, by, 30, 20, C.red);
-            }
-            if (Game.bossDeathTimer === 55) {
+            // === PHASE 2: STAGGERED ERUPTIONS (frames 30-80) ===
+            if (t === 35) {
                 Game.shake = 10;
                 Audio.play('explosion');
-                // Massive ring of light
-                Particles.ring(bx, by, 50, 30, C.gold);
-                Particles.burst(bx, by, 40, C.white);
+                Particles.burst(bx + 20, by - 8, 30, C.red);
+                Particles.ring(bx, by, 30, 20, C.purple);
             }
-            // Continuous small sparks during collapse
-            if (Game.bossDeathTimer > 20 && Game.bossDeathTimer < 70 && Game.bossDeathTimer % 5 === 0) {
-                var sparkX = bx + (Math.random() - 0.5) * 30;
-                var sparkY = by + (Math.random() - 0.5) * 20;
-                Particles.burst(sparkX, sparkY, 5, Utils.choice([C.red, C.purple, C.darkPurple]));
+            if (t === 48) {
+                Game.shake = 8;
+                Audio.play('explosion');
+                Particles.burst(bx - 18, by + 14, 25, C.gold);
+                Particles.burst(bx + 10, by + 10, 15, C.red);
+            }
+            if (t === 60) {
+                Game.shake = 12;
+                Audio.play('explosion');
+                Particles.ring(bx, by, 40, 25, C.gold);
+                Particles.burst(bx, by, 35, C.white);
+                triggerScreenFlash('#FFFFFF', 8);
+            }
+            if (t === 72) {
+                Game.shake = 6;
+                Audio.play('explosion');
+                Particles.burst(bx - 20, by - 10, 20, C.purple);
+                Particles.burst(bx + 22, by + 8, 20, C.red);
             }
 
-            // Phase 4: Final purge (frames 65-80)
-            if (Game.bossDeathTimer === 65) {
+            // Continuous sparks through eruptions
+            if (t > 25 && t < 85 && t % 4 === 0) {
+                var sparkX = bx + (Math.random() - 0.5) * 36;
+                var sparkY = by + (Math.random() - 0.5) * 24;
+                Particles.burst(sparkX, sparkY, 4, Utils.choice([C.red, C.purple, C.darkPurple, C.gold]));
+            }
+
+            // === PHASE 3: "IT'S FINALLY OVER" FAKE-OUT (frames 85-120) ===
+            // Things calm down... the sparks stop... a gentle beat...
+            if (t === 90) {
+                Particles.ring(bx, by, 50, 30, C.paleBlue);
+            }
+
+            // === PHASE 4: NOPE, EVEN BIGGER (frames 120-180) ===
+            if (t === 120) {
+                Game.shake = 16;
+                Audio.play('explosion');
+                Audio.play('explosion');
+                Particles.burst(bx, by, 50, C.red);
+                Particles.burst(bx, by, 40, C.gold);
+                Particles.ring(bx, by, 60, 35, C.white);
+                triggerScreenFlash('#FF4400', 10);
+            }
+            if (t === 132) {
+                Game.shake = 12;
+                Audio.play('explosion');
+                Particles.burst(bx - 25, by, 30, C.purple);
+                Particles.burst(bx + 25, by, 30, C.red);
+                Particles.confetti(bx, by - 20, 15);
+            }
+            if (t === 144) {
                 Game.shake = 14;
                 Audio.play('explosion');
-                // Giant white flash (screen goes bright)
-                Particles.burst(bx, by, 50, C.white);
-                Particles.burst(bx, by, 35, C.gold);
-                Particles.confetti(bx, by - 20, 20);
+                Particles.ring(bx, by, 45, 30, C.gold);
+                Particles.burst(bx, by - 10, 35, C.lightRed);
             }
-            if (Game.bossDeathTimer === 75) {
-                // Room brightens - the darkness lifts
-                Particles.ring(W / 2, H / 2, 80, 40, C.paleBlue);
+            if (t === 155) {
+                Game.shake = 10;
+                Audio.play('explosion');
+                Particles.burst(bx + 15, by - 15, 25, C.white);
+                Particles.burst(bx - 15, by + 15, 25, C.gold);
+            }
+            // Rapid fire sparks
+            if (t > 120 && t < 170 && t % 3 === 0) {
+                var sx2 = bx + (Math.random() - 0.5) * 50;
+                var sy2 = by + (Math.random() - 0.5) * 40;
+                Particles.burst(sx2, sy2, 6, Utils.choice([C.red, C.gold, C.white, C.purple]));
+                if (t % 6 === 0) Audio.play('explosion');
             }
 
-            // Phase 4b: Bargnot reaches out (frames 75-89)
-            if (Game.bossDeathTimer >= 75 && Game.bossDeathTimer < 90) {
+            // === PHASE 5: ANOTHER CALM... (frames 180-210) ===
+            if (t === 180) {
+                triggerScreenFlash('#FFFFFF', 12);
+                Game.shake = 18;
+                Audio.play('explosion');
+                Particles.burst(bx, by, 60, C.white);
+                Particles.ring(bx, by, 70, 40, C.gold);
+            }
+
+            // === PHASE 6: RIDICULOUS GRAND FINALE (frames 210-300) ===
+            // Explosions start chaining across the whole room
+            if (t === 215) {
+                Game.shake = 14;
+                Audio.play('explosion');
+                Particles.burst(3 * TILE, 4 * TILE, 25, C.red);
+                Particles.burst(12 * TILE, 4 * TILE, 25, C.gold);
+            }
+            if (t === 225) {
+                Game.shake = 16;
+                Audio.play('explosion');
+                Particles.burst(5 * TILE, 9 * TILE, 30, C.purple);
+                Particles.burst(10 * TILE, 3 * TILE, 30, C.red);
+                Particles.ring(bx, by, 55, 30, C.lightPurple);
+            }
+            if (t === 235) {
+                Game.shake = 12;
+                Audio.play('explosion');
+                Particles.burst(2 * TILE, 7 * TILE, 20, C.gold);
+                Particles.burst(13 * TILE, 8 * TILE, 20, C.red);
+                Particles.confetti(bx, by - 10, 20);
+            }
+            if (t === 245) {
+                Game.shake = 18;
+                Audio.play('explosion');
+                Particles.burst(bx, by, 45, C.gold);
+                Particles.burst(7 * TILE, 2 * TILE, 25, C.white);
+                Particles.burst(8 * TILE, 10 * TILE, 25, C.purple);
+            }
+            if (t === 255) {
+                Game.shake = 14;
+                Audio.play('explosion');
+                // Ring from every corner
+                Particles.ring(0, 0, 30, 15, C.red);
+                Particles.ring(W, 0, 30, 15, C.gold);
+                Particles.ring(0, H, 30, 15, C.purple);
+                Particles.ring(W, H, 30, 15, C.white);
+            }
+            if (t === 265) {
+                Game.shake = 20;
+                Audio.play('explosion');
+                Particles.burst(bx, by, 60, C.red);
+                Particles.ring(bx, by, 80, 50, C.gold);
+                triggerScreenFlash('#FF2200', 10);
+            }
+            if (t === 275) {
+                Game.shake = 16;
+                Audio.play('explosion');
+                Particles.confetti(bx - 30, by, 15);
+                Particles.confetti(bx + 30, by, 15);
+                Particles.confetti(bx, by - 20, 15);
+                Particles.burst(bx, by, 40, C.lightPurple);
+            }
+            // Constant chaos during finale
+            if (t > 210 && t < 285 && t % 3 === 0) {
+                var fx = Math.random() * W;
+                var fy = Math.random() * H;
+                Particles.burst(fx, fy, 8, Utils.choice([C.red, C.gold, C.purple, C.white, C.lightRed, C.lightPurple]));
+            }
+
+            // === PHASE 7: THE ACTUAL FINAL EXPLOSION (frames 290-320) ===
+            if (t === 290) {
+                Game.shake = 25;
+                Audio.play('explosion');
+                Audio.play('explosion');
+                triggerScreenFlash('#FFFFFF', 20);
+                // Everything at once
+                Particles.burst(bx, by, 80, C.white);
+                Particles.burst(bx, by, 60, C.gold);
+                Particles.burst(bx, by, 40, C.red);
+                Particles.ring(bx, by, 100, 60, C.paleBlue);
+                Particles.confetti(bx, by - 30, 30);
+                Particles.confetti(bx - 40, by, 20);
+                Particles.confetti(bx + 40, by, 20);
+            }
+            if (t === 305) {
+                // Room brightens - the darkness finally lifts
+                Particles.ring(W / 2, H / 2, 90, 50, C.paleBlue);
+                Particles.ring(W / 2, H / 2, 60, 30, C.white);
+            }
+
+            // === PHASE 8: BARGNOT REACHES OUT (frames 310-349) ===
+            if (t >= 310 && t < 350) {
                 Game._bossReachOut = true;
             }
-            if (Game.bossDeathTimer === 90) {
+            if (t === 350) {
                 Game._bossReachOut = false;
             }
 
-            // Phase 5: Bargnot's last words (frame 90)
-            if (Game.bossDeathTimer === 90) {
+            // === PHASE 9: BARGNOT'S LAST WORDS (frame 350) ===
+            if (t === 350) {
                 Game.bossDialogueStage = 1;
                 Dialogue.start('boss_defeat', function () {
                     // Rorik rescue dialogue
@@ -4733,13 +4862,15 @@
         // Render boss (with death animation effects)
         if (Game.boss && Game.boss.render) {
             if (Game.boss.dead && Game.bossDeathTimer > 0) {
-                // Flash white periodically during death sequence
-                var deathFlicker = Game.bossDeathTimer < 65 && Math.floor(Game.bossDeathTimer / 3) % 2 === 0;
-                // Fade out as death progresses
-                var deathAlpha = Game.bossDeathTimer < 65 ? 1 : Math.max(0, 1 - (Game.bossDeathTimer - 65) / 25);
+                var dt = Game.bossDeathTimer;
+                // Flicker during explosions, speed up flickering as it goes on
+                var flickerRate = dt < 120 ? 3 : dt < 210 ? 2 : 1;
+                var deathFlicker = dt < 290 && Math.floor(dt / flickerRate) % 2 === 0;
+                // Fade out during the final explosion
+                var deathAlpha = dt < 290 ? 1 : Math.max(0, 1 - (dt - 290) / 40);
                 ctx.globalAlpha = deathAlpha;
                 if (!deathFlicker) {
-                    // Boss reaches out toward player during frames 75-89
+                    // Boss reaches out toward player during final frames
                     if (Game._bossReachOut && Game.player) {
                         ctx.save();
                         var reachDx = Game.player.x - Game.boss.x;
@@ -4771,18 +4902,18 @@
         Particles.render(ctx);
 
         // Temple darkness overlay (lighten during boss death)
-        if (Game.boss && Game.boss.dead && Game.bossDeathTimer > 55) {
-            // Room gradually brightens - skip the darkness overlay
-            var brightAlpha = Math.min(1, (Game.bossDeathTimer - 55) / 35);
+        if (Game.boss && Game.boss.dead && Game.bossDeathTimer > 180) {
+            // Room gradually brightens - the darkness lifts after the chaos
+            var brightAlpha = Math.min(1, (Game.bossDeathTimer - 180) / 80);
             ctx.fillStyle = 'rgba(200,200,255,' + (brightAlpha * 0.08) + ')';
             ctx.fillRect(0, 0, W, H);
         } else {
             renderDarknessOverlay(ctx, Game.currentRoom);
         }
 
-        // White flash at the moment of final explosion
-        if (Game.boss && Game.boss.dead && Game.bossDeathTimer > 63 && Game.bossDeathTimer < 75) {
-            var flashAlpha = Math.max(0, 1 - (Game.bossDeathTimer - 63) / 12);
+        // White flash at the moment of the grand final explosion
+        if (Game.boss && Game.boss.dead && Game.bossDeathTimer > 288 && Game.bossDeathTimer < 310) {
+            var flashAlpha = Math.max(0, 1 - (Game.bossDeathTimer - 288) / 22);
             ctx.fillStyle = 'rgba(255,255,255,' + flashAlpha + ')';
             ctx.fillRect(0, 0, W, H);
         }

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valisar: Shadows of the Eldspyre</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="controls-hint">
+            <span>[Arrow Keys/D-Pad] Move</span>
+            <span>[Z/A Button] Attack / Confirm</span>
+            <span>[X/B Button] Special Ability</span>
+            <span>[Enter/Start] Start / Menu</span>
+            <span>[Gamepad Supported]</span>
+        </div>
+    </div>
+    <!-- Load order matters: engine first, then systems, then game orchestrator last -->
+    <script src="src/engine.js"></script>
+    <script src="src/music.js"></script>
+    <script src="src/sprites.js"></script>
+    <script src="src/maps.js"></script>
+    <script src="src/dialogue.js"></script>
+    <script src="src/entities.js"></script>
+    <script src="src/game.js"></script>
+</body>
+</html>

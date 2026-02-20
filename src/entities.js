@@ -159,11 +159,11 @@
                 }
 
                 // Walk animation: 4-phase cycle (0->1->2->3) with 8-tick hold per phase
-                // Sprite mapping: phase 0,2 = frame 0 (stride), phase 1,3 = frame 1 (upright)
+                // Sprite mapping: phase 0,2 = frame 0 (standing), phase 1 = frame 1 (left stride), phase 3 = frame 2 (right stride)
                 this.frameTimer++;
                 if (this.frameTimer >= 8) {
                     this.walkPhase = (this.walkPhase + 1) % 4;
-                    this.frame = (this.walkPhase % 2 === 0) ? 0 : 1;
+                    this.frame = [0, 1, 0, 2][this.walkPhase];
                     this.frameTimer = 0;
                     // Play footstep sound at the start of each stride (phases 0 and 2)
                     if (this.walkPhase === 0 || this.walkPhase === 2) {

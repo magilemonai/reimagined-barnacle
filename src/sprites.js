@@ -135,12 +135,34 @@
           '..aabbbbaa..',
           '...aBBBBa...',
           '...bbbbbb...',
-          '..dd....dd..',   // legs in stride
-          '..dd....dd..',
-          '..dd....dd..',
-          '..dd....dd..',
-          '..ooo..ooo..',
-          '.ooo....ooo.'
+          '..dd...dd...',   // left foot steps out
+          '..dd...dd...',
+          '..dd...dd...',
+          '.ddd..ddd...',
+          '.ooo..ooo...',
+          '.ooo..ooo...'
+        ];
+
+        // Frame 2: right foot forward
+        var down2 = [
+          '....hhhh....',
+          '...hhhhhh...',
+          '..hhhhhhHH..',
+          '..hhshksHH..',
+          '..hhssssHH..',
+          '...ssmsss...',
+          '..aaaaaaa...',
+          '..aaAbbAaa..',
+          '..aabbbbaa..',
+          '..aabbbbaa..',
+          '...aBBBBa...',
+          '...bbbbbb...',
+          '...dd...dd..',   // right foot steps out
+          '...dd...dd..',
+          '...dd...dd..',
+          '..ddd...ddd.',
+          '..ooo...ooo.',
+          '..ooo...ooo.'
         ];
 
         // Attack wind-up: weapon pulls to LEFT side, body leans back
@@ -244,12 +266,33 @@
           '..aabbbbaa..',
           '...aBBBBa...',
           '...bbbbbb...',
-          '..dd....dd..',
-          '..dd....dd..',
-          '..dd....dd..',
-          '..dd....dd..',
-          '..ooo..ooo..',
-          '.ooo....ooo.'
+          '..dd...dd...',   // left foot steps out
+          '..dd...dd...',
+          '..dd...dd...',
+          '.ddd..ddd...',
+          '.ooo..ooo...',
+          '.ooo..ooo...'
+        ];
+
+        var up2 = [
+          '....hhhh....',
+          '...hhhhhh...',
+          '..hhhhhhhh..',
+          '..hhhhhhhh..',
+          '..hhhhhhHH..',
+          '...hhhhhhH..',
+          '..aaaaaaa...',
+          '..aaAaaAaa..',
+          '..aabbbbaa..',
+          '..aabbbbaa..',
+          '...aBBBBa...',
+          '...bbbbbb...',
+          '...dd...dd..',   // right foot steps out
+          '...dd...dd..',
+          '...dd...dd..',
+          '..ddd...ddd.',
+          '..ooo...ooo.',
+          '..ooo...ooo.'
         ];
 
         // Up attack wind-up: weapon pulls to left behind body
@@ -360,6 +403,28 @@
           '..ooo...ooo.'
         ];
 
+        // Frame 2: opposite stride (left foot forward)
+        var right2 = [
+          '.....hhhh...',
+          '....hhhhhh..',
+          '...hhhhhhhH.',
+          '...hhshkhsH.',
+          '...hhssssHH.',
+          '....ssmsss..',
+          '...aaaaaaa..',
+          '..aaAbbbbaa.',
+          '..aabbbbbaa.',
+          '..aabbbbbaa.',
+          '...aBBBBa...',
+          '....bbbbb...',
+          '...dd..dd...',
+          '..dd...dd...',
+          '..dd....dd..',
+          '..ddd...dd..',
+          '..ooo..ooo..',
+          '.ooo...ooo..'
+        ];
+
         // Right attack wind-up: weapon pulled back behind body
         var rightAtk1 = [
           '.....hhhh...',
@@ -428,9 +493,9 @@
 
         // Build all frames
         var frames = {
-          down_0: down0, down_1: down1, down_atk_1: downAtk1, down_atk: downAtk, down_atk_2: downAtk2,
-          up_0: up0, up_1: up1, up_atk_1: upAtk1, up_atk: upAtk, up_atk_2: upAtk2,
-          right_0: right0, right_1: right1, right_atk_1: rightAtk1, right_atk: rightAtk, right_atk_2: rightAtk2
+          down_0: down0, down_1: down1, down_2: down2, down_atk_1: downAtk1, down_atk: downAtk, down_atk_2: downAtk2,
+          up_0: up0, up_1: up1, up_2: up2, up_atk_1: upAtk1, up_atk: upAtk, up_atk_2: upAtk2,
+          right_0: right0, right_1: right1, right_2: right2, right_atk_1: rightAtk1, right_atk: rightAtk, right_atk_2: rightAtk2
         };
 
         for (var key in frames) {

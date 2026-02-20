@@ -1528,6 +1528,235 @@
       });
 
       // =================================================================
+      // EXAMINE OBJECT SPRITES (16x16 overlays for interactable points)
+      // =================================================================
+
+      function me(n, fn) { S.create('exam_' + n, 16, 16, fn); }
+
+      // Bookshelf - small wooden shelf with books against wall
+      me('bookshelf', function (ctx) {
+        // Shelf frame (dark wood)
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(2, 3, 12, 12);
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(3, 4, 10, 10);
+        // Shelf dividers
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(2, 8, 12, 1);
+        // Top row books
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(4, 4, 2, 4);
+        ctx.fillStyle = P.darkBlue;
+        ctx.fillRect(6, 5, 2, 3);
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(8, 4, 2, 4);
+        ctx.fillStyle = P.darkPurple;
+        ctx.fillRect(10, 5, 2, 3);
+        // Bottom row books
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(4, 9, 3, 4);
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(7, 10, 2, 3);
+        ctx.fillStyle = P.darkBlue;
+        ctx.fillRect(9, 9, 3, 4);
+        // Highlight edge
+        ctx.fillStyle = P.lightBrown;
+        ctx.fillRect(3, 3, 10, 1);
+      });
+
+      // Tapestry - hanging fabric with faded pattern
+      me('tapestry', function (ctx) {
+        // Hanging rod
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(3, 1, 10, 2);
+        // Fabric body
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(4, 3, 8, 11);
+        // Worn purple edges
+        ctx.fillStyle = P.darkPurple;
+        ctx.fillRect(4, 3, 1, 11);
+        ctx.fillRect(11, 3, 1, 11);
+        // Faded central figure (ascending form)
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(7, 5, 2, 1);
+        ctx.fillRect(7, 6, 2, 3);
+        ctx.fillRect(6, 7, 1, 1);
+        ctx.fillRect(10, 7, 1, 1);
+        // Moth holes
+        ctx.fillStyle = P.darkStone;
+        ctx.fillRect(5, 9, 1, 1);
+        ctx.fillRect(9, 6, 1, 1);
+        ctx.fillRect(6, 12, 1, 1);
+        // Frayed bottom edge
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(5, 14, 2, 1);
+        ctx.fillRect(9, 14, 2, 1);
+      });
+
+      // Rubble - pile of broken stone fragments
+      me('rubble', function (ctx) {
+        // Large stone chunks
+        ctx.fillStyle = P.stone;
+        ctx.fillRect(2, 8, 5, 4);
+        ctx.fillRect(7, 9, 4, 3);
+        ctx.fillRect(10, 7, 3, 5);
+        // Darker fragments on top
+        ctx.fillStyle = P.darkStone;
+        ctx.fillRect(3, 7, 3, 2);
+        ctx.fillRect(8, 8, 3, 2);
+        ctx.fillRect(5, 10, 2, 2);
+        // Highlight edges
+        ctx.fillStyle = P.lightStone;
+        ctx.fillRect(2, 8, 5, 1);
+        ctx.fillRect(10, 7, 3, 1);
+        // Dust/debris dots
+        ctx.fillStyle = P.lightStone;
+        ctx.fillRect(1, 11, 1, 1);
+        ctx.fillRect(6, 12, 1, 1);
+        ctx.fillRect(13, 11, 1, 1);
+        ctx.fillRect(9, 7, 1, 1);
+      });
+
+      // Bones - scattered animal/goblin bones
+      me('bones', function (ctx) {
+        // Skull (small)
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(5, 6, 4, 3);
+        ctx.fillRect(6, 5, 2, 1);
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(5, 7, 1, 1);
+        ctx.fillRect(8, 7, 1, 1);
+        // Long bone
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(2, 10, 6, 2);
+        ctx.fillStyle = P.white;
+        ctx.fillRect(2, 10, 6, 1);
+        // Ribs
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(9, 8, 1, 4);
+        ctx.fillRect(11, 7, 1, 5);
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(9, 9, 3, 1);
+        ctx.fillRect(9, 11, 3, 1);
+        // Scattered small bones
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(1, 8, 2, 1);
+        ctx.fillRect(12, 11, 3, 1);
+      });
+
+      // Goblin war banner - crude flag on a stick
+      me('banner', function (ctx) {
+        // Pole
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(7, 1, 2, 14);
+        // Crude flag (tattered, asymmetric)
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(1, 2, 6, 7);
+        ctx.fillStyle = P.red;
+        ctx.fillRect(2, 3, 4, 5);
+        // Crude goblin skull symbol
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(3, 4, 2, 2);
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(3, 5, 1, 1);
+        ctx.fillRect(4, 5, 1, 1);
+        // Tattered edge
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(1, 9, 2, 1);
+        ctx.fillRect(4, 9, 1, 2);
+        // Pole tip (bone ornament)
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(6, 0, 4, 2);
+      });
+
+      // Dry fountain - cracked stone basin
+      me('fountain', function (ctx) {
+        // Basin base (round-ish)
+        ctx.fillStyle = P.stone;
+        ctx.fillRect(2, 7, 12, 6);
+        ctx.fillRect(4, 6, 8, 1);
+        ctx.fillRect(3, 13, 10, 1);
+        // Basin interior (darker)
+        ctx.fillStyle = P.darkStone;
+        ctx.fillRect(4, 8, 8, 4);
+        // Central column stump
+        ctx.fillStyle = P.lightStone;
+        ctx.fillRect(6, 4, 4, 5);
+        ctx.fillStyle = P.stone;
+        ctx.fillRect(7, 3, 2, 2);
+        // Cracks
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(4, 9, 1, 3);
+        ctx.fillRect(5, 11, 2, 1);
+        ctx.fillRect(10, 8, 1, 2);
+        // Water stain
+        ctx.fillStyle = P.darkBlue;
+        ctx.globalAlpha = 0.3;
+        ctx.fillRect(5, 9, 6, 2);
+        ctx.globalAlpha = 1;
+        // Rim highlight
+        ctx.fillStyle = P.lightStone;
+        ctx.fillRect(4, 7, 8, 1);
+      });
+
+      // Stone face fragment - broken statue face on the ground
+      me('stone_face', function (ctx) {
+        // Broken stone chunk
+        ctx.fillStyle = P.stone;
+        ctx.fillRect(3, 6, 10, 8);
+        ctx.fillRect(5, 5, 6, 1);
+        // Face carved into stone
+        ctx.fillStyle = P.darkStone;
+        ctx.fillRect(5, 7, 2, 1);   // left eye socket
+        ctx.fillRect(9, 7, 2, 1);   // right eye socket
+        // Eyes still watching
+        ctx.fillStyle = P.lightPurple;
+        ctx.fillRect(5, 7, 1, 1);
+        ctx.fillRect(10, 7, 1, 1);
+        // Broken nose
+        ctx.fillStyle = P.lightStone;
+        ctx.fillRect(7, 8, 2, 2);
+        // Claw marks across face
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(4, 9, 1, 3);
+        ctx.fillRect(6, 10, 1, 2);
+        ctx.fillRect(8, 9, 1, 3);
+        ctx.fillRect(11, 10, 1, 2);
+        // Broken edge
+        ctx.fillStyle = P.lightStone;
+        ctx.fillRect(3, 6, 10, 1);
+      });
+
+      // Rune stone - carved stone tablet on temple floor
+      me('rune_stone', function (ctx) {
+        // Stone slab
+        ctx.fillStyle = P.stone;
+        ctx.fillRect(3, 5, 10, 8);
+        ctx.fillRect(4, 4, 8, 1);
+        ctx.fillRect(4, 13, 8, 1);
+        // Darker inset
+        ctx.fillStyle = P.darkStone;
+        ctx.fillRect(4, 6, 8, 6);
+        // Glowing rune spirals
+        ctx.fillStyle = P.purple;
+        ctx.fillRect(5, 7, 1, 1);
+        ctx.fillRect(6, 8, 1, 1);
+        ctx.fillRect(7, 7, 2, 1);
+        ctx.fillRect(9, 8, 1, 1);
+        ctx.fillRect(10, 7, 1, 1);
+        ctx.fillRect(7, 9, 2, 1);
+        ctx.fillRect(5, 10, 1, 1);
+        ctx.fillRect(10, 10, 1, 1);
+        // Faint glow on runes
+        ctx.fillStyle = P.lightPurple;
+        ctx.fillRect(7, 7, 1, 1);
+        ctx.fillRect(8, 9, 1, 1);
+        // Stone edge highlight
+        ctx.fillStyle = P.lightStone;
+        ctx.fillRect(3, 5, 10, 1);
+      });
+
+      // =================================================================
       // ITEM SPRITES
       // =================================================================
 

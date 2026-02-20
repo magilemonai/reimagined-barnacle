@@ -1057,7 +1057,23 @@
         Utils.drawText(ctx, 'Z', promptX, promptY, C.yellow, 1);
     }
 
-    // Render subtle sparkle on examine objects so they stand out from plain tiles
+    // Render examine object overlay sprites on top of base tiles
+    function renderExamineObjects(ctx) {
+        if (!Game.currentRoom) return;
+        var roomId = Game.currentRoom.id;
+        var examineList = EXAMINE_OBJECTS[roomId];
+        if (!examineList) return;
+
+        for (var i = 0; i < examineList.length; i++) {
+            var obj = examineList[i];
+            if (!obj.sprite) continue;
+            var ox = obj.tx * TILE;
+            var oy = obj.ty * TILE;
+            safeDraw(ctx, obj.sprite, ox, oy);
+        }
+    }
+
+    // Render sparkle + glow on examine objects so they stand out as interactable
     function renderExamineSparkles(ctx) {
         if (!Game.currentRoom) return;
         var roomId = Game.currentRoom.id;
@@ -1069,16 +1085,33 @@
             var ox = obj.tx * TILE;
             var oy = obj.ty * TILE;
 
-            // Small glinting dot that moves around the tile
             var t = Game.frame * 0.05 + i * 2.1;
-            var sparkX = ox + 4 + Math.sin(t * 1.3) * 4;
-            var sparkY = oy + 4 + Math.cos(t * 0.9) * 4;
-            var alpha = 0.3 + Math.sin(t * 2.5) * 0.3;
-            if (alpha > 0) {
-                ctx.globalAlpha = alpha;
-                ctx.fillStyle = C.white;
-                ctx.fillRect(Math.floor(sparkX), Math.floor(sparkY), 1, 1);
-                ctx.globalAlpha = 1;
+
+            // Subtle pulsing glow underneath the object
+            var glowAlpha = 0.08 + Math.sin(t * 1.5) * 0.06;
+            ctx.globalAlpha = glowAlpha;
+            ctx.fillStyle = C.gold;
+            ctx.fillRect(ox + 1, oy + 1, 14, 14);
+            ctx.globalAlpha = 1;
+
+            // Orbiting sparkle dots (2 sparkles, offset phases)
+            for (var s = 0; s < 2; s++) {
+                var st = t + s * 3.14;
+                var sparkX = ox + 8 + Math.sin(st * 1.3) * 6;
+                var sparkY = oy + 8 + Math.cos(st * 0.9) * 6;
+                var alpha = 0.4 + Math.sin(st * 2.5) * 0.35;
+                if (alpha > 0) {
+                    ctx.globalAlpha = alpha;
+                    ctx.fillStyle = C.white;
+                    ctx.fillRect(Math.floor(sparkX), Math.floor(sparkY), 1, 1);
+                    // Cross sparkle shape
+                    ctx.globalAlpha = alpha * 0.5;
+                    ctx.fillRect(Math.floor(sparkX) - 1, Math.floor(sparkY), 1, 1);
+                    ctx.fillRect(Math.floor(sparkX) + 1, Math.floor(sparkY), 1, 1);
+                    ctx.fillRect(Math.floor(sparkX), Math.floor(sparkY) - 1, 1, 1);
+                    ctx.fillRect(Math.floor(sparkX), Math.floor(sparkY) + 1, 1, 1);
+                    ctx.globalAlpha = 1;
+                }
             }
         }
     }
@@ -1296,6 +1329,7 @@
     // =====================================================================
 
     // Lookup by room ID: objects at tile positions with dialogue keys
+    // sprite: overlay sprite key drawn on top of the base tile (omit if tile is already visual)
     var EXAMINE_OBJECTS = {
         ebon_vale_market: [
             { tx: 3,  ty: 5,  key: 'examine_market_stall' },
@@ -1306,38 +1340,38 @@
             { tx: 7,  ty: 5,  key: 'examine_well' }
         ],
         ebon_vale_north: [
-            { tx: 7,  ty: 3,  key: 'examine_fountain' }
+            { tx: 7,  ty: 3,  key: 'examine_fountain', sprite: 'exam_fountain' }
         ],
         temple_entrance: [
-            { tx: 2,  ty: 2,  key: 'examine_bookshelf' },
-            { tx: 13, ty: 2,  key: 'examine_bookshelf' },
-            { tx: 4,  ty: 3,  key: 'examine_pillar' },
-            { tx: 11, ty: 3,  key: 'examine_pillar' },
-            { tx: 7,  ty: 4,  key: 'examine_tapestry' },
-            { tx: 7,  ty: 2,  key: 'examine_statue_face' }
+            { tx: 2,  ty: 2,  key: 'examine_bookshelf', sprite: 'exam_bookshelf' },
+            { tx: 13, ty: 2,  key: 'examine_bookshelf', sprite: 'exam_bookshelf' },
+            { tx: 4,  ty: 2,  key: 'examine_pillar',    sprite: 'exam_rune_stone' },
+            { tx: 11, ty: 2,  key: 'examine_pillar',    sprite: 'exam_rune_stone' },
+            { tx: 7,  ty: 4,  key: 'examine_tapestry',  sprite: 'exam_tapestry' },
+            { tx: 8,  ty: 2,  key: 'examine_statue_face', sprite: 'exam_stone_face' }
         ],
         temple_puzzle: [
             { tx: 7,  ty: 7,  key: 'examine_puzzle_statue' },
             { tx: 8,  ty: 7,  key: 'examine_puzzle_statue' },
-            { tx: 3,  ty: 3,  key: 'examine_pillar' },
-            { tx: 12, ty: 3,  key: 'examine_pillar' },
-            { tx: 2,  ty: 8,  key: 'examine_rubble' },
-            { tx: 13, ty: 8,  key: 'examine_rubble' }
+            { tx: 5,  ty: 3,  key: 'examine_pillar',  sprite: 'exam_rune_stone' },
+            { tx: 10, ty: 3,  key: 'examine_pillar',  sprite: 'exam_rune_stone' },
+            { tx: 2,  ty: 8,  key: 'examine_rubble',  sprite: 'exam_rubble' },
+            { tx: 13, ty: 8,  key: 'examine_rubble',  sprite: 'exam_rubble' }
         ],
         temple_boss: [
             { tx: 7,  ty: 2,  key: 'examine_altar' },
             { tx: 8,  ty: 2,  key: 'examine_altar' },
-            { tx: 3,  ty: 4,  key: 'examine_pillar' },
-            { tx: 12, ty: 4,  key: 'examine_pillar' },
-            { tx: 5,  ty: 7,  key: 'examine_goblin_banner' },
-            { tx: 10, ty: 7,  key: 'examine_goblin_banner' }
+            { tx: 3,  ty: 4,  key: 'examine_pillar',        sprite: 'exam_rune_stone' },
+            { tx: 12, ty: 4,  key: 'examine_pillar',        sprite: 'exam_rune_stone' },
+            { tx: 5,  ty: 7,  key: 'examine_goblin_banner', sprite: 'exam_banner' },
+            { tx: 10, ty: 7,  key: 'examine_goblin_banner', sprite: 'exam_banner' }
         ],
         ebon_forest_entry: [
-            { tx: 6,  ty: 3,  key: 'examine_bones' }
+            { tx: 6,  ty: 3,  key: 'examine_bones', sprite: 'exam_bones' }
         ],
         ebon_forest_deep: [
-            { tx: 4,  ty: 6,  key: 'examine_bones' },
-            { tx: 11, ty: 4,  key: 'examine_rubble' }
+            { tx: 4,  ty: 6,  key: 'examine_bones',  sprite: 'exam_bones' },
+            { tx: 11, ty: 4,  key: 'examine_rubble', sprite: 'exam_rubble' }
         ]
     };
 
@@ -4530,7 +4564,10 @@
         // Pass 8B: Micro-animations (grass bends, water ripples)
         renderMicroAnimations(ctx);
 
-        // Examine object sparkles (so interactables stand out from plain tiles)
+        // Examine object overlay sprites (visible objects for interactable points)
+        renderExamineObjects(ctx);
+
+        // Examine object sparkles (glint + glow so interactables stand out)
         renderExamineSparkles(ctx);
 
         // Render general items (potions, etc.)

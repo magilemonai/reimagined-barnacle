@@ -1885,35 +1885,137 @@
         ctx.fillRect(22, 18, 3, 2);
       });
 
-      // Que'Rubra - ancient tree spirit, bark/leaf face
+      // Que'Rubra - ancient tree spirit portrait (Undertale-style expressive)
       mp('querubra', function (ctx) {
-        ctx.fillStyle = '#0a1a0a';
+        // Deep forest darkness background
+        ctx.fillStyle = '#050e05';
         ctx.fillRect(0, 0, 32, 32);
-        // Bark body
-        ctx.fillStyle = P.darkBrown;
-        ctx.fillRect(6, 18, 20, 14);
-        // Face - wooden, ancient
-        circ(ctx, 16, 14, 9, P.darkBrown);
-        circ(ctx, 16, 14, 7, P.brown);
-        // Glowing eyes
+        // Faint ambient glow behind head
+        ctx.fillStyle = '#0a200a';
+        ctx.fillRect(4, 3, 24, 26);
+        ctx.fillStyle = '#0c280c';
+        ctx.fillRect(6, 5, 20, 22);
+
+        // Bark trunk/body — gnarled, asymmetric
+        ctx.fillStyle = '#2a1808';
+        ctx.fillRect(8, 20, 16, 12);  // main trunk
+        ctx.fillRect(6, 22, 3, 10);   // left root shoulder
+        ctx.fillRect(23, 22, 3, 10);  // right root shoulder
+        // Bark texture lines
+        ctx.fillStyle = '#1a1004';
+        ctx.fillRect(10, 22, 1, 8);
+        ctx.fillRect(14, 21, 1, 9);
+        ctx.fillRect(18, 23, 1, 7);
+        ctx.fillRect(21, 22, 1, 8);
+
+        // Head — weathered bark face, slightly wider than body
+        ctx.fillStyle = '#3a2010';
+        ctx.fillRect(6, 8, 20, 14);   // face block
+        ctx.fillRect(8, 7, 16, 1);    // forehead
+        ctx.fillRect(7, 9, 1, 10);    // left cheek contour
+        ctx.fillRect(24, 9, 1, 10);   // right cheek contour
+        // Lighter inner face — aged wood grain
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(8, 9, 16, 11);
+        // Wood grain texture on face
+        ctx.fillStyle = '#5a3818';
+        ctx.fillRect(9, 10, 1, 8);
+        ctx.fillRect(22, 11, 1, 7);
+        ctx.fillRect(15, 9, 1, 5);
+        // Brow ridge — heavy, expressive, slightly furrowed
+        ctx.fillStyle = '#2a1808';
+        ctx.fillRect(9, 10, 5, 2);    // left brow (thicker = serious)
+        ctx.fillRect(18, 10, 5, 2);   // right brow
+        ctx.fillStyle = '#3a2010';
+        ctx.fillRect(10, 10, 4, 1);   // left brow highlight
+        ctx.fillRect(19, 10, 4, 1);   // right brow highlight
+
+        // Eyes — deep-set glowing sockets (the expressive core)
+        // Eye sockets (dark recesses)
+        ctx.fillStyle = '#0a0804';
+        ctx.fillRect(10, 12, 4, 3);   // left socket
+        ctx.fillRect(18, 12, 4, 3);   // right socket
+        // Green glow fill
+        ctx.fillStyle = '#1a6a1a';
+        ctx.fillRect(10, 12, 4, 3);
+        // Bright iris centers
         ctx.fillStyle = P.lightGreen;
-        ctx.fillRect(12, 12, 3, 2);
-        ctx.fillRect(19, 12, 3, 2);
+        ctx.fillRect(11, 12, 2, 2);   // left iris
+        ctx.fillRect(19, 12, 2, 2);   // right iris
+        // Pupil dots (dark centers give focus)
+        ctx.fillStyle = '#0a2a0a';
+        ctx.fillRect(12, 13, 1, 1);   // left pupil
+        ctx.fillRect(20, 13, 1, 1);   // right pupil
+        // Bright highlights (life in the eyes)
         ctx.fillStyle = P.paleGreen;
-        ctx.fillRect(13, 12, 1, 1);
-        ctx.fillRect(20, 12, 1, 1);
-        // Leaf crown
+        ctx.fillRect(11, 12, 1, 1);   // left highlight
+        ctx.fillRect(19, 12, 1, 1);   // right highlight
+        // Under-eye glow (light spills from sockets)
+        ctx.fillStyle = 'rgba(90, 197, 90, 0.3)';
+        ctx.fillRect(10, 15, 4, 1);
+        ctx.fillRect(18, 15, 4, 1);
+
+        // Nose — subtle bark ridge
+        ctx.fillStyle = '#5a3818';
+        ctx.fillRect(15, 14, 2, 2);
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(15, 14, 1, 1);
+
+        // Mouth — wide, knowing, slightly curved (wise not grim)
+        ctx.fillStyle = '#1a1004';
+        ctx.fillRect(11, 18, 10, 2);  // mouth opening
+        ctx.fillStyle = '#2a1808';
+        ctx.fillRect(12, 18, 8, 1);   // upper lip shadow
+        // Teeth-like wood grain inside mouth (ancient, unsettling)
+        ctx.fillStyle = '#3a2a10';
+        ctx.fillRect(13, 19, 1, 1);
+        ctx.fillRect(15, 19, 1, 1);
+        ctx.fillRect(17, 19, 1, 1);
+        ctx.fillRect(19, 19, 1, 1);
+        // Mouth corners turn slightly up (knowing expression)
+        ctx.fillStyle = '#1a1004';
+        ctx.fillRect(10, 17, 1, 1);
+        ctx.fillRect(21, 17, 1, 1);
+
+        // Leaf crown — elaborate, asymmetric, wild
+        // Main leaf clusters (varying heights for organic feel)
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(5, 3, 5, 6);     // far left cluster
+        ctx.fillRect(9, 1, 4, 8);     // left-center (tall)
+        ctx.fillRect(14, 0, 5, 7);    // center (tallest)
+        ctx.fillRect(19, 1, 4, 8);    // right-center
+        ctx.fillRect(23, 4, 4, 5);    // far right cluster
+        // Leaf highlights (brighter tips)
         ctx.fillStyle = P.green;
-        ctx.fillRect(8, 2, 4, 6);
-        ctx.fillRect(14, 1, 4, 5);
-        ctx.fillRect(20, 2, 4, 6);
+        ctx.fillRect(6, 3, 3, 4);
+        ctx.fillRect(10, 2, 2, 5);
+        ctx.fillRect(15, 1, 3, 4);
+        ctx.fillRect(20, 2, 2, 5);
+        ctx.fillRect(24, 5, 2, 3);
+        // Bright leaf tips / new growth
         ctx.fillStyle = P.lightGreen;
-        ctx.fillRect(10, 3, 2, 3);
-        ctx.fillRect(16, 2, 2, 3);
-        ctx.fillRect(22, 3, 2, 3);
-        // Mouth line (grim)
-        ctx.fillStyle = P.darkBrown;
-        ctx.fillRect(13, 18, 6, 1);
+        ctx.fillRect(7, 3, 1, 2);
+        ctx.fillRect(11, 2, 1, 2);
+        ctx.fillRect(16, 1, 1, 2);
+        ctx.fillRect(21, 2, 1, 2);
+        ctx.fillRect(25, 5, 1, 2);
+        // Tiny golden berries/flowers in the crown
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(8, 5, 1, 1);
+        ctx.fillRect(13, 3, 1, 1);
+        ctx.fillRect(22, 4, 1, 1);
+
+        // Hanging moss/vine wisps on sides of face
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(5, 9, 2, 6);
+        ctx.fillRect(25, 10, 2, 5);
+        ctx.fillStyle = P.green;
+        ctx.fillRect(5, 10, 1, 4);
+        ctx.fillRect(25, 11, 1, 3);
+        // Moss drip
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(5, 15, 1, 2);
+        ctx.fillRect(26, 15, 1, 2);
       });
 
       // Bargnot portraits - 2 expressions: arrogant and desperate

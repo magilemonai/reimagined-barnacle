@@ -932,11 +932,11 @@
         var visibleRow = rowText.substring(0, visibleLen);
         charsLeft = Math.max(0, charsLeft - rowText.length - 1);
 
-        // Loud text shake: if speaker is Bargnot and text has 3+ uppercase sequences,
-        // apply a sin-based y offset to simulate shaking
+        // Loud text shake: if speaker is Bargnot and the FULL line text has 3+ uppercase
+        // sequences, shake ALL rows consistently (not per-row, which causes misalignment)
         var rowY = textStartY + (r - pageStart) * ROW_HEIGHT;
-        if (line.speaker === 'Bargnot' && /[A-Z]{3,}/.test(visibleRow)) {
-          rowY += Math.sin(this._blinkTimer * 0.5) * 1;
+        if (line.speaker === 'Bargnot' && /[A-Z]{3,}/.test(line.text)) {
+          rowY += Math.sin(this._blinkTimer * 0.5 + r * 0.3) * 1;
         }
 
         window.Utils.drawText(

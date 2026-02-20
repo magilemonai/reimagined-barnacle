@@ -249,7 +249,7 @@
 
     fawks_return: [
       { speaker: 'Fawks', text: 'Back already? You look like you need a drink more than I do.' },
-      { speaker: 'Fawks', text: 'Helena\'s putting on a brave face but I can tell -- she hasn\'t slept in days.' }
+      { speaker: 'Fawks', text: 'Helena\'s putting on a brave face but I can tell -- she hasn\'t slept in days.', emotion: 'worried' }
     ],
 
     helena_return: [
@@ -287,8 +287,8 @@
     ],
 
     helena_victory: [
-      { speaker: 'Helena', text: 'You did it. You actually did it.' },
-      { speaker: 'Helena', text: 'I\'m going to sleep for the first time in a month. Thank you. From all of us.' }
+      { speaker: 'Helena', text: 'You did it. You actually did it.', emotion: 'hopeful' },
+      { speaker: 'Helena', text: 'I\'m going to sleep for the first time in a month. Thank you. From all of us.', emotion: 'hopeful' }
     ],
 
     elira_victory: [
@@ -317,7 +317,7 @@
 
     fawks_midgame: [
       { speaker: 'Fawks', text: 'You\'ve been to the forest? I can see it in your eyes. Drink this -- on the house.' },
-      { speaker: 'Fawks', text: 'People are saying maybe there\'s hope after all. Don\'t let us down, okay?' }
+      { speaker: 'Fawks', text: 'People are saying maybe there\'s hope after all. Don\'t let us down, okay?', emotion: 'worried' }
     ],
 
     helena_midgame: [

@@ -584,32 +584,35 @@
             var cy = this.y + this.h / 2;
 
             if (this.characterId === 'daxon') {
-                // Sword blade tracks the leading edge of the slash arc.
-                // Uses identical arc center & angle params as _drawSlashArc
-                // so the blade and the trail are in perfect sync.
-                var arcCx = cx, arcCy = cy;
+                // Sword hilt anchored at character's hand, blade extends
+                // outward using the same arc angle as _drawSlashArc so the
+                // swing and the trail stay in sync.
                 var startAngle;
                 switch (this.dir) {
-                    case 'down':  startAngle = -0.3; arcCy += 10; break;
-                    case 'up':    startAngle = Math.PI - 0.3; arcCy -= 14; break;
-                    case 'left':  startAngle = Math.PI / 2 - 0.3; arcCx -= 12; break;
-                    case 'right': startAngle = -Math.PI / 2 - 0.3; arcCx += 12; break;
+                    case 'down':  startAngle = -0.3; break;
+                    case 'up':    startAngle = Math.PI - 0.3; break;
+                    case 'left':  startAngle = Math.PI / 2 - 0.3; break;
+                    case 'right': startAngle = -Math.PI / 2 - 0.3; break;
                     default:      startAngle = 0;
                 }
                 var arcLen = Math.PI * 0.6;
-                // Same timing as the arc: completes in first 40% of attack
                 var arcProg = Math.min(progress * 2.5, 1);
                 var bladeAngle = startAngle + arcProg * arcLen;
 
-                // Tip at outer edge of arc, hilt 10px inward along same angle
-                var outerR = 16 + arcProg * 4;  // matches _drawSlashArc radius formula
-                var bladeLen = 10;
-                var innerR = Math.max(2, outerR - bladeLen);
-
-                var tipX = Math.round(arcCx + Math.cos(bladeAngle) * outerR);
-                var tipY = Math.round(arcCy + Math.sin(bladeAngle) * outerR);
-                var hiltX = Math.round(arcCx + Math.cos(bladeAngle) * innerR);
-                var hiltY = Math.round(arcCy + Math.sin(bladeAngle) * innerR);
+                // Hilt stays at character's hand (arm level, near sprite edge)
+                var hiltX, hiltY;
+                switch (this.dir) {
+                    case 'down':  hiltX = cx + 2; hiltY = cy;     break;
+                    case 'up':    hiltX = cx + 2; hiltY = cy - 7; break;
+                    case 'right': hiltX = cx + 5; hiltY = cy - 2; break;
+                    case 'left':  hiltX = cx - 5; hiltY = cy - 2; break;
+                    default:      hiltX = cx;     hiltY = cy;
+                }
+                var bladeLen = 12;
+                var tipX = Math.round(hiltX + Math.cos(bladeAngle) * bladeLen);
+                var tipY = Math.round(hiltY + Math.sin(bladeAngle) * bladeLen);
+                hiltX = Math.round(hiltX);
+                hiltY = Math.round(hiltY);
 
                 // Fade during recovery phase
                 ctx.globalAlpha = progress < 0.65 ? 0.95
@@ -633,25 +636,33 @@
                 ctx.globalAlpha = 1;
 
             } else if (this.characterId === 'luigi') {
-                // Bright energy bolt that shoots from hand to hitbox center
+                // Bright energy bolt from hand to the far edge of the hitbox
                 var ah = this.attackHitbox;
+                // Hand at arm level on the character sprite
                 var handX = cx, handY = cy;
                 switch (this.dir) {
-                    case 'down':  handY += 5; break;
-                    case 'up':    handY -= 8; break;
-                    case 'right': handX += 6; break;
-                    case 'left':  handX -= 6; break;
+                    case 'down':  handX += 2; handY = cy;     break;
+                    case 'up':    handX += 2; handY = cy - 7; break;
+                    case 'right': handX = cx + 5; handY = cy - 2; break;
+                    case 'left':  handX = cx - 5; handY = cy - 2; break;
                 }
-                var targetX = ah.x + ah.w / 2;
-                var targetY = ah.y + ah.h / 2;
+                // Target the far edge of the hitbox, not the center
+                var targetX, targetY;
+                switch (this.dir) {
+                    case 'down':  targetX = ah.x + ah.w / 2; targetY = ah.y + ah.h; break;
+                    case 'up':    targetX = ah.x + ah.w / 2; targetY = ah.y;        break;
+                    case 'right': targetX = ah.x + ah.w;     targetY = ah.y + ah.h / 2; break;
+                    case 'left':  targetX = ah.x;            targetY = ah.y + ah.h / 2; break;
+                    default:      targetX = ah.x + ah.w / 2; targetY = ah.y + ah.h / 2;
+                }
 
-                // Bolt reaches target at ~33% of attack, then explodes into
-                // the existing teal-fill VFX that's already drawn above
-                var boltT = Math.min(progress * 3.0, 1);
+                // Bolt reaches far edge at ~40% of attack, then the existing
+                // teal-fill VFX takes over as the explosion
+                var boltT = Math.min(progress * 2.5, 1);
                 var boltX = Math.round(handX + (targetX - handX) * boltT);
                 var boltY = Math.round(handY + (targetY - handY) * boltT);
 
-                if (progress < 0.45) {
+                if (progress < 0.5) {
                     ctx.globalAlpha = 0.95;
                     // Outer teal glow
                     ctx.fillStyle = C.teal;
@@ -678,13 +689,14 @@
 
             } else if (this.characterId === 'lirielle') {
                 // Vine whip: tendril lashes from hand into the hitbox area
+                // Hand at arm level (mid-chest of sprite), not body center
                 var handX = cx, handY = cy;
                 var vdx = 0, vdy = 0;
                 switch (this.dir) {
-                    case 'down':  handY += 5; vdy = 1; break;
-                    case 'up':    handY -= 8; vdy = -1; break;
-                    case 'right': handX += 6; vdx = 1; break;
-                    case 'left':  handX -= 6; vdx = -1; break;
+                    case 'down':  handX += 2; handY = cy;     vdy = 1; break;
+                    case 'up':    handX += 2; handY = cy - 7; vdy = -1; break;
+                    case 'right': handX = cx + 5; handY = cy - 2; vdx = 1; break;
+                    case 'left':  handX = cx - 5; handY = cy - 2; vdx = -1; break;
                 }
 
                 // Extends fast, holds, retracts

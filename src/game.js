@@ -3830,16 +3830,18 @@
         Particles.render(ctx);
 
         // Description text below character area
+        // Uses scale 1 (integer) so the bitmap font renders pixel-perfect
         var activeChar = isSliding ? Game.selectSlideTo : Game.selectedChar;
         if (Game.selectConfirmTimer > 0) activeChar = Game.selectConfirmChar;
         var desc = Game.charDescs[activeChar];
-        var descLines = wrapTextToWidth(desc, W - 20, 5);
-        if (descLines.length > 2) descLines.length = 2;
+        var descCharW = 6;  // CHAR_W at scale 1
+        var descLines = wrapTextToWidth(desc, W - 24, descCharW);
+        if (descLines.length > 3) descLines.length = 3;
 
-        var descY = 172;
+        var descY = 170;
         for (var l = 0; l < descLines.length; l++) {
-            var lx = Math.floor((W - descLines[l].length * 5) / 2);
-            Utils.drawText(ctx, descLines[l], lx, descY + l * 9, C.white, 0.8);
+            var lx = Math.floor((W - descLines[l].length * descCharW) / 2);
+            Utils.drawText(ctx, descLines[l], lx, descY + l * 9, C.white, 1);
         }
 
         // Bottom controls - single row for difficulty + speed run (Pass 7E names)

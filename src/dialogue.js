@@ -461,7 +461,9 @@
     'Bargnot':     'portrait_bargnot',
     'Rorik':       'portrait_rorik',
     'Nitriti':     'portrait_nitriti',
-    'Statue':      'portrait_statue'
+    'Statue':      'portrait_statue',
+    'Sign':        'portrait_sign',
+    'Inscription': 'portrait_inscription'
   };
 
   /** Speaker-name color palette */

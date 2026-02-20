@@ -3872,6 +3872,137 @@
         ctx.globalAlpha = 1;
       });
 
+      // Sign — weathered wooden signpost, carved text, nailed to a post
+      mp('sign', function (ctx) {
+        // Outdoor dusk background
+        ctx.fillStyle = '#0a0e1a';
+        ctx.fillRect(0, 0, 64, 64);
+        ctx.fillStyle = '#101828';
+        ctx.fillRect(4, 4, 56, 56);
+
+        // Wooden post — dark, weathered
+        ctx.fillStyle = '#3a2010';
+        ctx.fillRect(28, 34, 8, 30);
+        ctx.fillStyle = '#4a2818';
+        ctx.fillRect(29, 36, 6, 26);
+        // Wood grain on post
+        ctx.fillStyle = '#3a2010';
+        ctx.fillRect(31, 38, 1, 20);
+        ctx.fillRect(33, 36, 1, 22);
+
+        // Sign board — wide, wooden, slightly crooked
+        ctx.fillStyle = '#2a1808';
+        ctx.fillRect(4, 6, 56, 30);
+        ctx.fillStyle = '#4a2818';
+        ctx.fillRect(6, 8, 52, 26);
+        ctx.fillStyle = '#5a3820';
+        ctx.fillRect(8, 10, 48, 22);
+        // Wood grain texture
+        ctx.fillStyle = '#4a2818';
+        ctx.fillRect(10, 12, 44, 1);
+        ctx.fillRect(10, 18, 44, 1);
+        ctx.fillRect(10, 24, 44, 1);
+        // Board edge bevel
+        ctx.fillStyle = '#6a4828';
+        ctx.fillRect(8, 10, 48, 1);
+        ctx.fillStyle = '#3a2010';
+        ctx.fillRect(8, 31, 48, 1);
+
+        // Nails — holding the board to the post
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(10, 14, 2, 2);
+        ctx.fillRect(52, 14, 2, 2);
+        ctx.fillRect(10, 26, 2, 2);
+        ctx.fillRect(52, 26, 2, 2);
+        // Nail highlights
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(10, 14, 1, 1);
+        ctx.fillRect(52, 14, 1, 1);
+
+        // Carved/painted text lines (abstract — suggesting words)
+        ctx.fillStyle = '#1a1008';
+        ctx.fillRect(14, 14, 18, 2);
+        ctx.fillRect(36, 14, 12, 2);
+        ctx.fillRect(14, 19, 24, 2);
+        ctx.fillRect(14, 24, 10, 2);
+        ctx.fillRect(28, 24, 16, 2);
+        // Faded paint (lighter lines showing through)
+        ctx.fillStyle = '#7a5830';
+        ctx.fillRect(14, 28, 20, 1);
+
+        // Scratched graffiti at bottom — "GOOD LUCK" suggestion
+        ctx.fillStyle = '#8a6838';
+        ctx.fillRect(18, 28, 8, 1);
+        ctx.fillRect(30, 28, 10, 1);
+      });
+
+      // Inscription — ancient stone carving, weathered runes
+      mp('inscription', function (ctx) {
+        // Dark temple stone background
+        ctx.fillStyle = '#0a0a0e';
+        ctx.fillRect(0, 0, 64, 64);
+        ctx.fillStyle = '#141418';
+        ctx.fillRect(4, 4, 56, 56);
+
+        // Stone tablet — carved, ancient
+        ctx.fillStyle = '#2a2a30';
+        ctx.fillRect(6, 4, 52, 56);
+        ctx.fillStyle = '#3a3a42';
+        ctx.fillRect(8, 6, 48, 52);
+        ctx.fillStyle = '#4a4a54';
+        ctx.fillRect(10, 8, 44, 48);
+        // Stone border — carved frame
+        ctx.fillStyle = '#3a3a42';
+        ctx.fillRect(8, 6, 48, 2);
+        ctx.fillRect(8, 56, 48, 2);
+        ctx.fillRect(8, 6, 2, 52);
+        ctx.fillRect(54, 6, 2, 52);
+        // Inner bevel
+        ctx.fillStyle = '#5a5a64';
+        ctx.fillRect(10, 8, 44, 1);
+        ctx.fillStyle = '#2a2a30';
+        ctx.fillRect(10, 55, 44, 1);
+
+        // Carved rune lines — ancient script
+        ctx.fillStyle = '#2a2a34';
+        // Line 1 — longest, most legible
+        ctx.fillRect(14, 14, 4, 3); ctx.fillRect(20, 14, 6, 3);
+        ctx.fillRect(28, 14, 3, 3); ctx.fillRect(34, 14, 8, 3);
+        ctx.fillRect(44, 14, 5, 3);
+        // Line 2
+        ctx.fillRect(14, 22, 8, 3); ctx.fillRect(24, 22, 4, 3);
+        ctx.fillRect(30, 22, 6, 3); ctx.fillRect(40, 22, 9, 3);
+        // Line 3 — partially clawed away
+        ctx.fillRect(14, 30, 5, 3); ctx.fillRect(22, 30, 3, 3);
+        ctx.fillRect(38, 30, 6, 3);
+        // Line 4 — mostly illegible
+        ctx.fillRect(14, 38, 3, 3);
+        ctx.fillRect(44, 38, 5, 3);
+
+        // Claw damage — goblin scratches across the stone
+        ctx.fillStyle = '#2a2a30';
+        ctx.fillRect(26, 28, 2, 10);
+        ctx.fillRect(30, 26, 2, 14);
+        ctx.fillRect(34, 30, 2, 8);
+        // Deeper scratches
+        ctx.fillStyle = '#1a1a20';
+        ctx.fillRect(27, 30, 1, 6);
+        ctx.fillRect(31, 28, 1, 10);
+
+        // Faint purple glow from remaining runes (magical)
+        ctx.globalAlpha = 0.08;
+        ctx.fillStyle = '#8060c0';
+        ctx.fillRect(14, 12, 36, 8);
+        ctx.fillRect(14, 20, 36, 8);
+        ctx.globalAlpha = 1;
+
+        // Dust/age texture — tiny light spots
+        ctx.fillStyle = '#5a5a64';
+        ctx.fillRect(16, 46, 1, 1); ctx.fillRect(24, 48, 1, 1);
+        ctx.fillRect(38, 44, 1, 1); ctx.fillRect(46, 50, 1, 1);
+        ctx.fillRect(20, 52, 1, 1); ctx.fillRect(42, 46, 1, 1);
+      });
+
       // =================================================================
       // PASS 5B: TILE ART VARIANTS
       // =================================================================

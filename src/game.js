@@ -47,9 +47,9 @@
         charNames: ['Daxon Lamn', 'Luigi Bonemoon', 'Lirielle'],
         charClasses: ['Eldritch Knight', 'Warlock', 'Circle of Stars Druid'],
         charDescs: [
-            'A warrior of Ebon Vale. Strong melee attacks and a defensive shield.',
-            'A warlock bound by the Bonemoon prophecy. Ranged blasts and familiar Brog.',
-            'An elven druid seeking her lost parents. Quick strikes and healing magic.'
+            'Ebon Vale warrior. Wide cleaving sword. Shield Slam: invincibility + damaging shockwave.',
+            'Bonemoon warlock. Extended range blasts. Brog: summon a homing bolt familiar.',
+            'Elven druid. Long reach vine whip. Nature Burst: heal HP + thorn ring damages foes.'
         ],
 
         // Game objects
@@ -117,6 +117,9 @@
         brogTimer: 0,
         brogActive: false,
 
+        // Friendly projectiles (Luigi's Brog, etc.)
+        projectiles: [],
+
         // Title screen sparkle particles (manual, separate from Particles system)
         titleSparkles: [],
 
@@ -166,6 +169,9 @@
 
         // Sign interaction
         nearSign: null,
+
+        // Examine object interaction
+        nearExamine: null,
 
         // Area name banner slide animation
         roomBannerSlide: 0,
@@ -506,6 +512,9 @@
             }
         }
 
+        // Clear projectiles on room transition
+        Game.projectiles = [];
+
         // Create enemies (only if room not cleared)
         Game.enemies = [];
         if (!Game.clearedRooms[roomId] && room.enemies && room.enemies.length > 0) {
@@ -830,7 +839,7 @@
                         if (npc.interacted) {
                             // Return visits give blessing directly
                             sorenBlessing();
-                            Dialogue.start(null, null, 'May the light guide you, child. I have restored your strength.');
+                            Dialogue.start('soren_return');
                         } else {
                             // First visit: show greeting, then bless
                             npc.interacted = true;
@@ -846,6 +855,11 @@
                             if (typeof dialogueId2 === 'string' && window.DialogueData[dialogueId2]) {
                                 Dialogue.start(dialogueId2);
                                 npc.interacted = true;
+                                // Lore tracking: Que'Rubra mentions Smaldge and Nitriti
+                                if (npc.id === 'npc_querubra') {
+                                    Game.loreEntries['lore_smaldge'] = true;
+                                    Game.loreEntries['lore_nitriti'] = true;
+                                }
                             } else {
                                 npc.interact();
                             }
@@ -1032,6 +1046,74 @@
         var promptX = Math.floor(sign.x * TILE + 4);
         var promptY = Math.floor(sign.y * TILE - 10 + bobY);
         Utils.drawText(ctx, 'Z', promptX, promptY, C.yellow, 1);
+    }
+
+    function renderExaminePrompt(ctx) {
+        if (!Game.nearExamine || Dialogue.isActive()) return;
+        var obj = Game.nearExamine;
+        var bobY = Math.sin(Game.frame * 0.15) * 2;
+        var promptX = Math.floor(obj.tx * TILE + 4);
+        var promptY = Math.floor(obj.ty * TILE - 10 + bobY);
+        Utils.drawText(ctx, 'Z', promptX, promptY, C.yellow, 1);
+    }
+
+    // Render examine object overlay sprites on top of base tiles
+    function renderExamineObjects(ctx) {
+        if (!Game.currentRoom) return;
+        var roomId = Game.currentRoom.id;
+        var examineList = EXAMINE_OBJECTS[roomId];
+        if (!examineList) return;
+
+        for (var i = 0; i < examineList.length; i++) {
+            var obj = examineList[i];
+            if (!obj.sprite) continue;
+            var ox = obj.tx * TILE;
+            var oy = obj.ty * TILE;
+            safeDraw(ctx, obj.sprite, ox, oy);
+        }
+    }
+
+    // Render sparkle + glow on examine objects so they stand out as interactable
+    function renderExamineSparkles(ctx) {
+        if (!Game.currentRoom) return;
+        var roomId = Game.currentRoom.id;
+        var examineList = EXAMINE_OBJECTS[roomId];
+        if (!examineList) return;
+
+        for (var i = 0; i < examineList.length; i++) {
+            var obj = examineList[i];
+            var ox = obj.tx * TILE;
+            var oy = obj.ty * TILE;
+
+            var t = Game.frame * 0.05 + i * 2.1;
+
+            // Subtle pulsing glow underneath the object
+            var glowAlpha = 0.08 + Math.sin(t * 1.5) * 0.06;
+            ctx.globalAlpha = glowAlpha;
+            ctx.fillStyle = C.gold;
+            ctx.fillRect(ox + 1, oy + 1, 14, 14);
+            ctx.globalAlpha = 1;
+
+            // Orbiting sparkle dots (2 sparkles, offset phases)
+            for (var s = 0; s < 2; s++) {
+                var st = t + s * 3.14;
+                var sparkX = ox + 8 + Math.sin(st * 1.3) * 6;
+                var sparkY = oy + 8 + Math.cos(st * 0.9) * 6;
+                var alpha = 0.4 + Math.sin(st * 2.5) * 0.35;
+                if (alpha > 0) {
+                    ctx.globalAlpha = alpha;
+                    ctx.fillStyle = C.white;
+                    ctx.fillRect(Math.floor(sparkX), Math.floor(sparkY), 1, 1);
+                    // Cross sparkle shape
+                    ctx.globalAlpha = alpha * 0.5;
+                    ctx.fillRect(Math.floor(sparkX) - 1, Math.floor(sparkY), 1, 1);
+                    ctx.fillRect(Math.floor(sparkX) + 1, Math.floor(sparkY), 1, 1);
+                    ctx.fillRect(Math.floor(sparkX), Math.floor(sparkY) - 1, 1, 1);
+                    ctx.fillRect(Math.floor(sparkX), Math.floor(sparkY) + 1, 1, 1);
+                    ctx.globalAlpha = 1;
+                }
+            }
+        }
     }
 
     // =====================================================================
@@ -1247,97 +1329,84 @@
     // =====================================================================
 
     // Lookup by room ID: objects at tile positions with dialogue keys
+    // sprite: overlay sprite key drawn on top of the base tile (omit if tile is already visual)
     var EXAMINE_OBJECTS = {
         ebon_vale_market: [
-            { tx: 3,  ty: 5,  key: 'examine_market_stall' },
-            { tx: 12, ty: 5,  key: 'examine_market_stall' },
-            { tx: 7,  ty: 3,  key: 'examine_forge_anvil' }
+            { tx: 7,  ty: 5,  key: 'examine_market_stall', sprite: 'exam_market_sign' },
+            { tx: 2,  ty: 10, key: 'examine_forge_anvil',  sprite: 'exam_anvil' }
         ],
         ebon_vale_square: [
             { tx: 7,  ty: 5,  key: 'examine_well' }
         ],
         ebon_vale_north: [
-            { tx: 7,  ty: 3,  key: 'examine_fountain' }
+            { tx: 10, ty: 3,  key: 'examine_fountain', sprite: 'exam_fountain' }
         ],
         temple_entrance: [
-            { tx: 2,  ty: 2,  key: 'examine_bookshelf' },
-            { tx: 13, ty: 2,  key: 'examine_bookshelf' },
-            { tx: 4,  ty: 3,  key: 'examine_pillar' },
-            { tx: 11, ty: 3,  key: 'examine_pillar' },
-            { tx: 7,  ty: 4,  key: 'examine_tapestry' },
-            { tx: 7,  ty: 2,  key: 'examine_statue_face' }
+            { tx: 2,  ty: 2,  key: 'examine_bookshelf', sprite: 'exam_bookshelf' },
+            { tx: 13, ty: 2,  key: 'examine_bookshelf', sprite: 'exam_bookshelf' },
+            { tx: 4,  ty: 2,  key: 'examine_pillar',    sprite: 'exam_rune_stone' },
+            { tx: 11, ty: 2,  key: 'examine_pillar',    sprite: 'exam_rune_stone' },
+            { tx: 7,  ty: 4,  key: 'examine_tapestry',  sprite: 'exam_tapestry' },
+            { tx: 8,  ty: 2,  key: 'examine_statue_face', sprite: 'exam_stone_face' }
         ],
         temple_puzzle: [
             { tx: 7,  ty: 7,  key: 'examine_puzzle_statue' },
             { tx: 8,  ty: 7,  key: 'examine_puzzle_statue' },
-            { tx: 3,  ty: 3,  key: 'examine_pillar' },
-            { tx: 12, ty: 3,  key: 'examine_pillar' },
-            { tx: 2,  ty: 8,  key: 'examine_rubble' },
-            { tx: 13, ty: 8,  key: 'examine_rubble' }
+            { tx: 5,  ty: 3,  key: 'examine_pillar',  sprite: 'exam_rune_stone' },
+            { tx: 10, ty: 3,  key: 'examine_pillar',  sprite: 'exam_rune_stone' },
+            { tx: 2,  ty: 8,  key: 'examine_rubble',  sprite: 'exam_rubble' },
+            { tx: 13, ty: 8,  key: 'examine_rubble',  sprite: 'exam_rubble' }
         ],
         temple_boss: [
             { tx: 7,  ty: 2,  key: 'examine_altar' },
             { tx: 8,  ty: 2,  key: 'examine_altar' },
-            { tx: 3,  ty: 4,  key: 'examine_pillar' },
-            { tx: 12, ty: 4,  key: 'examine_pillar' },
-            { tx: 5,  ty: 7,  key: 'examine_goblin_banner' },
-            { tx: 10, ty: 7,  key: 'examine_goblin_banner' }
+            { tx: 3,  ty: 4,  key: 'examine_pillar',        sprite: 'exam_rune_stone' },
+            { tx: 12, ty: 4,  key: 'examine_pillar',        sprite: 'exam_rune_stone' },
+            { tx: 5,  ty: 7,  key: 'examine_goblin_banner', sprite: 'exam_banner' },
+            { tx: 10, ty: 7,  key: 'examine_goblin_banner', sprite: 'exam_banner' }
         ],
         ebon_forest_entry: [
-            { tx: 6,  ty: 3,  key: 'examine_bones' }
+            { tx: 6,  ty: 3,  key: 'examine_bones', sprite: 'exam_bones' }
         ],
         ebon_forest_deep: [
-            { tx: 4,  ty: 6,  key: 'examine_bones' },
-            { tx: 11, ty: 4,  key: 'examine_rubble' }
+            { tx: 4,  ty: 6,  key: 'examine_bones',  sprite: 'exam_bones' },
+            { tx: 11, ty: 4,  key: 'examine_rubble', sprite: 'exam_rubble' }
         ]
     };
 
     function checkExamineObjects() {
         if (!Game.player || !Game.currentRoom) return;
-        if (Dialogue.isActive()) return;
-        if (!Input.pressed['z']) return;
+        if (Dialogue.isActive()) { Game.nearExamine = null; return; }
 
-        // Don't trigger examine if near an NPC or enemy
-        if (Game.nearNPC) return;
+        Game.nearExamine = null;
 
         var roomId = Game.currentRoom.id;
         var examineList = EXAMINE_OBJECTS[roomId];
-        if (!examineList) return;
 
         var px = Game.player.x + Game.player.w / 2;
         var py = Game.player.y + Game.player.h / 2;
 
-        for (var i = 0; i < examineList.length; i++) {
-            var obj = examineList[i];
-            var ox = obj.tx * TILE + TILE / 2;
-            var oy = obj.ty * TILE + TILE / 2;
-            var dx = px - ox;
-            var dy = py - oy;
-            var dist = Math.sqrt(dx * dx + dy * dy);
+        // Check examine objects for proximity
+        if (examineList) {
+            for (var i = 0; i < examineList.length; i++) {
+                var obj = examineList[i];
+                var ox = obj.tx * TILE + TILE / 2;
+                var oy = obj.ty * TILE + TILE / 2;
+                var dx = px - ox;
+                var dy = py - oy;
+                var dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < 20) {
-                // Check no enemy is in interaction range either
-                var enemyNear = false;
-                for (var e = 0; e < Game.enemies.length; e++) {
-                    if (Game.enemies[e].dead) continue;
-                    var ex = Game.enemies[e].x + Game.enemies[e].w / 2;
-                    var ey = Game.enemies[e].y + Game.enemies[e].h / 2;
-                    var eDist = Math.sqrt((px - ex) * (px - ex) + (py - ey) * (py - ey));
-                    if (eDist < 24) { enemyNear = true; break; }
+                if (dist < 20) {
+                    Game.nearExamine = obj;
+                    break;
                 }
-                if (enemyNear) return;
-
-                Dialogue.start(obj.key);
-                Audio.play('select');
-                return;
             }
         }
 
-        // Also check torch tiles for examine
-        if (Game.currentRoom.tiles) {
+        // Also check torch tiles for proximity
+        if (!Game.nearExamine && Game.currentRoom.tiles) {
             var tileX = Math.floor(px / TILE);
             var tileY = Math.floor(py / TILE);
-            // Check tiles around player
             for (var dy2 = -1; dy2 <= 1; dy2++) {
                 for (var dx2 = -1; dx2 <= 1; dx2++) {
                     var checkX = tileX + dx2;
@@ -1349,13 +1418,41 @@
                         var torchCY = checkY * TILE + TILE / 2;
                         var tDist = Math.sqrt((px - torchCX) * (px - torchCX) + (py - torchCY) * (py - torchCY));
                         if (tDist < 20) {
-                            Dialogue.start('examine_torch');
-                            Audio.play('select');
-                            return;
+                            Game.nearExamine = { tx: checkX, ty: checkY, key: 'examine_torch' };
+                            break;
                         }
                     }
                 }
+                if (Game.nearExamine) break;
             }
+        }
+
+        // Interact on Z press
+        if (!Input.pressed['z']) return;
+        if (Game.nearNPC) return;
+        if (!Game.nearExamine) return;
+
+        // Check no enemy is in interaction range
+        var enemyNear = false;
+        for (var e = 0; e < Game.enemies.length; e++) {
+            if (Game.enemies[e].dead) continue;
+            var ex = Game.enemies[e].x + Game.enemies[e].w / 2;
+            var ey = Game.enemies[e].y + Game.enemies[e].h / 2;
+            var eDist = Math.sqrt((px - ex) * (px - ex) + (py - ey) * (py - ey));
+            if (eDist < 24) { enemyNear = true; break; }
+        }
+        if (enemyNear) return;
+
+        var examKey = Game.nearExamine.key;
+        Dialogue.start(examKey);
+        Audio.play('select');
+        // Lore tracking for bestiary
+        if (examKey === 'examine_tapestry') {
+            Game.loreEntries['lore_nitriti'] = true;
+            Game.loreEntries['lore_eldspyre'] = true;
+        }
+        if (examKey === 'examine_pillar') {
+            Game.loreEntries['lore_bonemoon'] = true;
         }
     }
 
@@ -1838,7 +1935,7 @@
 
         Game.player._pendingProjectile = false;
 
-        // Find nearest non-dead enemy
+        // Find nearest non-dead enemy to aim initial direction
         var target = null;
         var minDist = Infinity;
 
@@ -1860,71 +1957,88 @@
             }
         }
 
-        // Create burst of teal particles from player toward target
-        var tx = Game.player.x + 8;
-        var ty = Game.player.y + 8;
+        var px = Game.player.x + 8;
+        var py = Game.player.y + 8;
+
+        // Launch particle trail from player
+        for (var p = 0; p < 6; p++) {
+            var angle = Math.random() * Math.PI * 2;
+            Particles.add(px, py, {
+                vx: Math.cos(angle) * 1.5,
+                vy: Math.sin(angle) * 1.5,
+                life: 12,
+                color: Math.random() > 0.5 ? C.teal : C.darkTeal,
+                size: 2,
+                gravity: 0
+            });
+        }
 
         if (target) {
-            var dx = target.x + 8 - tx;
-            var dy = target.y + 8 - ty;
+            var dx = target.x + 8 - px;
+            var dy = target.y + 8 - py;
             var dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            var nx = dx / dist;
-            var ny = dy / dist;
+            var vx = (dx / dist) * 2.5;
+            var vy = (dy / dist) * 2.5;
 
-            for (var p = 0; p < 12; p++) {
-                var speed = 2 + Math.random() * 3;
-                Particles.add(tx, ty, {
-                    vx: nx * speed + (Math.random() - 0.5) * 1.5,
-                    vy: ny * speed + (Math.random() - 0.5) * 1.5,
-                    life: 20 + Math.floor(Math.random() * 10),
+            // Create a real homing projectile
+            var proj = new Entities.Projectile(px, py, vx, vy, {
+                homing: true,
+                speed: 2.5,
+                damage: 4,
+                color: C.teal,
+                life: 90,
+                w: 5,
+                h: 5
+            });
+            Game.projectiles.push(proj);
+        } else {
+            // No target, just fire forward based on facing
+            var facing = Game.player.facing || 'right';
+            var fvx = facing === 'left' ? -2.5 : facing === 'right' ? 2.5 : 0;
+            var fvy = facing === 'up' ? -2.5 : facing === 'down' ? 2.5 : 0;
+            if (fvx === 0 && fvy === 0) fvx = 2.5;
+            var proj2 = new Entities.Projectile(px, py, fvx, fvy, {
+                homing: false,
+                speed: 2.5,
+                damage: 4,
+                color: C.teal,
+                life: 60,
+                w: 5,
+                h: 5
+            });
+            Game.projectiles.push(proj2);
+        }
+    }
+
+    function updateProjectiles() {
+        var allTargets = Game.enemies.slice();
+        if (Game.boss && !Game.boss.dead) {
+            allTargets.push(Game.boss);
+        }
+
+        for (var i = Game.projectiles.length - 1; i >= 0; i--) {
+            var proj = Game.projectiles[i];
+            // Emit trail particles
+            if (Game.frame % 2 === 0) {
+                Particles.add(proj.x, proj.y, {
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    life: 8 + Math.floor(Math.random() * 6),
                     color: Math.random() > 0.5 ? C.teal : C.darkTeal,
-                    size: 2,
+                    size: 1,
                     gravity: 0
                 });
             }
-
-            // Set up delayed damage
-            Game.brogTarget = target;
-            Game.brogTimer = 15;
-            Game.brogActive = true;
-        } else {
-            // No target, just particles
-            for (var p2 = 0; p2 < 12; p2++) {
-                var angle = Math.random() * Math.PI * 2;
-                var spd = 1 + Math.random() * 2;
-                Particles.add(tx, ty, {
-                    vx: Math.cos(angle) * spd,
-                    vy: Math.sin(angle) * spd,
-                    life: 20,
-                    color: C.teal,
-                    size: 2,
-                    gravity: 0
-                });
+            var dead = proj.update(allTargets);
+            if (dead) {
+                Game.projectiles.splice(i, 1);
             }
         }
     }
 
-    function updateBrogDamage() {
-        if (!Game.brogActive) return;
-
-        Game.brogTimer--;
-        if (Game.brogTimer <= 0) {
-            Game.brogActive = false;
-            if (Game.brogTarget && !Game.brogTarget.dead) {
-                // Deal 4 damage
-                Game.brogTarget.hp = (Game.brogTarget.hp || 0) - 4;
-                if (Game.brogTarget.hp <= 0) {
-                    Game.brogTarget.dead = true;
-                    Game.brogTarget.deathTimer = 30;
-                    Audio.play('death');
-                    Particles.burst(Game.brogTarget.x + 8, Game.brogTarget.y + 8, 12, C.teal);
-                } else {
-                    Audio.play('hit');
-                    Particles.burst(Game.brogTarget.x + 8, Game.brogTarget.y + 8, 6, C.teal);
-                }
-                Game.shake = 2;
-            }
-            Game.brogTarget = null;
+    function renderProjectiles(ctx) {
+        for (var i = 0; i < Game.projectiles.length; i++) {
+            Game.projectiles[i].render(ctx);
         }
     }
 
@@ -2019,6 +2133,8 @@
                 Game.encounteredEnemies['boss'] = true; // Bestiary
                 if (Music) Music.stop();
                 Dialogue.start('boss_intro', function () {
+                    // Lore tracking: Bargnot mentions Smaldge
+                    Game.loreEntries['lore_smaldge'] = true;
                     // Spawn boss at center of room
                     try {
                         Game.boss = new Entities.Boss(7 * TILE, 6 * TILE);
@@ -3621,9 +3737,9 @@
 
     // Character stats for select screen display
     var CHAR_STATS = {
-        daxon:    { hp: 4, atk: 4, spd: 3, spc: 'Shield', spcDesc: 'Invincibility' },
-        luigi:    { hp: 3, atk: 3, spd: 3, spc: 'Brog',   spcDesc: 'Homing bolt' },
-        lirielle: { hp: 3, atk: 2, spd: 3, spc: 'Heal',   spcDesc: 'Restore HP' }
+        daxon:    { hp: 4, atk: 4, spd: 3, spc: 'Shield Slam', spcDesc: 'Invincible + shockwave' },
+        luigi:    { hp: 3, atk: 3, spd: 3, spc: 'Brog',        spcDesc: 'Summon homing bolt' },
+        lirielle: { hp: 3, atk: 2, spd: 3, spc: 'Nature Burst', spcDesc: 'Heal + thorn ring' }
     };
 
     // Helper: word-wrap text to fit maxW pixels at given charWidth
@@ -3830,16 +3946,18 @@
         Particles.render(ctx);
 
         // Description text below character area
+        // Uses scale 1 (integer) so the bitmap font renders pixel-perfect
         var activeChar = isSliding ? Game.selectSlideTo : Game.selectedChar;
         if (Game.selectConfirmTimer > 0) activeChar = Game.selectConfirmChar;
         var desc = Game.charDescs[activeChar];
-        var descLines = wrapTextToWidth(desc, W - 20, 5);
-        if (descLines.length > 2) descLines.length = 2;
+        var descCharW = 6;  // CHAR_W at scale 1
+        var descLines = wrapTextToWidth(desc, W - 24, descCharW);
+        if (descLines.length > 3) descLines.length = 3;
 
-        var descY = 172;
+        var descY = 170;
         for (var l = 0; l < descLines.length; l++) {
-            var lx = Math.floor((W - descLines[l].length * 5) / 2);
-            Utils.drawText(ctx, descLines[l], lx, descY + l * 9, C.white, 0.8);
+            var lx = Math.floor((W - descLines[l].length * descCharW) / 2);
+            Utils.drawText(ctx, descLines[l], lx, descY + l * 9, C.white, 1);
         }
 
         // Bottom controls - single row for difficulty + speed run (Pass 7E names)
@@ -4272,9 +4390,9 @@
             enemyHPBefore.push(Game.enemies[ei].hp);
         }
 
-        // Combat resolution
+        // Combat resolution (pass projectiles for friendly projectile hits)
         if (Game.player) {
-            Entities.resolveCombat(Game.player, Game.enemies, Game.boss);
+            Entities.resolveCombat(Game.player, Game.enemies, Game.boss, Game.projectiles);
         }
 
         // Spawn floating damage numbers based on HP changes
@@ -4342,7 +4460,7 @@
 
         // Handle character specials
         handleBrogSpecial();
-        updateBrogDamage();
+        updateProjectiles();
         handleDaxonShockwave();
         handleLirielleNatureBurst();
 
@@ -4445,6 +4563,12 @@
         // Pass 8B: Micro-animations (grass bends, water ripples)
         renderMicroAnimations(ctx);
 
+        // Examine object overlay sprites (visible objects for interactable points)
+        renderExamineObjects(ctx);
+
+        // Examine object sparkles (glint + glow so interactables stand out)
+        renderExamineSparkles(ctx);
+
         // Render general items (potions, etc.)
         renderItems(ctx);
 
@@ -4501,6 +4625,9 @@
             Game.player.render(ctx);
         }
 
+        // Render friendly projectiles (Luigi's Brog, etc.)
+        renderProjectiles(ctx);
+
         // Render environment particles (leaves, dust, embers, fireflies, wisps)
         renderEnvironmentParticles(ctx);
 
@@ -4539,6 +4666,9 @@
 
         // Render sign interaction prompt
         renderSignPrompt(ctx);
+
+        // Render examine object interaction prompt
+        renderExaminePrompt(ctx);
 
         // Render speed run timer
         if (Game.speedRunEnabled) renderSpeedRunTimer(ctx);
@@ -4646,9 +4776,9 @@
         var bPlayerHP = Game.player ? Game.player.hp : 0;
         var bBossHP = (Game.boss && !Game.boss.dead) ? Game.boss.hp : 0;
 
-        // Combat resolution
+        // Combat resolution (pass projectiles for friendly projectile hits)
         if (Game.player) {
-            Entities.resolveCombat(Game.player, Game.enemies, Game.boss);
+            Entities.resolveCombat(Game.player, Game.enemies, Game.boss, Game.projectiles);
         }
 
         // Spawn floating damage numbers
@@ -4661,7 +4791,7 @@
 
         // Handle character specials
         handleBrogSpecial();
-        updateBrogDamage();
+        updateProjectiles();
         handleDaxonShockwave();
         handleLirielleNatureBurst();
 
@@ -5058,6 +5188,9 @@
             Game.player.render(ctx);
         }
 
+        // Render friendly projectiles (Luigi's Brog, etc.)
+        renderProjectiles(ctx);
+
         // Environment particles (embers, boss wisps)
         renderEnvironmentParticles(ctx);
 
@@ -5236,11 +5369,6 @@
             if (Music) Music.play('epilogue');
             Dialogue.start('ending_nitriti', function () {
                 Game.flags.bossDefeated = true;
-                // Unlock lore entries from the ending
-                Game.loreEntries['lore_nitriti'] = true;
-                Game.loreEntries['lore_smaldge'] = true;
-                Game.loreEntries['lore_bonemoon'] = true;
-                Game.loreEntries['lore_eldspyre'] = true;
                 Game.state = 'victory';
                 Game.victoryDialogueDone = false;
                 Game.creditsY = H + 20;
@@ -6527,6 +6655,7 @@
         Game.selectedChar = 0;
         Game.player = null;
         Game.enemies = [];
+        Game.projectiles = [];
         Game.npcs = [];
         Game.heartDrops = [];
         Game.boss = null;

@@ -617,10 +617,10 @@
           gain.gain.linearRampToValueAtTime(0.35 * this.masterVolume, t + 0.05);
           gain.gain.setValueAtTime(0.35 * this.masterVolume, t + 0.5);
           gain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
-          // Rapid trill: alternating between Eb4 (311Hz) and E4 (330Hz) — sinister minor 2nd, high register
+          // Rapid trill: alternating between Eb5 (622Hz) and E5 (660Hz) — sinister minor 2nd, very high register
           var trillLen = 0.04;
           for (var ti = 0; ti < 15; ti++) {
-            var freq = (ti % 2 === 0) ? 311 : 330;
+            var freq = (ti % 2 === 0) ? 622 : 660;
             this._osc('square', freq, gain, t + ti * trillLen, t + (ti + 1) * trillLen);
           }
           // Low rumble underneath

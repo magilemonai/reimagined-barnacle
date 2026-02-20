@@ -516,6 +516,9 @@
             var cy = this.y + this.h / 2;
             var alpha = 0.7 * (1 - progress);
 
+            // Draw the weapon animation first, then VFX on top
+            this._renderWeapon(ctx, progress);
+
             if (this.characterId === 'luigi') {
                 // Teal energy blast — expanding ring
                 ctx.fillStyle = C.teal;
@@ -572,6 +575,184 @@
                     }
                 }
                 ctx.globalAlpha = 1;
+            }
+        }
+
+        /** Render the character's weapon animating through the attack swing */
+        _renderWeapon(ctx, progress) {
+            var cx = this.x + this.w / 2;
+            var cy = this.y + this.h / 2;
+
+            if (this.characterId === 'daxon') {
+                // Sword hilt anchored at character's hand, blade extends
+                // outward using the same arc angle as _drawSlashArc so the
+                // swing and the trail stay in sync.
+                var startAngle;
+                switch (this.dir) {
+                    case 'down':  startAngle = -0.3; break;
+                    case 'up':    startAngle = Math.PI - 0.3; break;
+                    case 'left':  startAngle = Math.PI / 2 - 0.3; break;
+                    case 'right': startAngle = -Math.PI / 2 - 0.3; break;
+                    default:      startAngle = 0;
+                }
+                var arcLen = Math.PI * 0.6;
+                var arcProg = Math.min(progress * 2.5, 1);
+                var bladeAngle = startAngle + arcProg * arcLen;
+
+                // Hilt stays at character's hand (arm level, near sprite edge)
+                var hiltX, hiltY;
+                switch (this.dir) {
+                    case 'down':  hiltX = cx + 2; hiltY = cy;     break;
+                    case 'up':    hiltX = cx + 2; hiltY = cy - 7; break;
+                    case 'right': hiltX = cx + 5; hiltY = cy - 2; break;
+                    case 'left':  hiltX = cx - 5; hiltY = cy - 2; break;
+                    default:      hiltX = cx;     hiltY = cy;
+                }
+                var bladeLen = 12;
+                var tipX = Math.round(hiltX + Math.cos(bladeAngle) * bladeLen);
+                var tipY = Math.round(hiltY + Math.sin(bladeAngle) * bladeLen);
+                hiltX = Math.round(hiltX);
+                hiltY = Math.round(hiltY);
+
+                // Fade during recovery phase
+                ctx.globalAlpha = progress < 0.65 ? 0.95
+                    : Math.max(0, 0.95 * (1 - (progress - 0.65) / 0.35));
+
+                // Blade body (2px wide pixel line)
+                this._drawPixelLine(ctx, hiltX, hiltY, tipX, tipY, C.lightGray, 2);
+                // Bright edge highlight (1px)
+                this._drawPixelLine(ctx, hiltX, hiltY, tipX, tipY, C.white, 1);
+                // Bright tip pixel
+                ctx.fillStyle = C.white;
+                ctx.fillRect(tipX, tipY, 2, 2);
+                // Gold crossguard at hilt
+                var perpA = bladeAngle + Math.PI / 2;
+                ctx.fillStyle = C.gold;
+                ctx.fillRect(Math.round(hiltX + Math.cos(perpA) * 3),
+                    Math.round(hiltY + Math.sin(perpA) * 3), 2, 1);
+                ctx.fillRect(Math.round(hiltX - Math.cos(perpA) * 3),
+                    Math.round(hiltY - Math.sin(perpA) * 3), 2, 1);
+
+                ctx.globalAlpha = 1;
+
+            } else if (this.characterId === 'luigi') {
+                // Bright energy bolt from hand to the far edge of the hitbox
+                var ah = this.attackHitbox;
+                // Hand at arm level on the character sprite
+                var handX = cx, handY = cy;
+                switch (this.dir) {
+                    case 'down':  handX += 2; handY = cy;     break;
+                    case 'up':    handX += 2; handY = cy - 7; break;
+                    case 'right': handX = cx + 5; handY = cy - 2; break;
+                    case 'left':  handX = cx - 5; handY = cy - 2; break;
+                }
+                // Target the far edge of the hitbox, not the center
+                var targetX, targetY;
+                switch (this.dir) {
+                    case 'down':  targetX = ah.x + ah.w / 2; targetY = ah.y + ah.h; break;
+                    case 'up':    targetX = ah.x + ah.w / 2; targetY = ah.y;        break;
+                    case 'right': targetX = ah.x + ah.w;     targetY = ah.y + ah.h / 2; break;
+                    case 'left':  targetX = ah.x;            targetY = ah.y + ah.h / 2; break;
+                    default:      targetX = ah.x + ah.w / 2; targetY = ah.y + ah.h / 2;
+                }
+
+                // Bolt reaches far edge at ~40% of attack, then the existing
+                // teal-fill VFX takes over as the explosion
+                var boltT = Math.min(progress * 2.5, 1);
+                var boltX = Math.round(handX + (targetX - handX) * boltT);
+                var boltY = Math.round(handY + (targetY - handY) * boltT);
+
+                if (progress < 0.5) {
+                    ctx.globalAlpha = 0.95;
+                    // Outer teal glow
+                    ctx.fillStyle = C.teal;
+                    ctx.fillRect(boltX - 2, boltY - 2, 5, 5);
+                    // White-hot core
+                    ctx.fillStyle = C.white;
+                    ctx.fillRect(boltX - 1, boltY - 1, 3, 3);
+
+                    // Trailing energy pixels behind bolt
+                    var tdx = targetX - handX;
+                    var tdy = targetY - handY;
+                    var dist = Math.sqrt(tdx * tdx + tdy * tdy) || 1;
+                    var ndx = tdx / dist;
+                    var ndy = tdy / dist;
+                    for (var ti = 1; ti <= 3; ti++) {
+                        ctx.globalAlpha = 0.6 * (1 - ti / 4);
+                        ctx.fillStyle = C.teal;
+                        ctx.fillRect(
+                            Math.round(boltX - ndx * ti * 3) - 1,
+                            Math.round(boltY - ndy * ti * 3) - 1, 2, 2);
+                    }
+                    ctx.globalAlpha = 1;
+                }
+
+            } else if (this.characterId === 'lirielle') {
+                // Vine whip: tendril lashes from hand into the hitbox area
+                // Hand at arm level (mid-chest of sprite), not body center
+                var handX = cx, handY = cy;
+                var vdx = 0, vdy = 0;
+                switch (this.dir) {
+                    case 'down':  handX += 2; handY = cy;     vdy = 1; break;
+                    case 'up':    handX += 2; handY = cy - 7; vdy = -1; break;
+                    case 'right': handX = cx + 5; handY = cy - 2; vdx = 1; break;
+                    case 'left':  handX = cx - 5; handY = cy - 2; vdx = -1; break;
+                }
+
+                // Extends fast, holds, retracts
+                var maxLen = 16;
+                var extend;
+                if (progress < 0.35) {
+                    extend = progress / 0.35;
+                } else if (progress < 0.6) {
+                    extend = 1;
+                } else {
+                    extend = 1 - (progress - 0.6) / 0.4;
+                }
+                var vineLen = maxLen * extend;
+
+                ctx.globalAlpha = progress < 0.75 ? 0.9
+                    : 0.9 * (1 - (progress - 0.75) / 0.25);
+
+                // Connected pixel segments with gentle S-curve
+                var segments = 8;
+                var prevPx = Math.round(handX), prevPy = Math.round(handY);
+                for (var si = 1; si <= segments; si++) {
+                    var segT = si / segments;
+                    var reach = segT * vineLen;
+                    var wave = Math.sin(segT * Math.PI * 2 + progress * Math.PI * 3)
+                        * 2 * segT;
+                    var px = Math.round(handX + vdx * reach + (-vdy) * wave);
+                    var py = Math.round(handY + vdy * reach + vdx * wave);
+                    var thick = segT < 0.3 ? 2 : (segT < 0.7 ? 2 : 1);
+                    var segColor = segT < 0.4 ? C.green : C.lightGreen;
+                    this._drawPixelLine(ctx, prevPx, prevPy, px, py,
+                        segColor, thick);
+                    prevPx = px;
+                    prevPy = py;
+                }
+                // Bright whip tip
+                if (extend > 0.15) {
+                    ctx.fillStyle = '#aaffaa';
+                    ctx.fillRect(prevPx - 1, prevPy - 1, 3, 3);
+                }
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        /** Pixel-art line (Bresenham) using fillRect for SNES-style consistency */
+        _drawPixelLine(ctx, x0, y0, x1, y1, color, thickness) {
+            ctx.fillStyle = color;
+            var dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+            var sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+            var err = dx - dy;
+            var limit = dx + dy + 1;
+            while (limit-- > 0) {
+                ctx.fillRect(x0, y0, thickness, thickness);
+                if (x0 === x1 && y0 === y1) break;
+                var e2 = 2 * err;
+                if (e2 > -dy) { err -= dy; x0 += sx; }
+                if (e2 < dx) { err += dx; y0 += sy; }
             }
         }
 

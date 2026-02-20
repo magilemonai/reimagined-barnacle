@@ -78,8 +78,8 @@
     ],
 
     svana_greeting: [
-      { speaker: 'Svana', text: 'What are you looking at? ...Sorry. I\'m Svana. I haven\'t slept.' },
-      { speaker: 'Svana', text: 'They took my cousin Rorik. Dragged him to their temple for some ritual. He\'s strong but he\'s not... he\'s not invincible.' },
+      { speaker: 'Svana', text: 'What are you looking at? ...Sorry. I\'m Svana. I haven\'t slept.', emotion: 'worried' },
+      { speaker: 'Svana', text: 'They took my cousin Rorik. Dragged him to their temple for some ritual. He\'s strong but he\'s not... he\'s not invincible.', emotion: 'worried' },
       { speaker: 'Svana', text: 'If you find him in there -- when you find him -- tell him Svana says he\'s an idiot for getting caught.' },
       { speaker: 'Svana', text: '...And tell him to come home.' }
     ],
@@ -235,7 +235,7 @@
     ],
 
     soren_return: [
-      { speaker: 'Soren', text: 'You\'ve returned. The spirits told me you would. ...Actually I just heard the door. Sit. Rest. Let me tend your wounds.' }
+      { speaker: 'Soren', text: 'You\'ve returned. The spirits told me you would. ...Actually I just heard the door. Sit. Rest. May the winds be at your back.' }
     ],
 
     svana_return: [
@@ -325,11 +325,13 @@
     ],
 
     examine_tapestry: [
-      { speaker: '', text: 'A faded tapestry depicting Nitriti ascending beyond the veil. Moths have eaten through their face.' }
+      { speaker: '', text: 'A faded tapestry depicting Nitriti ascending beyond the veil. Moths have eaten through their face.' },
+      { speaker: '', text: 'At the bottom, barely legible: "When shadow returns, seek the Eldspyre. The mountain that burns with starlight holds the last light."' }
     ],
 
     examine_pillar: [
-      { speaker: '', text: 'Ancient stone pillar carved with spiraling runes. The carvings glow faintly purple in the torchlight.' }
+      { speaker: '', text: 'Ancient stone pillar carved with spiraling runes. The carvings glow faintly purple in the torchlight.' },
+      { speaker: '', text: 'One phrase repeats in the spirals: "When the Bonemoon rises, the veil will tear. Darkness gathers beyond."' }
     ],
 
     examine_rubble: [

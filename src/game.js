@@ -852,6 +852,7 @@
                         }
                     } else if (npc.id === 'shrine_checkpoint') {
                         // Temple checkpoint shrine: heal and set respawn
+                        npc.interacted = true;
                         var shrineKey = Game.checkpointUsed ? 'shrine_rest_return' : 'shrine_rest';
                         Game.checkpointUsed = true;
                         Game.checkpoint = {
@@ -1086,6 +1087,36 @@
         var promptX = Math.floor(obj.tx * TILE + 4);
         var promptY = Math.floor(obj.ty * TILE - 10 + bobY);
         Utils.drawText(ctx, 'Z', promptX, promptY, C.yellow, 1);
+    }
+
+    // Examine objects that show a "!" indicator until first examined
+    var INDICATOR_EXAMINE_KEYS = {
+        'examine_puzzle_statue': true
+    };
+
+    function renderExamineIndicators(ctx) {
+        if (!Game.currentRoom) return;
+        var roomId = Game.currentRoom.id;
+        var examineList = EXAMINE_OBJECTS[roomId];
+        if (!examineList) return;
+
+        // Deduplicate: only render one "!" per key (statue spans two tiles)
+        var rendered = {};
+        for (var i = 0; i < examineList.length; i++) {
+            var obj = examineList[i];
+            if (!INDICATOR_EXAMINE_KEYS[obj.key]) continue;
+            if (Game.examinedObjects[obj.key]) continue;
+            if (rendered[obj.key]) continue;
+            rendered[obj.key] = true;
+
+            var indicatorBob = Math.sin(Game.frame * 0.12) * 2;
+            var ix = Math.floor(obj.tx * TILE + 4);
+            var iy = Math.floor(obj.ty * TILE - 18 + indicatorBob);
+            // Yellow "!" — vertical bar + dot (matches NPC style)
+            ctx.fillStyle = C.yellow;
+            ctx.fillRect(ix, iy, 2, 4);
+            ctx.fillRect(ix, iy + 5, 2, 1);
+        }
     }
 
     // Render examine object overlay sprites on top of base tiles
@@ -1475,6 +1506,7 @@
         if (enemyNear) return;
 
         var examKey = Game.nearExamine.key;
+        Game.examinedObjects[examKey] = true;
         Dialogue.start(examKey);
         Audio.play('select');
         // Lore tracking for bestiary
@@ -2641,8 +2673,8 @@
         for (var i = 0; i < torches.length; i++) {
             var tx = torches[i].x;
             var ty = torches[i].y;
-            // Pulsing radius 36-48px using sin wave (matches darkness cutout)
-            var flickerR = 42 + Math.sin(flickerSeed + i * 2.5) * 6;
+            // Pulsing radius 35-45px using sin wave (matches darkness cutout)
+            var flickerR = 40 + Math.sin(flickerSeed + i * 2.5) * 5;
             // Random jitter ±2px for flicker
             flickerR += (Math.random() - 0.5) * 4;
             var flickerA = 0.14 + Math.sin(flickerSeed * 1.3 + i) * 0.05;
@@ -2694,18 +2726,18 @@
         // Clear and fill with darkness (atmospheric but still readable)
         dCtx.globalCompositeOperation = 'source-over';
         dCtx.clearRect(0, 0, W, H);
-        dCtx.fillStyle = 'rgba(0,0,10,0.55)';
+        dCtx.fillStyle = 'rgba(0,0,10,0.60)';
         dCtx.fillRect(0, 0, W, H);
 
         // Cut out light circles using destination-out compositing
         dCtx.globalCompositeOperation = 'destination-out';
 
-        // Light around each torch: pulsing radius 36-48px via sin wave, ±2px random jitter
+        // Light around each torch: pulsing radius 35-45px via sin wave, ±2px random jitter
         for (var i = 0; i < torches.length; i++) {
             var tx = torches[i].x;
             var ty = torches[i].y;
-            // Base pulsing radius: oscillates between 36 and 48 using sin wave
-            var pulseR = 42 + Math.sin(flickerSeed + i * 2.5) * 6;
+            // Base pulsing radius: oscillates between 35 and 45 using sin wave
+            var pulseR = 40 + Math.sin(flickerSeed + i * 2.5) * 5;
             // Random jitter ±2px each frame for flicker effect
             var jitter = (Math.random() - 0.5) * 4; // -2 to +2
             var lr = pulseR + jitter;
@@ -2721,14 +2753,14 @@
             dCtx.fill();
         }
 
-        // Light around the player: 52px radius, shrinks to 36px at low HP
+        // Light around the player: 48px radius, shrinks to 34px at low HP
         if (Game.player) {
             var px = Game.player.x + Game.player.w / 2;
             var py = Game.player.y + Game.player.h / 2;
-            // Player light shrinks as HP drops: 52px at full, 36px at 0 HP
+            // Player light shrinks as HP drops: 48px at full, 34px at 0 HP
             var hpRatio = Game.player.maxHp > 0 ? (Game.player.hp / Game.player.maxHp) : 0;
             hpRatio = Math.max(0, Math.min(1, hpRatio));
-            var pr = 36 + hpRatio * 16; // 36 at 0hp, 52 at full hp
+            var pr = 34 + hpRatio * 14; // 34 at 0hp, 48 at full hp
 
             var pGrad = dCtx.createRadialGradient(px, py, 0, px, py, pr);
             pGrad.addColorStop(0, 'rgba(0,0,0,1)');
@@ -4798,7 +4830,8 @@
         // Render sign interaction prompt
         renderSignPrompt(ctx);
 
-        // Render examine object interaction prompt
+        // Render examine object interaction prompt and indicators
+        renderExamineIndicators(ctx);
         renderExaminePrompt(ctx);
 
         // Render speed run timer
@@ -6251,6 +6284,7 @@
                 encounteredEnemies: Game.encounteredEnemies,
                 metNPCs: Game.metNPCs,
                 loreEntries: Game.loreEntries,
+                examinedObjects: Game.examinedObjects,
                 deathCounts: Game.deathCounts,
                 playerHasDied: Game.playerHasDied,
                 difficulty: Game.difficulty,
@@ -6295,6 +6329,7 @@
             Game.encounteredEnemies = data.encounteredEnemies || {};
             Game.metNPCs = data.metNPCs || {};
             Game.loreEntries = data.loreEntries || {};
+            Game.examinedObjects = data.examinedObjects || {};
             Game.deathCounts = data.deathCounts || {};
             Game.playerHasDied = data.playerHasDied || false;
             Game.difficulty = data.difficulty != null ? data.difficulty : 1;
@@ -6859,6 +6894,7 @@
         Game.encounteredEnemies = {};
         Game.metNPCs = {};
         Game.loreEntries = {};
+        Game.examinedObjects = {};
         Game.gameOverMenuIndex = 0;
         Game.deathCounts = {};
         Game.playerHasDied = false;

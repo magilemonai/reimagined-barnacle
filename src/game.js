@@ -850,6 +850,7 @@
                         if (dialogueId2) {
                             if (typeof dialogueId2 === 'string' && window.DialogueData[dialogueId2]) {
                                 Dialogue.start(dialogueId2);
+                                npc.interacted = true;
                             } else {
                                 npc.interact();
                             }

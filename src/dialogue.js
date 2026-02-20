@@ -352,7 +352,7 @@
     ],
 
     examine_puzzle_statue: [
-      { speaker: '', text: 'An ancient altar bearing the mark of Izuriel Sakazarac. Three gem-shaped slots are carved into the stone -- one for a crown, one for a cape, one for a scepter.' }
+      { speaker: 'Statue', text: 'An ancient altar bearing the mark of Izuriel Sakazarac. Three gem-shaped slots are carved into the stone -- one for a crown, one for a cape, one for a scepter.' }
     ],
 
     examine_bones: [

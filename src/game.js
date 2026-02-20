@@ -931,7 +931,7 @@
                 // Check if the zone is clear of enemies
                 var zoneClear = isZoneClear(item);
 
-                if (zoneClear && Input.pressed['z']) {
+                if (Input.pressed['z']) {
                     // Pick up the item
                     Game.collectedItems[item.id] = true;
 
@@ -2248,6 +2248,12 @@
         // Temple boss room - spawn boss on first entry
         if (Game.currentRoom.id === 'temple_boss' && !Game.flags.bossDefeated && !Game.boss) {
             if (Game.state === 'game') {
+                // Create boss immediately so she's visible during intro dialogue
+                try {
+                    Game.boss = new Entities.Boss(7 * TILE, 6 * TILE);
+                } catch (e) {
+                    console.warn('Error creating boss:', e);
+                }
                 Game.state = 'boss_intro';
                 Game.bossDialogueStage = 0;
                 Game.encounteredEnemies['boss'] = true; // Bestiary
@@ -2255,12 +2261,6 @@
                 Dialogue.start('boss_intro', function () {
                     // Lore tracking: Bargnot mentions Smaldge
                     Game.loreEntries['lore_smaldge'] = true;
-                    // Spawn boss at center of room
-                    try {
-                        Game.boss = new Entities.Boss(7 * TILE, 6 * TILE);
-                    } catch (e) {
-                        console.warn('Error creating boss:', e);
-                    }
                     Game.state = 'boss';
                     if (Music) Music.play('boss');
                 });
@@ -4782,6 +4782,11 @@
             }
         }
 
+        // Render boss (visible during boss_intro before fight starts)
+        if (Game.boss && Game.boss.render) {
+            Game.boss.render(ctx);
+        }
+
         // Render player
         if (Game.player && Game.player.render) {
             Game.player.render(ctx);
@@ -5263,6 +5268,9 @@
 
         // Pass 8B: Door open animation
         renderDoorAnimation(ctx);
+
+        // Examine object overlay sprites (banners, etc. — visible throughout boss fight)
+        renderExamineObjects(ctx);
 
         // Render NPCs
         for (var n = 0; n < Game.npcs.length; n++) {

@@ -738,11 +738,6 @@
         var base = id.replace('npc_', '').replace('brother_', '');
         var DD = window.DialogueData;
 
-        // Post-boss victory dialogue (highest priority)
-        if (Game.flags.bossDefeated && DD[base + '_victory']) {
-            return base + '_victory';
-        }
-
         // Mid-game dialogue (after visiting forest)
         if (Game.visitedRooms && Game.visitedRooms['ebon_forest'] && DD[base + '_midgame']) {
             if (npc.interacted) {
@@ -911,6 +906,20 @@
 
                     Audio.play('pickup');
                 }
+            }
+        }
+
+        // Check statue interaction when relics are incomplete
+        if (!Game.flags.puzzleSolved && !(Game.flags.puzzleCrown && Game.flags.puzzleCape && Game.flags.puzzleScepter)) {
+            var incStatueX = 7 * TILE + 8;
+            var incStatueY = 9 * TILE + 8;
+            var incDist = Utils.dist(
+                { x: Game.player.x + 8, y: Game.player.y + 8 },
+                { x: incStatueX, y: incStatueY }
+            );
+            if (incDist < 28 && Input.pressed['z'] && !Dialogue.isActive()) {
+                Dialogue.start('statue_incomplete');
+                Audio.play('select');
             }
         }
 
@@ -1255,7 +1264,8 @@
             { tx: 13, ty: 2,  key: 'examine_bookshelf' },
             { tx: 4,  ty: 3,  key: 'examine_pillar' },
             { tx: 11, ty: 3,  key: 'examine_pillar' },
-            { tx: 7,  ty: 4,  key: 'examine_tapestry' }
+            { tx: 7,  ty: 4,  key: 'examine_tapestry' },
+            { tx: 7,  ty: 2,  key: 'examine_statue_face' }
         ],
         temple_puzzle: [
             { tx: 7,  ty: 7,  key: 'examine_puzzle_statue' },

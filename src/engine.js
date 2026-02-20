@@ -617,10 +617,10 @@
           gain.gain.linearRampToValueAtTime(0.35 * this.masterVolume, t + 0.05);
           gain.gain.setValueAtTime(0.35 * this.masterVolume, t + 0.5);
           gain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
-          // Rapid trill: alternating between Eb3 (156Hz) and E3 (165Hz) — sinister minor 2nd
-          var trillLen = 0.05;
-          for (var ti = 0; ti < 12; ti++) {
-            var freq = (ti % 2 === 0) ? 156 : 165;
+          // Rapid trill: alternating between Eb4 (311Hz) and E4 (330Hz) — sinister minor 2nd, high register
+          var trillLen = 0.04;
+          for (var ti = 0; ti < 15; ti++) {
+            var freq = (ti % 2 === 0) ? 311 : 330;
             this._osc('square', freq, gain, t + ti * trillLen, t + (ti + 1) * trillLen);
           }
           // Low rumble underneath
@@ -628,7 +628,7 @@
           refillRumble.gain.setValueAtTime(0.01, t);
           refillRumble.gain.linearRampToValueAtTime(0.15 * this.masterVolume, t + 0.1);
           refillRumble.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
-          this._osc('sine', 55, refillRumble, t, t + 0.6);
+          this._osc('sine', 65, refillRumble, t, t + 0.6);
           break;
 
         // ---- Pass 8C: Boss phase transition boom ----

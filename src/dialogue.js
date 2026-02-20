@@ -77,12 +77,6 @@
       { speaker: 'Soren', text: 'Come. Let me bless you before you go. It\'s the least the spirits can offer.' }
     ],
 
-    rorik_greeting: [
-      { speaker: 'Rorik', text: 'Aye, name\'s Rorik Flamebeard. Lost me kin to those blasted goblins.' },
-      { speaker: 'Rorik', text: 'If you\'re heading to that temple, watch for traps. Bargnot is cunning.' },
-      { speaker: 'Rorik', text: 'May the forge-fire guide your blade.' }
-    ],
-
     svana_greeting: [
       { speaker: 'Svana', text: 'What are you looking at? ...Sorry. I\'m Svana. I haven\'t slept.' },
       { speaker: 'Svana', text: 'They took my cousin Rorik. Dragged him to their temple for some ritual. He\'s strong but he\'s not... he\'s not invincible.' },
@@ -195,6 +189,12 @@
 
     ending_final: [
       { speaker: '', text: 'Ebon Vale breathes again. The tavern lights burn late. For one night, no one is afraid.', scene: 'vale_peace' },
+      { speaker: 'Svana', text: 'RORIK! You absolute fool, I thought you were -- Don\'t you EVER -- ...come here.', scene: 'vale_peace' },
+      { speaker: 'Helena', text: 'You did it. You actually did it. I\'m going to sleep for the first time in a month. Thank you. From all of us.', scene: 'vale_peace', emotion: 'hopeful' },
+      { speaker: 'Fawks', text: 'Drinks are on the house tonight! ...Don\'t tell Helena I said that.', scene: 'vale_peace' },
+      { speaker: 'Braxon', text: 'You came back. All of you came back. That\'s all that matters to an old smith.', scene: 'vale_peace' },
+      { speaker: 'Elira', text: '...Okay. Maybe I trust chosen ones a little.', scene: 'vale_peace' },
+      { speaker: 'Soren', text: 'You have done a great thing. Rest now. You have earned it.', scene: 'vale_peace' },
       { speaker: '', text: 'But beyond the mountains, the Bonemoon swells. An infinite sea of darkness that swallows even starlight.', scene: 'bonemoon' },
       { speaker: '', text: 'Three travelers stand at the edge of what comes next. They are tired. They are wounded. They are not done.', scene: 'heroes_path' },
       { speaker: '', text: 'VALISAR: SHADOWS OF THE ELDSPYRE. Thank you for playing.', scene: 'title_card' }
@@ -204,43 +204,13 @@
     // Item Pickup Dialogues
     // -----------------------------------------------------------------
 
-    pickup_eldertech: [
-      { speaker: '', text: 'You found an Eldertech Sphere! An ancient artifact of mysterious power.' }
-    ],
-
     pickup_potion: [
       { speaker: '', text: 'You found a healing potion! Your health has been restored.' }
-    ],
-
-    pickup_silencestone: [
-      { speaker: '', text: 'You found the Silence Stone! A black opal of incredible power. Nitriti\'s blessing flows through it.' }
-    ],
-
-    // -----------------------------------------------------------------
-    // Sign interactions
-    // -----------------------------------------------------------------
-
-    sign_market: [
-      { speaker: 'Sign', text: 'EBON VALE MARKET -- Braxon\'s Forge. Chapel of the Wandering Spirit.' },
-      { speaker: 'Sign', text: '"All are welcome at The Dancing Pig (children must be accompanied by an adult)."' }
-    ],
-
-    sign_square: [
-      { speaker: 'Sign', text: 'EBON VALE TOWN SQUARE -- Founded in the Age of Starfall by the Valisar settlers.' },
-      { speaker: 'Sign', text: 'The paint is faded. Someone has nailed a fresh notice: "STAY INDOORS AFTER DARK."' }
     ],
 
     sign_temple: [
       { speaker: 'Inscription', text: 'The stone is ancient. Most of the carving has been clawed away.' },
       { speaker: 'Inscription', text: 'You can make out: "...Nitriti, They Who Guard... between worlds... speak only... truth..."' }
-    ],
-
-    // -----------------------------------------------------------------
-    // Statue interactions
-    // -----------------------------------------------------------------
-
-    statue_interaction: [
-      { speaker: 'Statue', text: 'A weathered stone statue. The face has been defaced by goblin claws. The inscription reads: Izuriel Sakazarac.' }
     ],
 
     // -----------------------------------------------------------------
@@ -278,40 +248,6 @@
     ],
 
     // -----------------------------------------------------------------
-    // Post-Boss Victory Dialogues
-    // -----------------------------------------------------------------
-
-    fawks_victory: [
-      { speaker: 'Fawks', text: 'Drinks are on the house tonight!' },
-      { speaker: 'Fawks', text: '...Don\'t tell Helena I said that.' }
-    ],
-
-    helena_victory: [
-      { speaker: 'Helena', text: 'You did it. You actually did it.', emotion: 'hopeful' },
-      { speaker: 'Helena', text: 'I\'m going to sleep for the first time in a month. Thank you. From all of us.', emotion: 'hopeful' }
-    ],
-
-    elira_victory: [
-      { speaker: 'Elira', text: 'Heard you took down the goblin queen.' },
-      { speaker: 'Elira', text: '...Okay. Maybe I trust chosen ones a little.' }
-    ],
-
-    svana_victory: [
-      { speaker: 'Svana', text: 'RORIK! You absolute fool, I thought you were --' },
-      { speaker: 'Svana', text: 'Don\'t you EVER -- ...come here.' }
-    ],
-
-    braxon_victory: [
-      { speaker: 'Braxon', text: 'You came back. All of you came back.' },
-      { speaker: 'Braxon', text: 'That\'s all that matters to an old smith.' }
-    ],
-
-    soren_victory: [
-      { speaker: 'Soren', text: 'The spirits are quiet again. For the first time in weeks, my whiskers have stopped twitching.' },
-      { speaker: 'Soren', text: 'You have done a great thing. Rest now. You have earned it.' }
-    ],
-
-    // -----------------------------------------------------------------
     // Midgame Dialogues (after visiting forest)
     // -----------------------------------------------------------------
 
@@ -328,15 +264,6 @@
     elira_midgame: [
       { speaker: 'Elira', text: 'My scouts tracked your path through the forest. Not bad. You might actually survive the temple.' },
       { speaker: 'Elira', text: 'Bargnot\'s strongest are in there. Spinecleavers. Big, armored, mean. Hit them from behind.' }
-    ],
-
-    // -----------------------------------------------------------------
-    // Dynamic Que'Rubra Progress Dialogue
-    // -----------------------------------------------------------------
-
-    querubra_progress: [
-      { speaker: 'Que\'Rubra', text: 'The forest knows your progress. You have collected [X] of the three relics.' },
-      { speaker: 'Que\'Rubra', text: 'Hurry. I can feel Nitriti\'s temple crying out. The walls themselves remember what they were.' }
     ],
 
     // -----------------------------------------------------------------

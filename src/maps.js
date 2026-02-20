@@ -46,6 +46,8 @@
         SPIKE:       28,   // tile_spike         - passable (hazard)
         MUSHROOM:    29,   // tile_mushroom      - passable (decoration)
         CRACKED:     30,   // tile_cracked_floor - passable (decoration)
+        STATUE_L:    31,   // tile_statue_left   - solid (left half of wide statue)
+        STATUE_R:    32,   // tile_statue_right  - solid (right half of wide statue)
     };
 
     window.T = T;
@@ -87,6 +89,8 @@
     window.TileProps[T.SPIKE]        = { solid: false, name: 'tile_spike',  hazard: true, damage: 1 };
     window.TileProps[T.MUSHROOM]     = { solid: false, name: 'tile_mushroom' };
     window.TileProps[T.CRACKED]      = { solid: false, name: 'tile_cracked_floor' };
+    window.TileProps[T.STATUE_L]     = { solid: true,  name: 'tile_statue_left',  hitbox: { x: 0, y: 4, w: 16, h: 11 } };
+    window.TileProps[T.STATUE_R]     = { solid: true,  name: 'tile_statue_right', hitbox: { x: 0, y: 4, w: 16, h: 11 } };
 
     // =========================================================================
     //  Shorthand aliases for readability in tile grids
@@ -123,6 +127,8 @@
     var Sp = T.SPIKE;        // 28 spike trap
     var Mu = T.MUSHROOM;     // 29 mushroom
     var Cr = T.CRACKED;      // 30 cracked floor
+    var SL = T.STATUE_L;     // 31 statue left half
+    var SR = T.STATUE_R;     // 32 statue right half
 
     // =========================================================================
     //  Room Definitions
@@ -410,7 +416,7 @@
             [TW,  TF,  TF,  TW,  TW,  TW,  TF,  TF,  TF,  TF,  TW,  TW,  TW,  TF,  TF,  TW ],  // row 4  - alcove walls (no pillars blocking path)
             [TW,  TF,  TF,  TW,  TW,  TF,  TF,  Cp,  Cp,  TF,  TF,  TW,  TW,  TF,  TF,  TW ],  // row 5  - carpet leads to statue
             [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 6  - wide open approach
-            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  St,  St,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 7  - STATUE of Izuriel above altar
+            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  SL,  SR,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 7  - STATUE of Izuriel above altar (left + right halves)
             [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 8  - carpet between statue and altar
             [TW,  To,  TF,  TF,  TF,  TF,  TF,  Al,  Al,  TF,  TF,  TF,  TF,  TF,  To,  TW ],  // row 9  - ALTAR with gem boxes, torches at walls
             [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 10 - carpet continues south

@@ -1404,6 +1404,91 @@
         ctx.fillRect(5, 5, 6, 1);
       });
 
+      // Left half of wide Izuriel Sakazarac statue (32px total across 2 tiles)
+      mt('statue_left', function (ctx) {
+        // Stone base background
+        fill(ctx, P.stone);
+        // Pedestal base (extends right)
+        ctx.fillStyle = P.darkStone;
+        ctx.fillRect(4, 12, 12, 4);
+        ctx.fillStyle = P.lightStone;
+        ctx.fillRect(4, 12, 12, 1);
+        // Body left side — robed figure
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(8, 4, 8, 8);
+        ctx.fillRect(6, 6, 4, 6);
+        // Left arm extended outward holding something
+        ctx.fillRect(2, 5, 6, 3);
+        ctx.fillRect(2, 5, 2, 2);
+        // Head left half
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(10, 1, 6, 4);
+        ctx.fillRect(12, 0, 4, 2);
+        // Crown left half (spires)
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(12, 0, 1, 2);
+        ctx.fillRect(14, 0, 1, 1);
+        // Face detail left
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(12, 2, 2, 1);
+        // Robe folds
+        ctx.fillStyle = P.darkStone;
+        ctx.fillRect(8, 6, 1, 6);
+        ctx.fillRect(10, 8, 1, 4);
+        // Left orb/relic in hand
+        ctx.fillStyle = P.purple;
+        ctx.fillRect(2, 4, 3, 3);
+        ctx.fillStyle = P.lightPurple;
+        ctx.fillRect(3, 4, 1, 1);
+      });
+
+      // Right half of wide Izuriel Sakazarac statue
+      mt('statue_right', function (ctx) {
+        // Stone base background
+        fill(ctx, P.stone);
+        // Pedestal base (extends left)
+        ctx.fillStyle = P.darkStone;
+        ctx.fillRect(0, 12, 12, 4);
+        ctx.fillStyle = P.lightStone;
+        ctx.fillRect(0, 12, 12, 1);
+        // Body right side — robed figure
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(0, 4, 8, 8);
+        ctx.fillRect(6, 6, 4, 6);
+        // Right arm raised holding staff
+        ctx.fillRect(8, 3, 4, 3);
+        ctx.fillRect(10, 1, 2, 4);
+        // Staff extends up
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(11, 0, 1, 5);
+        // Staff tip gem
+        ctx.fillStyle = P.lightPurple;
+        ctx.fillRect(10, 0, 3, 1);
+        ctx.fillStyle = P.purple;
+        ctx.fillRect(11, 0, 1, 1);
+        // Head right half
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(0, 1, 6, 4);
+        ctx.fillRect(0, 0, 4, 2);
+        // Crown right half
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(1, 0, 1, 2);
+        ctx.fillRect(3, 0, 1, 1);
+        // Face detail right
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(2, 2, 2, 1);
+        // Robe folds
+        ctx.fillStyle = P.darkStone;
+        ctx.fillRect(5, 6, 1, 6);
+        ctx.fillRect(7, 8, 1, 4);
+        // Inscription on base
+        ctx.fillStyle = P.purple;
+        ctx.fillRect(2, 13, 1, 1);
+        ctx.fillRect(4, 13, 2, 1);
+        ctx.fillRect(7, 13, 1, 1);
+        ctx.fillRect(9, 13, 2, 1);
+      });
+
       mt('bridge', function (ctx) {
         fill(ctx, P.blue);
         dots(ctx, P.lightBlue, 4);
@@ -1754,6 +1839,58 @@
         // Stone edge highlight
         ctx.fillStyle = P.lightStone;
         ctx.fillRect(3, 5, 10, 1);
+      });
+
+      // Abandoned market sign - wooden post with hanging sign
+      me('market_sign', function (ctx) {
+        // Post
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(7, 3, 2, 13);
+        // Hanging sign board
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(2, 4, 12, 8);
+        ctx.fillStyle = P.lightBrown;
+        ctx.fillRect(3, 5, 10, 6);
+        // Faded text lines
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(4, 6, 5, 1);
+        ctx.fillRect(4, 8, 7, 1);
+        ctx.fillRect(5, 10, 4, 1);
+        // Hanging chains
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(3, 3, 1, 2);
+        ctx.fillRect(12, 3, 1, 2);
+        // Sign tilted slightly (one chain broken)
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(13, 8, 1, 4);
+      });
+
+      // Forge anvil - Braxon's anvil inside his shop
+      me('anvil', function (ctx) {
+        // Anvil base
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(3, 10, 10, 4);
+        // Anvil body
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(4, 6, 8, 5);
+        // Anvil horn (pointed end left)
+        ctx.fillRect(1, 7, 4, 3);
+        ctx.fillRect(0, 8, 2, 1);
+        // Anvil heel (right)
+        ctx.fillRect(11, 7, 3, 3);
+        // Top face (working surface)
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(4, 6, 8, 1);
+        ctx.fillRect(2, 7, 3, 1);
+        // Hammer marks on surface
+        ctx.fillStyle = P.darkStone;
+        ctx.fillRect(6, 6, 1, 1);
+        ctx.fillRect(9, 6, 1, 1);
+        ctx.fillRect(7, 7, 2, 1);
+        // Legs visible
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(4, 13, 2, 1);
+        ctx.fillRect(10, 13, 2, 1);
       });
 
       // =================================================================
@@ -3902,6 +4039,162 @@
         ctx.fillStyle = '#8a2a10';
         ctx.fillRect(14, 18, 2, 3);
         ctx.fillRect(48, 18, 2, 3);
+      });
+
+      // Svana Ironveil — worried: same fierce dwarf but exhausted and afraid
+      mp('svana_worried', function (ctx) {
+        // Darker background (dimmer, more oppressive)
+        ctx.fillStyle = '#1a0e1a';
+        ctx.fillRect(0, 0, 64, 64);
+        ctx.fillStyle = '#241828';
+        ctx.fillRect(4, 6, 56, 58);
+
+        // Armor — same plate over chain
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(4, 42, 56, 22);
+        ctx.fillStyle = '#4a4a58';
+        ctx.fillRect(8, 42, 48, 20);
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(8, 44, 10, 6);
+        ctx.fillRect(46, 44, 10, 6);
+        ctx.fillStyle = '#b0b0b8';
+        ctx.fillRect(10, 44, 6, 4);
+        ctx.fillRect(48, 44, 6, 4);
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(18, 44, 28, 12);
+        ctx.fillStyle = '#8a8a98';
+        for (var sy = 45; sy < 56; sy += 3) {
+          for (var sx = 20; sx < 44; sx += 4) {
+            ctx.fillRect(sx, sy, 2, 1);
+          }
+        }
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(20, 40, 24, 4);
+        ctx.fillStyle = '#4a4a58';
+        ctx.fillRect(22, 40, 20, 2);
+
+        // Neck
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(24, 34, 16, 8);
+        ctx.fillStyle = P.paleSkin;
+        ctx.fillRect(25, 34, 14, 6);
+
+        // Face — same broad features but paler, drained
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(12, 10, 40, 26);
+        ctx.fillStyle = P.paleSkin;
+        ctx.fillRect(14, 10, 36, 24);
+        ctx.fillStyle = '#e8d8c8';
+        ctx.fillRect(16, 12, 32, 21);
+        // Less flush, more pallor
+        ctx.fillStyle = '#d8b8a0';
+        ctx.fillRect(16, 24, 6, 4);
+        ctx.fillRect(42, 24, 6, 4);
+        // Jaw
+        ctx.fillStyle = P.paleSkin;
+        ctx.fillRect(14, 30, 2, 4);
+        ctx.fillRect(48, 30, 2, 4);
+
+        // Eyes — same blue but wider, lifted worried brows
+        // Brows — angled up in center (worried)
+        ctx.fillStyle = '#901810';
+        ctx.fillRect(18, 18, 12, 2);
+        ctx.fillRect(36, 18, 12, 2);
+        // Inner brows raised (worry crease)
+        ctx.fillRect(28, 16, 4, 1);
+        ctx.fillRect(32, 16, 4, 1);
+        // Eye whites — wider
+        ctx.fillStyle = '#e8e0e0';
+        ctx.fillRect(20, 20, 8, 6);
+        ctx.fillRect(38, 20, 8, 6);
+        // Blue irises
+        ctx.fillStyle = P.blue;
+        ctx.fillRect(22, 21, 5, 5);
+        ctx.fillRect(40, 21, 5, 5);
+        ctx.fillStyle = P.lightBlue;
+        ctx.fillRect(23, 22, 3, 3);
+        ctx.fillRect(41, 22, 3, 3);
+        // Pupils
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(24, 23, 2, 2);
+        ctx.fillRect(42, 23, 2, 2);
+        // Catch-light
+        ctx.fillStyle = '#e0e0f0';
+        ctx.fillRect(22, 20, 2, 2);
+        ctx.fillRect(40, 20, 2, 2);
+        // Dark circles under eyes (exhaustion)
+        ctx.fillStyle = '#b098a0';
+        ctx.fillRect(20, 26, 8, 2);
+        ctx.fillRect(38, 26, 8, 2);
+
+        // Nose — same
+        ctx.fillStyle = P.paleSkin;
+        ctx.fillRect(29, 24, 6, 4);
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(29, 27, 2, 1);
+        ctx.fillRect(33, 27, 2, 1);
+
+        // Mouth — tight, trembling, not determined
+        ctx.fillStyle = P.darkRed;
+        ctx.fillRect(27, 30, 10, 2);
+        ctx.fillStyle = '#a05050';
+        ctx.fillRect(29, 30, 6, 1);
+        // Slight downturn at corners
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(26, 31, 2, 1);
+        ctx.fillRect(36, 31, 2, 1);
+
+        // Hair — same red braids but messier
+        ctx.fillStyle = P.red;
+        ctx.fillRect(12, 4, 40, 10);
+        ctx.fillRect(14, 2, 36, 4);
+        ctx.fillStyle = '#e04030';
+        ctx.fillRect(18, 4, 8, 4);
+        ctx.fillRect(34, 4, 8, 4);
+        ctx.fillStyle = '#f05040';
+        ctx.fillRect(22, 3, 4, 2);
+        ctx.fillRect(38, 3, 4, 2);
+        ctx.fillStyle = '#901810';
+        ctx.fillRect(26, 6, 2, 4);
+        ctx.fillRect(36, 6, 2, 4);
+        // Left braid — slightly disheveled
+        ctx.fillStyle = P.red;
+        ctx.fillRect(8, 10, 8, 34);
+        ctx.fillStyle = '#c03020';
+        ctx.fillRect(10, 12, 4, 28);
+        ctx.fillStyle = '#901810';
+        ctx.fillRect(10, 16, 4, 2);
+        ctx.fillRect(10, 22, 4, 2);
+        ctx.fillRect(10, 28, 4, 2);
+        ctx.fillRect(10, 34, 4, 2);
+        // Loose strands (disheveled from worry)
+        ctx.fillStyle = '#c03020';
+        ctx.fillRect(14, 14, 2, 3);
+        ctx.fillRect(15, 20, 1, 4);
+        // Left braid clasp
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(8, 40, 8, 4);
+        ctx.fillStyle = P.yellow;
+        ctx.fillRect(10, 41, 4, 2);
+        // Right braid
+        ctx.fillStyle = P.red;
+        ctx.fillRect(48, 10, 8, 34);
+        ctx.fillStyle = '#c03020';
+        ctx.fillRect(50, 12, 4, 28);
+        ctx.fillStyle = '#901810';
+        ctx.fillRect(50, 16, 4, 2);
+        ctx.fillRect(50, 22, 4, 2);
+        ctx.fillRect(50, 28, 4, 2);
+        ctx.fillRect(50, 34, 4, 2);
+        // Loose strands right
+        ctx.fillStyle = '#c03020';
+        ctx.fillRect(48, 14, 2, 3);
+        ctx.fillRect(48, 20, 1, 4);
+        // Right braid clasp
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(48, 40, 8, 4);
+        ctx.fillStyle = P.yellow;
+        ctx.fillRect(50, 41, 4, 2);
       });
 
       // Nitriti — ethereal spirit between stars: pale luminous face floating

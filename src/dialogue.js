@@ -78,8 +78,8 @@
     ],
 
     svana_greeting: [
-      { speaker: 'Svana', text: 'What are you looking at? ...Sorry. I\'m Svana. I haven\'t slept.' },
-      { speaker: 'Svana', text: 'They took my cousin Rorik. Dragged him to their temple for some ritual. He\'s strong but he\'s not... he\'s not invincible.' },
+      { speaker: 'Svana', text: 'What are you looking at? ...Sorry. I\'m Svana. I haven\'t slept.', emotion: 'worried' },
+      { speaker: 'Svana', text: 'They took my cousin Rorik. Dragged him to their temple for some ritual. He\'s strong but he\'s not... he\'s not invincible.', emotion: 'worried' },
       { speaker: 'Svana', text: 'If you find him in there -- when you find him -- tell him Svana says he\'s an idiot for getting caught.' },
       { speaker: 'Svana', text: '...And tell him to come home.' }
     ],

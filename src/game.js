@@ -1332,15 +1332,14 @@
     // sprite: overlay sprite key drawn on top of the base tile (omit if tile is already visual)
     var EXAMINE_OBJECTS = {
         ebon_vale_market: [
-            { tx: 3,  ty: 5,  key: 'examine_market_stall' },
-            { tx: 12, ty: 5,  key: 'examine_market_stall' },
-            { tx: 7,  ty: 3,  key: 'examine_forge_anvil' }
+            { tx: 7,  ty: 5,  key: 'examine_market_stall', sprite: 'exam_market_sign' },
+            { tx: 2,  ty: 10, key: 'examine_forge_anvil',  sprite: 'exam_anvil' }
         ],
         ebon_vale_square: [
             { tx: 7,  ty: 5,  key: 'examine_well' }
         ],
         ebon_vale_north: [
-            { tx: 7,  ty: 3,  key: 'examine_fountain', sprite: 'exam_fountain' }
+            { tx: 10, ty: 3,  key: 'examine_fountain', sprite: 'exam_fountain' }
         ],
         temple_entrance: [
             { tx: 2,  ty: 2,  key: 'examine_bookshelf', sprite: 'exam_bookshelf' },

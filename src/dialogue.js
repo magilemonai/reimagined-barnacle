@@ -363,7 +363,7 @@
   var BOX_X = 0;
   var BOX_Y = 160;       // bottom portion of the 224px screen
   var BOX_W = 256;        // full width of the internal buffer
-  var BOX_H = 60;         // tall enough for speaker name + 2 text rows
+  var BOX_H = 60;         // tall enough for speaker name + 3 text rows
   var BOX_PAD = 8;        // inner padding from box edges
   var BORDER_COLOR = '#6a6a7a';    // lighter border (matches C.gray)
   var INNER_BORDER_COLOR = '#4a4a5a'; // slightly darker inner border
@@ -421,7 +421,7 @@
   // =======================================================================
 
   /** Max visible text rows in the dialogue box */
-  var MAX_VISIBLE_ROWS = 2;
+  var MAX_VISIBLE_ROWS = 3;
 
   /** Row height in pixels */
   var ROW_HEIGHT = 10;

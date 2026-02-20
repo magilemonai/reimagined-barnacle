@@ -5064,12 +5064,14 @@
         // Particles
         Particles.render(ctx);
 
-        // Temple darkness overlay (lighten during boss death)
-        if (Game.boss && Game.boss.dead && Game.bossDeathTimer > 240) {
-            // Room gradually brightens - the darkness lifts after the chaos
-            var brightAlpha = Math.min(1, (Game.bossDeathTimer - 240) / 80);
-            ctx.fillStyle = 'rgba(200,200,255,' + (brightAlpha * 0.08) + ')';
-            ctx.fillRect(0, 0, W, H);
+        // Temple darkness overlay (fade out as soon as boss dies)
+        if (Game.boss && Game.boss.dead) {
+            var darkFade = Math.max(0, 1 - Game.bossDeathTimer / 40);
+            if (darkFade > 0) {
+                ctx.globalAlpha = darkFade;
+                renderDarknessOverlay(ctx, Game.currentRoom);
+                ctx.globalAlpha = 1;
+            }
         } else {
             renderDarknessOverlay(ctx, Game.currentRoom);
         }

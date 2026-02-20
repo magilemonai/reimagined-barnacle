@@ -558,6 +558,22 @@
       this._onComplete = onComplete || null;
       this.active = true;
 
+      // Pre-compute total advancement steps across all lines
+      // (each page within each line counts as one step)
+      this._linePageCounts = [];
+      this._totalSteps = 0;
+      for (var li = 0; li < data.length; li++) {
+        var ln = data[li];
+        var hasPrt = ln.speaker && ln.speaker.length > 0;
+        var prtAreaW = hasPrt ? 55 : 0;
+        var mc = Math.floor((BOX_W - prtAreaW - BOX_PAD * 2) / 6);
+        var wrappedRows = this._wordWrap(ln.text, mc);
+        var pages = Math.ceil(wrappedRows.length / MAX_VISIBLE_ROWS) || 1;
+        this._linePageCounts.push(pages);
+        this._totalSteps += pages;
+      }
+      this._currentStep = 0;
+
       // Per-speaker typewriter pitch
       var firstSpeaker = data[0] ? data[0].speaker : '';
       if (firstSpeaker === 'Bargnot') {
@@ -643,6 +659,7 @@
       // Page fully visible -> check if more pages exist for this line
       if (this._rowPage < this._totalPages() - 1) {
         this._rowPage++;
+        this._currentStep++;
         // Don't reset displayedChars - it tracks cumulative progress
         this._blinkTimer = 0;
         if (window.GameAudio) window.GameAudio.play('select');
@@ -651,6 +668,7 @@
 
       // All pages done -> next line or close
       this.currentLine++;
+      this._currentStep++;
       if (this.currentLine >= this.lines.length) {
         this.close();
       } else {
@@ -883,12 +901,14 @@
         textStartX = TEXT_X;
       }
 
-      // Line progress dots
-      var totalLines = this.lines.length;
-      if (totalLines > 1) {
-        var dotBaseX = bx + bw - 8 - totalLines * 4;
-        for (var d = 0; d < totalLines; d++) {
-          ctx.fillStyle = (d <= this.currentLine) ? (hasPortrait ? nameColor : NARRATOR_COLOR) : '#333';
+      // Progress dots — one per advancement step (page), unified tracking
+      var totalSteps = this._totalSteps || 1;
+      if (totalSteps > 1) {
+        var dotCount = Math.min(totalSteps, 25); // cap for very long dialogues
+        var dotBaseX = bx + bw - 8 - dotCount * 4;
+        var curStep = this._currentStep || 0;
+        for (var d = 0; d < dotCount; d++) {
+          ctx.fillStyle = (d <= curStep) ? (hasPortrait ? nameColor : NARRATOR_COLOR) : '#333';
           ctx.fillRect(dotBaseX + d * 4, by + 4, 2, 2);
         }
       }
@@ -929,11 +949,7 @@
         );
       }
 
-      // Page indicator for multi-page lines
-      if (this._totalPages() > 1) {
-        var pageText = (this._rowPage + 1) + '/' + this._totalPages();
-        window.Utils.drawText(ctx, pageText, bx + bw - 30, by + bh - 12, '#888', 1);
-      }
+      // (Page indicator removed — dots now track all advancement steps)
 
       // --- Skip hint for seen dialogues ---
       if (this._canSkip) {

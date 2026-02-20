@@ -886,6 +886,133 @@
       S.cache['goblin_lackey_atk_2'] = S.cache['goblin_atk_2'];
 
       // =================================================================
+      // GOBLIN SHAMAN (16x16) — robed goblin with staff and glowing eyes
+      // =================================================================
+      var shPal = {
+        g: P.darkGreen, G: '#1a3a1a', r: '#44ff88', // green glowing eyes
+        p: P.purple, P: '#4a2a6a', // robes
+        b: P.brown, B: P.darkBrown, // staff
+        w: P.white, k: P.black, y: P.gold
+      };
+
+      S.create('goblin_shaman_0', 16, 16, function (ctx) {
+        dp(ctx, [
+          '....rggr....',
+          '...gggggg...',
+          '..gggrrggg..',
+          '..ggggggg...',
+          '...pppp.B...',
+          '..pppppp.B..',
+          '..pPppPp.B..',
+          '..pppppp.B..',
+          '...pppp..y..',
+          '...pp.pp....',
+          '..pp...pp...',
+          '..kk...kk...',
+        ], shPal, 2, 2);
+      });
+
+      S.create('goblin_shaman_1', 16, 16, function (ctx) {
+        dp(ctx, [
+          '....rggr....',
+          '...gggggg...',
+          '..gggrrggg..',
+          '..ggggggg...',
+          '...pppp.B...',
+          '..pppppp.B..',
+          '..pPppPp.B..',
+          '..pppppp.B..',
+          '...pppp..y..',
+          '..pp..pp....',
+          '..pp..pp....',
+          '..kk..kk....',
+        ], shPal, 2, 2);
+      });
+
+      S.create('goblin_shaman_atk', 16, 16, function (ctx) {
+        dp(ctx, [
+          '....rggr....',
+          '...gggggg...',
+          '..gggrrggg..',
+          '..ggggggg...',
+          '...ppppBB...',
+          '..ppppppBy..',
+          '..pPppPp....',
+          '..pppppp....',
+          '...pppp.....',
+          '...pp.pp....',
+          '..pp...pp...',
+          '..kk...kk...',
+        ], shPal, 2, 2);
+      });
+
+      S.cache['goblin_shaman_atk_1'] = S.cache['goblin_shaman_atk'];
+      S.cache['goblin_shaman_atk_2'] = S.cache['goblin_shaman_0'];
+
+      // =================================================================
+      // DIRE BOAR (16x16) — stocky tusked beast
+      // =================================================================
+      var boarPal = {
+        b: P.brown, B: P.darkBrown, t: P.tan,
+        w: P.white, k: P.black, r: P.red,
+        g: P.gray, G: P.darkGray
+      };
+
+      S.create('dire_boar_0', 16, 16, function (ctx) {
+        dp(ctx, [
+          '............',
+          '..BBbbbb....',
+          '.BbbbbbbB...',
+          '.Bbrrbbbbb..',
+          '.bbbbbbbbb..',
+          'wbbbbbbbbb..',
+          '.btbbbtbbb..',
+          '..bbbbbbbb..',
+          '..BBBBBBBB..',
+          '..bb..bb....',
+          '..GG..GG....',
+          '............',
+        ], boarPal, 2, 2);
+      });
+
+      S.create('dire_boar_1', 16, 16, function (ctx) {
+        dp(ctx, [
+          '............',
+          '..BBbbbb....',
+          '.BbbbbbbB...',
+          '.Bbrrbbbbb..',
+          '.bbbbbbbbb..',
+          'wbbbbbbbbb..',
+          '.btbbbtbbb..',
+          '..bbbbbbbb..',
+          '..BBBBBBBB..',
+          '..bb...bb...',
+          '..GG...GG...',
+          '............',
+        ], boarPal, 2, 2);
+      });
+
+      S.create('dire_boar_atk', 16, 16, function (ctx) {
+        dp(ctx, [
+          '............',
+          '...BBbbbb...',
+          '..BbbbbbbB..',
+          'w.Bbrrbbbbb.',
+          'w.bbbbbbbbb.',
+          '..bbbbbbbbb.',
+          '..btbbbtbbb.',
+          '..bbbbbbbb..',
+          '..BBBBBBBB..',
+          '..bb..bb....',
+          '..GG..GG....',
+          '............',
+        ], boarPal, 2, 2);
+      });
+
+      S.cache['dire_boar_atk_1'] = S.cache['dire_boar_atk'];
+      S.cache['dire_boar_atk_2'] = S.cache['dire_boar_0'];
+
+      // =================================================================
       // BOSS SPRITES (32x32 - Queen Bargnot)
       // =================================================================
       //

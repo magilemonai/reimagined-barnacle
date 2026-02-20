@@ -929,11 +929,8 @@
     }
   };
 
-  // Expose as window.Audio (we store a reference so we don't shadow
-  // the native Audio constructor more than necessary)
+  // Expose as window.GameAudio (avoid shadowing the native Audio constructor)
   window.GameAudio = GameAudio;
-  // Also alias for convenience per spec
-  window.Audio = GameAudio;
 
   // =========================================================================
   // PARTICLE SYSTEM (window.Particles)

@@ -324,6 +324,15 @@
       { speaker: '', text: 'The town well. The water is dark and smells of iron. Nobody drinks from it anymore.' }
     ],
 
+    shrine_rest: [
+      { speaker: '', text: 'A shrine to Nitriti glows with faint warmth. You rest a moment and feel your wounds mend.' },
+      { speaker: '', text: 'This place will remember you. Should you fall, you will return here.' }
+    ],
+
+    shrine_rest_return: [
+      { speaker: '', text: 'The shrine\'s warmth washes over you once more.' }
+    ],
+
     examine_tapestry: [
       { speaker: '', text: 'A faded tapestry depicting Nitriti ascending beyond the veil. Moths have eaten through their face.' },
       { speaker: '', text: 'At the bottom, barely legible: "When shadow returns, seek the Eldspyre. The mountain that burns with starlight holds the last light."' }

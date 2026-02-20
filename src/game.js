@@ -913,11 +913,11 @@
             }
         }
 
-        // Check central statue interaction
+        // Check central altar interaction (altar is at row 9, statue above at row 7)
         if (Game.flags.puzzleCrown && Game.flags.puzzleCape && Game.flags.puzzleScepter && !Game.flags.puzzleSolved) {
-            // Statue is at col 7-8, row 7
+            // Altar is at col 7-8, row 9
             var statueX = 7 * TILE + 8;
-            var statueY = 7 * TILE + 8;
+            var statueY = 9 * TILE + 8;
             var distToStatue = Utils.dist(
                 { x: Game.player.x + 8, y: Game.player.y + 8 },
                 { x: statueX, y: statueY }
@@ -970,8 +970,8 @@
                 // Right zone: cols 11-15
                 if (eCol >= 11) zoneEnemies++;
             } else if (item.type === 'item_scepter') {
-                // Top zone: rows 0-4
-                if (eRow <= 4) zoneEnemies++;
+                // Top center zone: rows 0-4 AND cols 5-10 (only center guards, not side alcoves)
+                if (eRow <= 4 && eCol >= 5 && eCol <= 10) zoneEnemies++;
             }
         }
 
@@ -1244,8 +1244,7 @@
             { tx: 7,  ty: 3,  key: 'examine_forge_anvil' }
         ],
         ebon_vale_square: [
-            { tx: 7,  ty: 7,  key: 'examine_well' },
-            { tx: 8,  ty: 7,  key: 'examine_well' }
+            { tx: 7,  ty: 5,  key: 'examine_well' }
         ],
         ebon_vale_north: [
             { tx: 7,  ty: 3,  key: 'examine_fountain' }
@@ -1393,15 +1392,23 @@
             ctx.fillRect(ax - coreR, ay - coreR, coreR * 2, coreR * 2);
         }
 
-        // Altar pedestal glow: pulsing violet light draws eye to the central altar
+        // Altar pedestal glow: pulsing violet light draws eye to the central altar (now at row 9)
         var altarCX = 7 * TILE + TILE;  // center of the 2 altar tiles
-        var altarCY = 7 * TILE + TILE / 2;
+        var altarCY = 9 * TILE + TILE / 2;
 
         if (!Game.flags.puzzleSolved) {
             // Always show a subtle pedestal glow on the altar
             var pedestalAlpha = 0.08 + Math.sin(flickerSeed * 0.6) * 0.04;
             ctx.globalAlpha = pedestalAlpha;
             ctx.fillStyle = '#8060c0';
+            ctx.fillRect(7 * TILE - 2, 9 * TILE - 2, TILE * 2 + 4, TILE + 4);
+            ctx.globalAlpha = 1;
+
+            // Statue glow above altar (row 7)
+            var statueCY = 7 * TILE + TILE / 2;
+            var statueGlow = 0.06 + Math.sin(flickerSeed * 0.4) * 0.03;
+            ctx.globalAlpha = statueGlow;
+            ctx.fillStyle = '#9070d0';
             ctx.fillRect(7 * TILE - 2, 7 * TILE - 2, TILE * 2 + 4, TILE + 4);
             ctx.globalAlpha = 1;
         }
@@ -1908,6 +1915,82 @@
             }
             Game.brogTarget = null;
         }
+    }
+
+    // =====================================================================
+    // DAXON'S SHIELD SLAM SHOCKWAVE
+    // =====================================================================
+
+    function handleDaxonShockwave() {
+        if (!Game.player || !Game.player._pendingShockwave) return;
+        Game.player._pendingShockwave = false;
+
+        var px = Game.player.x + Game.player.w / 2;
+        var py = Game.player.y + Game.player.h / 2;
+        var shockRadius = 40; // pixels
+        var shockDmg = 2;
+
+        // Damage all enemies in radius
+        var allTargets = Game.enemies.slice();
+        if (Game.boss && !Game.boss.dead) allTargets.push(Game.boss);
+
+        for (var i = 0; i < allTargets.length; i++) {
+            var e = allTargets[i];
+            if (e.dead) continue;
+            var ex = e.x + (e.w || 12) / 2;
+            var ey = e.y + (e.h || 12) / 2;
+            var dist = Math.sqrt((px - ex) * (px - ex) + (py - ey) * (py - ey));
+            if (dist < shockRadius) {
+                if (e.takeDamage) {
+                    e.takeDamage(shockDmg, px, py);
+                } else {
+                    e.hp -= shockDmg;
+                    if (e.hp <= 0) { e.dead = true; e.deathTimer = 30; }
+                }
+                Particles.burst(ex, ey, 6, C.lightBlue);
+            }
+        }
+
+        Game.shake = 4;
+    }
+
+    // =====================================================================
+    // LIRIELLE'S NATURE BURST
+    // =====================================================================
+
+    function handleLirielleNatureBurst() {
+        if (!Game.player || !Game.player._pendingNatureBurst) return;
+        Game.player._pendingNatureBurst = false;
+
+        var px = Game.player.x + Game.player.w / 2;
+        var py = Game.player.y + Game.player.h / 2;
+        var burstRadius = 36; // pixels
+        var burstDmg = 3;
+
+        // Damage all enemies in radius
+        var allTargets = Game.enemies.slice();
+        if (Game.boss && !Game.boss.dead) allTargets.push(Game.boss);
+
+        for (var i = 0; i < allTargets.length; i++) {
+            var e = allTargets[i];
+            if (e.dead) continue;
+            var ex = e.x + (e.w || 12) / 2;
+            var ey = e.y + (e.h || 12) / 2;
+            var dist = Math.sqrt((px - ex) * (px - ex) + (py - ey) * (py - ey));
+            if (dist < burstRadius) {
+                if (e.takeDamage) {
+                    e.takeDamage(burstDmg, px, py);
+                } else {
+                    e.hp -= burstDmg;
+                    if (e.hp <= 0) { e.dead = true; e.deathTimer = 30; }
+                }
+                Particles.burst(ex, ey, 6, C.green);
+                // Thorn impact particles
+                Particles.add(ex, ey, { vx: 0, vy: -1, life: 12, color: '#88dd44', size: 2, gravity: 0 });
+            }
+        }
+
+        Game.shake = 2;
     }
 
     // =====================================================================
@@ -4103,9 +4186,11 @@
             return;
         }
 
-        // If dialogue is active: only update dialogue
+        // If dialogue is active: only update dialogue (+ screen flash/particles so overlays fade properly)
         if (Dialogue.isActive()) {
             Dialogue.update();
+            updateScreenFlash();
+            Particles.update();
             if (Input.pressed['z']) {
                 Dialogue.advance();
             }
@@ -4244,9 +4329,11 @@
         if (Game._puzzleSparkles.cape > 0) Game._puzzleSparkles.cape--;
         if (Game._puzzleSparkles.scepter > 0) Game._puzzleSparkles.scepter--;
 
-        // Handle Luigi's Brog special
+        // Handle character specials
         handleBrogSpecial();
         updateBrogDamage();
+        handleDaxonShockwave();
+        handleLirielleNatureBurst();
 
         // Check dead enemies & drops
         checkDeadEnemies();
@@ -4507,9 +4594,11 @@
             return;
         }
 
-        // If dialogue is active: only update dialogue
+        // If dialogue is active: only update dialogue (+ screen flash/particles so overlays fade)
         if (Dialogue.isActive()) {
             Dialogue.update();
+            updateScreenFlash();
+            Particles.update();
             if (Input.pressed['z']) {
                 Dialogue.advance();
             }
@@ -4559,9 +4648,11 @@
             spawnFloatingText(Game.boss.x + 8, Game.boss.y - 6, bBossHP - Game.boss.hp, C.white);
         }
 
-        // Handle Luigi's Brog special
+        // Handle character specials
         handleBrogSpecial();
         updateBrogDamage();
+        handleDaxonShockwave();
+        handleLirielleNatureBurst();
 
         // Heart drops
         updateHeartDrops();

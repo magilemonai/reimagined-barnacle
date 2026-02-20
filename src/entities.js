@@ -39,7 +39,7 @@
             this.hp = this.maxHp;
             this.attacking = false;
             this.attackTimer = 0;
-            this.attackDuration = 15;   // frames
+            this.attackDuration = (characterId === 'lirielle') ? 12 : 15;   // frames (Lirielle attacks faster)
             this.attackCooldown = 0;
             this.attackHitbox = null;   // {x,y,w,h} active during attack
             this.attackDealt = false;   // prevent multi-hit per swing
@@ -218,6 +218,26 @@
                 }
             }
 
+            // Daxon has a heavy cleaving swing -- wider perpendicular hitbox
+            if (this.characterId === 'daxon') {
+                switch (this.dir) {
+                    case 'down':  hx -= 4; hw = 24; hh = 20; break;
+                    case 'up':    hx -= 4; hw = 24; hy -= 4; hh = 20; break;
+                    case 'left':  hx -= 4; hw = 20; hy -= 4; hh = 24; break;
+                    case 'right': hw = 20; hy -= 4; hh = 24; break;
+                }
+            }
+
+            // Lirielle has nature magic -- extended reach (vine whip)
+            if (this.characterId === 'lirielle') {
+                switch (this.dir) {
+                    case 'down':  hh = 24;            break;
+                    case 'up':    hy -= 8; hh = 24;   break;
+                    case 'left':  hx -= 8; hw = 24;   break;
+                    case 'right': hw = 24;            break;
+                }
+            }
+
             this.attackHitbox = { x: hx, y: hy, w: hw, h: hh };
         }
 
@@ -226,13 +246,28 @@
             this.specialCooldown = this.specialMaxCooldown;
 
             if (this.characterId === 'daxon') {
-                // Shield: brief invincibility with barrier VFX
+                // Shield Slam: invincibility + ground shockwave damages nearby enemies
                 this.invincible = 90; // 1.5 seconds
                 this.flash = 6;
-                // Blue barrier ring burst
-                Particles.ring(this.x + this.w / 2, this.y + this.h / 2, 14, 12, C.lightBlue);
+                this._pendingShockwave = true;
+                // Shockwave ring burst — large and dramatic
+                Particles.ring(this.x + this.w / 2, this.y + this.h / 2, 18, 16, C.lightBlue);
+                Particles.ring(this.x + this.w / 2, this.y + this.h / 2, 10, 12, C.white);
                 Particles.sparkle(this.x + this.w / 2, this.y, C.lightBlue);
-                Audio.play('pickup');
+                // Ground impact sparks
+                for (var si = 0; si < 8; si++) {
+                    var sAngle = (si / 8) * Math.PI * 2;
+                    Particles.add(
+                        this.x + this.w / 2 + Math.cos(sAngle) * 8,
+                        this.y + this.h / 2 + Math.sin(sAngle) * 8, {
+                        vx: Math.cos(sAngle) * 2,
+                        vy: Math.sin(sAngle) * 2,
+                        life: 15 + Math.floor(Math.random() * 8),
+                        color: Math.random() < 0.5 ? C.lightBlue : C.white,
+                        size: 2, gravity: 0.05
+                    });
+                }
+                Audio.play('stagger');
             } else if (this.characterId === 'luigi') {
                 // Brog attack: a seeking projectile (created by the game layer)
                 this._pendingProjectile = true;
@@ -240,14 +275,29 @@
                 Particles.ring(this.x + this.w / 2, this.y + this.h / 2, 8, 8, C.purple);
                 Audio.play('sword');
             } else if (this.characterId === 'lirielle') {
-                // Heal 2 half-hearts with expanding green ring + leaf burst
+                // Nature Burst: heal 2 half-hearts + thorny damage ring hits nearby enemies
                 this.hp = Math.min(this.hp + 2, this.maxHp);
-                // Expanding heal ring
-                Particles.ring(this.x + this.w / 2, this.y + this.h / 2, 10, 10, C.paleGreen);
-                // Leaf particles rising
-                for (var i = 0; i < 6; i++) {
+                this._pendingNatureBurst = true;
+                // Expanding heal ring + thorn ring
+                Particles.ring(this.x + this.w / 2, this.y + this.h / 2, 12, 14, C.paleGreen);
+                Particles.ring(this.x + this.w / 2, this.y + this.h / 2, 20, 10, C.green);
+                // Thorn/leaf burst particles radiating outward
+                for (var i = 0; i < 12; i++) {
+                    var bAngle = (i / 12) * Math.PI * 2;
                     Particles.add(
-                        this.x + this.w / 2 + (Math.random() * 12 - 6),
+                        this.x + this.w / 2 + Math.cos(bAngle) * 6,
+                        this.y + this.h / 2 + Math.sin(bAngle) * 6, {
+                        vx: Math.cos(bAngle) * 1.8,
+                        vy: Math.sin(bAngle) * 1.8,
+                        life: 18 + Math.floor(Math.random() * 10),
+                        color: Math.random() < 0.4 ? '#88dd44' : (Math.random() < 0.5 ? C.green : C.lightGreen),
+                        size: 2, gravity: 0
+                    });
+                }
+                // Rising leaf particles
+                for (var li = 0; li < 6; li++) {
+                    Particles.add(
+                        this.x + this.w / 2 + (Math.random() * 16 - 8),
                         this.y + this.h / 2 + (Math.random() * 8 - 4), {
                         vx: (Math.random() - 0.5) * 0.4,
                         vy: -0.5 - Math.random() * 0.6,
@@ -477,28 +527,49 @@
                 }
                 ctx.globalAlpha = 1;
             } else if (this.characterId === 'lirielle') {
-                // Green crescent slash with leaf particles
+                // Green vine-whip slash with trailing leaves
                 ctx.globalAlpha = alpha;
-                this._drawSlashArc(ctx, cx, cy, 14, C.lightGreen, progress);
-                if (progress < 0.4 && Math.random() < 0.4) {
+                this._drawSlashArc(ctx, cx, cy, 18, C.lightGreen, progress);
+                // Second inner arc for vine effect
+                this._drawSlashArc(ctx, cx, cy, 12, '#88dd44', progress * 0.8);
+                // Leaf/vine trail particles
+                if (progress < 0.5 && Math.random() < 0.6) {
                     Particles.add(ah.x + Math.random() * ah.w, ah.y + Math.random() * ah.h, {
-                        vx: (Math.random() - 0.5) * 0.5,
-                        vy: -0.5 - Math.random() * 0.3,
-                        life: 12, color: C.green, size: 1, gravity: -0.01
+                        vx: (Math.random() - 0.5) * 0.8,
+                        vy: -0.5 - Math.random() * 0.4,
+                        life: 15, color: Math.random() < 0.5 ? C.green : C.lightGreen, size: 1, gravity: -0.02
                     });
                 }
+                // Vine whip tip glow
+                ctx.fillStyle = C.lightGreen;
+                ctx.globalAlpha = 0.5 * (1 - progress);
+                ctx.fillRect(Math.floor(ah.x + ah.w / 2 - 2), Math.floor(ah.y + ah.h / 2 - 2), 4, 4);
                 ctx.globalAlpha = 1;
             } else {
-                // Daxon: crisp white sword slash arc
+                // Daxon: heavy cleaving sword arc — wide and powerful
                 ctx.globalAlpha = alpha;
-                this._drawSlashArc(ctx, cx, cy, 14, C.white, progress);
-                // Spark particles on hit frame
-                if (progress > 0.2 && progress < 0.5 && this.attackDealt) {
-                    Particles.add(ah.x + ah.w / 2 + (Math.random() * 6 - 3), ah.y + ah.h / 2, {
-                        vx: (Math.random() - 0.5) * 2,
-                        vy: (Math.random() - 0.5) * 2,
-                        life: 6, color: C.white, size: 1, gravity: 0
-                    });
+                this._drawSlashArc(ctx, cx, cy, 18, C.white, progress);
+                // Secondary arc for weight feel
+                this._drawSlashArc(ctx, cx, cy, 14, C.lightBlue, progress * 0.9);
+                // Heavy spark burst on hit
+                if (progress > 0.15 && progress < 0.5 && this.attackDealt) {
+                    for (var sp = 0; sp < 2; sp++) {
+                        Particles.add(ah.x + ah.w / 2 + (Math.random() * 10 - 5), ah.y + ah.h / 2 + (Math.random() * 6 - 3), {
+                            vx: (Math.random() - 0.5) * 3,
+                            vy: (Math.random() - 0.5) * 3,
+                            life: 8, color: Math.random() < 0.5 ? C.white : C.lightBlue, size: 1, gravity: 0.1
+                        });
+                    }
+                }
+                // Ground impact line for cleave feel
+                if (progress > 0.3 && progress < 0.6) {
+                    ctx.globalAlpha = 0.4 * (1 - progress);
+                    ctx.fillStyle = C.white;
+                    if (this.dir === 'left' || this.dir === 'right') {
+                        ctx.fillRect(Math.floor(ah.x), Math.floor(ah.y + ah.h / 2), ah.w, 1);
+                    } else {
+                        ctx.fillRect(Math.floor(ah.x + ah.w / 2), Math.floor(ah.y), 1, ah.h);
+                    }
                 }
                 ctx.globalAlpha = 1;
             }
@@ -1245,9 +1316,14 @@
             if (this.phaseTransition) {
                 this.phaseTransitionTimer--;
                 this.flash = 2;
-                // Animate bar refill
+                // Animate bar refill with audio cue
                 if (this._barFillAnim < 1) {
                     this._barFillAnim = Math.min(1, this._barFillAnim + this._barFillSpeed);
+                    // Play rising refill sound once when fill begins
+                    if (!this._barFillSoundPlayed && this._barFillAnim > 0.05) {
+                        this._barFillSoundPlayed = true;
+                        Audio.play('bar_refill');
+                    }
                 }
                 // Periodic bursts during transition
                 var cx = this.x + this.w / 2;
@@ -1356,6 +1432,7 @@
             // Trigger HP bar refill animation (starts empty, fills over ~40 frames)
             this._barFillAnim = 0;
             this._barFillSpeed = 0.025;
+            this._barFillSoundPlayed = false;
 
             var cx = this.x + this.w / 2;
             var cy = this.y + this.h / 2;
@@ -2589,30 +2666,37 @@
 
         // --- Player melee attacks hitting enemies ---
         if (player.attacking && player.attackHitbox && !player.attackDealt) {
+            var isDaxon = (player.characterId === 'daxon');
+            var hitAny = false;
+
             for (i = 0; i < enemies.length; i++) {
                 enemy = enemies[i];
                 if (enemy.dead) continue;
                 enemyBox = { x: enemy.x, y: enemy.y, w: enemy.w, h: enemy.h };
                 if (Utils.aabb(player.attackHitbox, enemyBox)) {
                     enemy.takeDamage(atkDmg, player.x + player.w / 2, player.y + player.h / 2);
-                    player.attackDealt = true;
+                    hitAny = true;
                     // Attacker hitstop matches target: heavier hits freeze longer
                     player.hitstop = atkDmg >= 3 ? 5 : 3;
                     // Screen shake scales with damage
                     player._hitShake = atkDmg >= 3 ? 3 : 2;
+                    // Daxon cleaves through ALL enemies in arc; others stop at first
+                    if (!isDaxon) { player.attackDealt = true; break; }
                 }
             }
 
             // Player melee attacks hitting boss
-            if (boss && !boss.dead) {
+            if (boss && !boss.dead && (isDaxon || !hitAny)) {
                 bossBox = { x: boss.x, y: boss.y, w: boss.w, h: boss.h };
                 if (Utils.aabb(player.attackHitbox, bossBox)) {
                     boss.takeDamage(atkDmg, player.x + player.w / 2, player.y + player.h / 2);
-                    player.attackDealt = true;
+                    hitAny = true;
                     player.hitstop = 5; // Boss hits always feel weighty
                     player._hitShake = 3;
                 }
             }
+
+            if (hitAny) player.attackDealt = true;
         }
 
         // --- Friendly projectiles hitting enemies / boss ---

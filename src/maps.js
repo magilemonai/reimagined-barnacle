@@ -408,12 +408,12 @@
             [TW,  TF,  TF,  TW,  To,  TF,  TF,  TF,  TF,  TF,  TF,  To,  TW,  TF,  TF,  TW ],  // row 2  - top alcove (scepter)
             [TW,  TF,  Ch,  TW,  Pi,  TF,  TF,  TF,  TF,  TF,  TF,  Pi,  TW,  Ch,  TF,  TW ],  // row 3  - chests in side alcoves
             [TW,  TF,  TF,  TW,  TW,  TW,  TF,  TF,  TF,  TF,  TW,  TW,  TW,  TF,  TF,  TW ],  // row 4  - alcove walls (no pillars blocking path)
-            [TW,  TF,  TF,  TW,  TW,  TF,  TF,  Cp,  Cp,  TF,  TF,  TW,  TW,  TF,  TF,  TW ],  // row 5  - carpet leads to altar
+            [TW,  TF,  TF,  TW,  TW,  TF,  TF,  Cp,  Cp,  TF,  TF,  TW,  TW,  TF,  TF,  TW ],  // row 5  - carpet leads to statue
             [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 6  - wide open approach
-            [TW,  To,  TF,  TF,  TF,  TF,  TF,  Al,  Al,  TF,  TF,  TF,  TF,  TF,  To,  TW ],  // row 7  - ALTAR CENTER: torches at walls for atmosphere
-            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 8  - wide open below
-            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 9  - carpet continues south
-            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 10
+            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  St,  St,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 7  - STATUE of Izuriel above altar
+            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 8  - carpet between statue and altar
+            [TW,  To,  TF,  TF,  TF,  TF,  TF,  Al,  Al,  TF,  TF,  TF,  TF,  TF,  To,  TW ],  // row 9  - ALTAR with gem boxes, torches at walls
+            [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 10 - carpet continues south
             [TW,  TF,  TF,  TF,  TF,  TF,  TF,  Cp,  Cp,  TF,  TF,  TF,  TF,  TF,  TF,  TW ],  // row 11
             [TW,  TW,  TW,  TW,  TW,  TF,  TF,  Cp,  Cp,  TF,  TF,  TW,  TW,  TW,  TW,  TW ],  // row 12
             [Dk,  Dk,  Dk,  Dk,  TW,  TW,  TW,  TD,  TD,  TW,  TW,  TW,  Dk,  Dk,  Dk,  Dk ],  // row 13 - exit south

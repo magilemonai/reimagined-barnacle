@@ -610,6 +610,26 @@
           this._osc('sine', 900 + Math.random() * 150, gain, t, t + 0.018);
           break;
 
+        // ---- Boss HP bar refill: dark ascending power-up tone (500ms) ----
+        case 'bar_refill':
+          gain = this._gain(0.4);
+          gain.gain.setValueAtTime(0.01, t);
+          gain.gain.linearRampToValueAtTime(0.4 * this.masterVolume, t + 0.15);
+          gain.gain.setValueAtTime(0.4 * this.masterVolume, t + 0.4);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+          // Dark ascending tone (minor key: C3 - Eb3 - Gb3 - Bb3)
+          this._osc('sawtooth', 131, gain, t, t + 0.12);
+          this._osc('sawtooth', 156, gain, t + 0.12, t + 0.24);
+          this._osc('sawtooth', 185, gain, t + 0.24, t + 0.36);
+          this._osc('sawtooth', 233, gain, t + 0.36, t + 0.5);
+          // Low rumble underneath
+          var refillRumble = this._gain(0.2);
+          refillRumble.gain.setValueAtTime(0.01, t);
+          refillRumble.gain.linearRampToValueAtTime(0.2 * this.masterVolume, t + 0.2);
+          refillRumble.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+          this._osc('sine', 55, refillRumble, t, t + 0.5);
+          break;
+
         // ---- Pass 8C: Boss phase transition boom ----
         case 'phase_boom':
           gain = this._gain(0.9);

@@ -790,7 +790,7 @@
         // Speaker name text in the tab
         window.Utils.drawText(ctx, line.speaker, tabX + 4, tabY - tabH + 4, '#f0f0f0', 1);
 
-        // --- Pass 5B: Speaker portrait (32x32 scaled to fit) ---
+        // --- Pass 5B: Speaker portrait (128x128 scaled to fit) ---
         var portraitX = BOX_X + 5;
         var portraitY = by + 5;
         var portraitSize = bh - 10;

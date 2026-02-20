@@ -1663,86 +1663,418 @@
       function mp(name, fn) { S.create('portrait_' + name, 32, 32, fn); }
 
       // Fawks - warm, round face, barkeep apron
+      // Fawks - warm innkeeper, kind eyes, brown hair, sturdy build
       mp('fawks', function (ctx) {
-        // Background
-        ctx.fillStyle = '#2a1a0a';
+        // Warm tavern background
+        ctx.fillStyle = '#1a1008';
         ctx.fillRect(0, 0, 32, 32);
-        // Shoulders/chest
+        ctx.fillStyle = '#241810';
+        ctx.fillRect(3, 4, 26, 28);
+
+        // Shoulders — broad, sturdy, rolled-up sleeves
         ctx.fillStyle = P.brown;
-        ctx.fillRect(6, 22, 20, 10);
+        ctx.fillRect(4, 23, 24, 9);
+        ctx.fillStyle = '#8a5a2a';
+        ctx.fillRect(6, 23, 20, 8);
+        // Apron — well-worn, flour-dusted
         ctx.fillStyle = P.lightBrown;
-        ctx.fillRect(10, 22, 12, 8); // apron
-        // Neck
-        ctx.fillStyle = P.skin;
-        ctx.fillRect(13, 18, 6, 5);
-        // Face
-        circ(ctx, 16, 13, 7, P.skin);
-        circ(ctx, 16, 13, 6, P.paleSkin);
-        // Eyes
-        ctx.fillStyle = P.darkBrown;
-        ctx.fillRect(13, 11, 2, 2);
-        ctx.fillRect(18, 11, 2, 2);
-        // Mouth (smile)
-        ctx.fillStyle = P.darkRed;
-        ctx.fillRect(14, 16, 4, 1);
-        // Hair
+        ctx.fillRect(10, 23, 12, 9);
+        ctx.fillStyle = P.tan;
+        ctx.fillRect(11, 24, 10, 7);
+        // Apron string
         ctx.fillStyle = P.brown;
-        ctx.fillRect(10, 5, 12, 4);
-        ctx.fillRect(9, 7, 3, 4);
-        ctx.fillRect(20, 7, 3, 4);
-      });
-
-      // Helena - dignified, silver-streaked hair
-      mp('helena', function (ctx) {
-        ctx.fillStyle = '#0a1a0a';
-        ctx.fillRect(0, 0, 32, 32);
-        ctx.fillStyle = P.darkGreen;
-        ctx.fillRect(6, 22, 20, 10);
-        ctx.fillStyle = P.gold;
-        ctx.fillRect(14, 21, 4, 2); // chain of office
+        ctx.fillRect(10, 23, 1, 6);
+        ctx.fillRect(21, 23, 1, 6);
+        // Collar — open, casual
+        ctx.fillStyle = '#8a5a2a';
+        ctx.fillRect(12, 20, 2, 3);
+        ctx.fillRect(18, 20, 2, 3);
+        // Chest visible at collar opening
         ctx.fillStyle = P.skin;
-        ctx.fillRect(13, 18, 6, 5);
-        circ(ctx, 16, 13, 7, P.skin);
-        circ(ctx, 16, 13, 6, P.paleSkin);
-        ctx.fillStyle = P.darkGreen;
-        ctx.fillRect(13, 11, 2, 2);
-        ctx.fillRect(18, 11, 2, 2);
-        ctx.fillStyle = P.darkRed;
-        ctx.fillRect(15, 16, 2, 1);
-        // Silver-streaked hair
-        ctx.fillStyle = P.lightGray;
-        ctx.fillRect(9, 4, 14, 5);
-        ctx.fillRect(8, 7, 3, 6);
-        ctx.fillRect(21, 7, 3, 6);
-        ctx.fillStyle = P.gray;
-        ctx.fillRect(11, 5, 2, 3);
-        ctx.fillRect(19, 5, 2, 3);
+        ctx.fillRect(14, 21, 4, 2);
+
+        // Neck — thick, working-man's build
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(12, 18, 8, 5);
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(13, 18, 6, 4);
+
+        // Face — round, friendly, ruddy cheeks
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(8, 8, 16, 12);
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(9, 8, 14, 11);
+        ctx.fillStyle = P.paleSkin;
+        ctx.fillRect(10, 9, 12, 9);
+        // Ruddy cheeks (warm from the kitchen)
+        ctx.fillStyle = '#e0a888';
+        ctx.fillRect(10, 14, 3, 2);
+        ctx.fillRect(19, 14, 3, 2);
+        // Jaw — broad, rounded
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(9, 17, 1, 2);
+        ctx.fillRect(22, 17, 1, 2);
+
+        // Eyes — warm brown, crinkled at corners (smile lines)
+        // Brow — relaxed, slightly raised (open, welcoming)
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(11, 10, 4, 1);
+        ctx.fillRect(18, 10, 4, 1);
+        // Eye whites
+        ctx.fillStyle = '#e8e0d8';
+        ctx.fillRect(11, 11, 4, 3);
+        ctx.fillRect(18, 11, 4, 3);
+        // Brown irises
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(12, 11, 3, 3);
+        ctx.fillRect(19, 11, 3, 3);
+        // Iris highlight
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(13, 12, 1, 1);
+        ctx.fillRect(20, 12, 1, 1);
+        // Pupils
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(13, 12, 1, 1);
+        ctx.fillRect(20, 12, 1, 1);
+        // Warm catch-light (firelight)
+        ctx.fillStyle = '#f0d8a0';
+        ctx.fillRect(12, 11, 1, 1);
+        ctx.fillRect(19, 11, 1, 1);
+        // Smile crinkles at eye corners
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(10, 12, 1, 1);
+        ctx.fillRect(22, 12, 1, 1);
+        ctx.fillRect(10, 13, 1, 1);
+        ctx.fillRect(22, 13, 1, 1);
+
+        // Nose — broad, friendly
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(15, 13, 2, 3);
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(14, 15, 1, 1);
+        ctx.fillRect(17, 15, 1, 1);  // nostrils
+
+        // Mouth — genuine, warm smile
+        ctx.fillStyle = '#a04040';
+        ctx.fillRect(12, 17, 8, 1);
+        ctx.fillStyle = '#c06060';
+        ctx.fillRect(13, 17, 6, 1);
+        // Upturned corners (real smile, not forced)
+        ctx.fillStyle = '#a04040';
+        ctx.fillRect(12, 16, 1, 1);
+        ctx.fillRect(19, 16, 1, 1);
+        // Slight lower lip
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(14, 18, 4, 1);
+
+        // Hair — thick brown, slightly messy (busy innkeeper)
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(8, 3, 16, 7);
+        ctx.fillRect(7, 5, 2, 8);
+        ctx.fillRect(23, 5, 2, 8);
+        // Hair volume
+        ctx.fillRect(9, 2, 14, 2);
+        // Lighter brown highlights
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(10, 3, 3, 4);
+        ctx.fillRect(15, 2, 3, 4);
+        ctx.fillRect(20, 3, 2, 4);
+        // Stray hair tuft (slightly unkempt)
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(9, 2, 2, 1);
+        ctx.fillRect(21, 2, 2, 1);
+        // Side hair
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(7, 8, 2, 5);
+        ctx.fillRect(23, 8, 2, 5);
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(7, 9, 1, 3);
+        ctx.fillRect(24, 9, 1, 3);
+
+        // Stubble shadow (works hard, no time to shave)
+        ctx.fillStyle = 'rgba(74, 42, 10, 0.25)';
+        ctx.fillRect(10, 16, 3, 2);
+        ctx.fillRect(19, 16, 3, 2);
+        ctx.fillRect(12, 18, 8, 1);
       });
 
-      // Elira Voss - military, short hair, scar
-      mp('elira', function (ctx) {
-        ctx.fillStyle = '#1a1a2a';
+      // Helena - dignified village leader, silver-streaked hair, chain of office
+      mp('helena', function (ctx) {
+        // Muted green-dark background (her office, candlelit)
+        ctx.fillStyle = '#0a140a';
         ctx.fillRect(0, 0, 32, 32);
-        ctx.fillStyle = P.darkGray;
-        ctx.fillRect(6, 22, 20, 10); // armor
-        ctx.fillStyle = P.lightGray;
-        ctx.fillRect(8, 24, 2, 2); // shoulder plate
-        ctx.fillRect(22, 24, 2, 2);
+        ctx.fillStyle = '#0e1a0e';
+        ctx.fillRect(3, 4, 26, 28);
+
+        // Shoulders — high-collared green vestment
+        ctx.fillStyle = '#1a4a1a';
+        ctx.fillRect(5, 23, 22, 9);
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(7, 23, 18, 8);
+        // Collar detail — stiff, upright
+        ctx.fillStyle = '#1a4a1a';
+        ctx.fillRect(10, 20, 3, 4);
+        ctx.fillRect(19, 20, 3, 4);
+        // Collar trim
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(10, 20, 1, 3);
+        ctx.fillRect(21, 20, 1, 3);
+        // Chain of office — ornate
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(13, 22, 1, 1);
+        ctx.fillRect(14, 23, 1, 1);
+        ctx.fillRect(15, 22, 2, 1);
+        ctx.fillRect(17, 23, 1, 1);
+        ctx.fillRect(18, 22, 1, 1);
+        // Pendant
+        ctx.fillStyle = P.lightGreen;
+        ctx.fillRect(15, 24, 2, 2);
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(15, 24, 1, 1);
+
+        // Neck — slender, dignified posture
         ctx.fillStyle = P.darkSkin;
         ctx.fillRect(13, 18, 6, 5);
-        circ(ctx, 16, 13, 7, P.darkSkin);
-        circ(ctx, 16, 13, 6, P.skin);
-        ctx.fillStyle = P.darkBrown;
-        ctx.fillRect(13, 11, 2, 2);
-        ctx.fillRect(18, 11, 2, 2);
-        ctx.fillStyle = P.darkRed;
-        ctx.fillRect(15, 16, 2, 1);
-        // Short dark hair
-        ctx.fillStyle = P.black;
-        ctx.fillRect(10, 4, 12, 4);
-        // Scar
-        ctx.fillStyle = P.lightRed;
-        ctx.fillRect(19, 10, 1, 4);
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(13, 18, 5, 4);
+
+        // Face — oval, refined features
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(8, 8, 16, 12);
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(9, 8, 14, 11);
+        ctx.fillStyle = P.paleSkin;
+        ctx.fillRect(10, 9, 12, 9);
+        // Cheekbone highlights
+        ctx.fillStyle = '#f4dcc0';
+        ctx.fillRect(10, 13, 2, 2);
+        ctx.fillRect(20, 13, 2, 2);
+        // Jaw contour
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(9, 17, 1, 2);
+        ctx.fillRect(22, 17, 1, 2);
+
+        // Eyes — deep green, steady, perceptive
+        // Brow line — composed, slightly arched (not angry, authoritative)
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(11, 10, 4, 1);
+        ctx.fillRect(18, 10, 4, 1);
+        // Eye whites
+        ctx.fillStyle = '#e8e0d8';
+        ctx.fillRect(11, 11, 4, 3);
+        ctx.fillRect(18, 11, 4, 3);
+        // Green irises
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(12, 11, 3, 3);
+        ctx.fillRect(19, 11, 3, 3);
+        // Bright iris center
+        ctx.fillStyle = P.green;
+        ctx.fillRect(13, 12, 1, 1);
+        ctx.fillRect(20, 12, 1, 1);
+        // Pupils
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(13, 12, 1, 1);
+        ctx.fillRect(20, 12, 1, 1);
+        // Catch-light (warm, candlelit)
+        ctx.fillStyle = '#f0e8d0';
+        ctx.fillRect(12, 11, 1, 1);
+        ctx.fillRect(19, 11, 1, 1);
+        // Lower lash line
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(11, 14, 4, 1);
+        ctx.fillRect(18, 14, 4, 1);
+
+        // Nose — straight, refined
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(15, 13, 2, 3);
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(15, 15, 1, 1);
+
+        // Mouth — composed, firm but not unkind
+        ctx.fillStyle = '#a04040';
+        ctx.fillRect(13, 17, 6, 1);
+        ctx.fillStyle = '#c06060';
+        ctx.fillRect(14, 17, 4, 1);
+        // Slight definition at lip corners
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(12, 17, 1, 1);
+        ctx.fillRect(19, 17, 1, 1);
+
+        // Hair — silver-streaked, swept back, stately
+        // Base hair shape
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(8, 3, 16, 7);
+        ctx.fillRect(7, 5, 2, 10);
+        ctx.fillRect(23, 5, 2, 10);
+        // Hair volume on top
+        ctx.fillRect(9, 2, 14, 2);
+        // Silver streaks
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(10, 3, 2, 5);
+        ctx.fillRect(14, 2, 2, 5);
+        ctx.fillRect(20, 3, 2, 5);
+        // Bright highlights
+        ctx.fillStyle = '#d0d0e0';
+        ctx.fillRect(11, 3, 1, 3);
+        ctx.fillRect(15, 2, 1, 3);
+        ctx.fillRect(21, 3, 1, 3);
+        // Darker undertone in hair
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(13, 4, 1, 4);
+        ctx.fillRect(17, 4, 1, 4);
+        // Side hair framing face
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(7, 8, 2, 7);
+        ctx.fillRect(23, 8, 2, 7);
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(7, 9, 1, 4);
+        ctx.fillRect(24, 9, 1, 4);
+
+        // Fine wrinkle lines (age/wisdom, not haggard)
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(10, 16, 3, 1);  // left nasolabial
+        ctx.fillRect(19, 16, 3, 1);  // right nasolabial
+      });
+
+      // Elira Voss - military captain, short dark hair, battle scar, fierce
+      mp('elira', function (ctx) {
+        // Cold steel-blue background (garrison, pre-dawn)
+        ctx.fillStyle = '#0e0e1a';
+        ctx.fillRect(0, 0, 32, 32);
+        ctx.fillStyle = '#141420';
+        ctx.fillRect(3, 4, 26, 28);
+
+        // Armor — layered plate, battle-worn
+        ctx.fillStyle = '#2a2a3a';
+        ctx.fillRect(4, 23, 24, 9);
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(6, 23, 20, 8);
+        // Pauldrons — raised, angular
+        ctx.fillStyle = '#3a3a4a';
+        ctx.fillRect(4, 22, 5, 4);
+        ctx.fillRect(23, 22, 5, 4);
+        // Pauldron highlights (metal sheen)
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(5, 22, 3, 1);
+        ctx.fillRect(24, 22, 3, 1);
+        // Pauldron rivets
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(5, 24, 1, 1);
+        ctx.fillRect(7, 24, 1, 1);
+        ctx.fillRect(25, 24, 1, 1);
+        ctx.fillRect(27, 24, 1, 1);
+        // Gorget (neck armor)
+        ctx.fillStyle = '#3a3a4a';
+        ctx.fillRect(11, 20, 10, 3);
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(12, 20, 8, 2);
+
+        // Neck
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(13, 18, 6, 4);
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(13, 18, 5, 3);
+
+        // Face — angular, strong jaw, dark skin
+        ctx.fillStyle = '#8a6848';
+        ctx.fillRect(8, 7, 16, 13);
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(9, 7, 14, 12);
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(10, 8, 12, 10);
+        // High cheekbones (sharp, defined)
+        ctx.fillStyle = '#d0a878';
+        ctx.fillRect(10, 13, 2, 1);
+        ctx.fillRect(20, 13, 2, 1);
+        // Strong jaw line
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(9, 17, 1, 2);
+        ctx.fillRect(22, 17, 1, 2);
+        ctx.fillRect(10, 18, 12, 1);
+
+        // Eyes — sharp, focused, dark brown (a soldier's eyes)
+        // Brows — angled down slightly (intense, not angry)
+        ctx.fillStyle = '#1a1010';
+        ctx.fillRect(11, 9, 5, 1);
+        ctx.fillRect(17, 9, 5, 1);
+        // Brow angle (inner ends lower = focused)
+        ctx.fillStyle = '#1a1010';
+        ctx.fillRect(14, 10, 1, 1);
+        ctx.fillRect(18, 10, 1, 1);
+        // Eye whites
+        ctx.fillStyle = '#e0d8d0';
+        ctx.fillRect(11, 11, 4, 2);
+        ctx.fillRect(18, 11, 4, 2);
+        // Dark brown irises
+        ctx.fillStyle = '#3a2010';
+        ctx.fillRect(12, 11, 3, 2);
+        ctx.fillRect(19, 11, 3, 2);
+        // Iris detail
+        ctx.fillStyle = '#5a3818';
+        ctx.fillRect(13, 11, 1, 1);
+        ctx.fillRect(20, 11, 1, 1);
+        // Pupils
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(13, 11, 1, 1);
+        ctx.fillRect(20, 11, 1, 1);
+        // Steel catch-light
+        ctx.fillStyle = '#c0c8d8';
+        ctx.fillRect(12, 11, 1, 1);
+        ctx.fillRect(19, 11, 1, 1);
+        // Under-eye — no crinkles (she doesn't smile much)
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(11, 13, 4, 1);
+        ctx.fillRect(18, 13, 4, 1);
+
+        // Nose — straight, strong
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(15, 12, 2, 3);
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(15, 12, 1, 2);
+
+        // Mouth — set, determined, thin-lipped
+        ctx.fillStyle = '#804040';
+        ctx.fillRect(13, 16, 6, 1);
+        ctx.fillStyle = '#905050';
+        ctx.fillRect(14, 16, 4, 1);
+        // Slight tension at corners (holding back words)
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(12, 16, 1, 1);
+        ctx.fillRect(19, 16, 1, 1);
+
+        // Scar — jagged, healed but prominent (right side of face)
+        // Main scar line (raised, lighter tissue)
+        ctx.fillStyle = '#d08888';
+        ctx.fillRect(21, 9, 1, 1);
+        ctx.fillRect(20, 10, 1, 1);
+        ctx.fillRect(20, 11, 1, 1);
+        ctx.fillRect(21, 12, 1, 1);
+        ctx.fillRect(21, 13, 1, 1);
+        ctx.fillRect(20, 14, 1, 1);
+        // Scar shadow (depth)
+        ctx.fillStyle = '#a06060';
+        ctx.fillRect(22, 10, 1, 1);
+        ctx.fillRect(21, 11, 1, 1);
+        ctx.fillRect(22, 13, 1, 1);
+
+        // Hair — cropped short, military cut, near-black
+        ctx.fillStyle = '#0f0f0f';
+        ctx.fillRect(8, 3, 16, 6);
+        ctx.fillRect(8, 2, 14, 2);
+        // Tight to the head (practical)
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(9, 3, 14, 4);
+        // Subtle sheen
+        ctx.fillStyle = '#2a2a3a';
+        ctx.fillRect(12, 3, 3, 2);
+        ctx.fillRect(17, 3, 2, 2);
+        // Tight sides (undercut)
+        ctx.fillStyle = '#0f0f0f';
+        ctx.fillRect(7, 6, 2, 4);
+        ctx.fillRect(23, 6, 2, 4);
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(8, 7, 1, 3);
+        ctx.fillRect(23, 7, 1, 3);
       });
 
       // Braxon - gruff, broad, beard
@@ -2080,75 +2412,284 @@
         ctx.globalAlpha = 1;
       });
 
-      // Fawks - worried expression: furrowed brow, downturned mouth
+      // Fawks - worried expression: brow tension, tight mouth, less warmth
       mp('fawks_worried', function (ctx) {
-        // Background
-        ctx.fillStyle = '#2a1a0a';
+        // Slightly dimmer tavern background (mood shift)
+        ctx.fillStyle = '#180e06';
         ctx.fillRect(0, 0, 32, 32);
-        // Shoulders/chest
+        ctx.fillStyle = '#20140c';
+        ctx.fillRect(3, 4, 26, 28);
+
+        // Shoulders — same sturdy build, slightly hunched
         ctx.fillStyle = P.brown;
-        ctx.fillRect(6, 22, 20, 10);
+        ctx.fillRect(4, 24, 24, 8);
+        ctx.fillStyle = '#8a5a2a';
+        ctx.fillRect(6, 24, 20, 7);
+        // Apron
         ctx.fillStyle = P.lightBrown;
-        ctx.fillRect(10, 22, 12, 8); // apron
-        // Neck
-        ctx.fillStyle = P.skin;
-        ctx.fillRect(13, 18, 6, 5);
-        // Face
-        circ(ctx, 16, 13, 7, P.skin);
-        circ(ctx, 16, 13, 6, P.paleSkin);
-        // Eyes - worried, slightly raised brows
-        ctx.fillStyle = P.darkBrown;
-        ctx.fillRect(13, 11, 2, 2);
-        ctx.fillRect(18, 11, 2, 2);
-        // Furrowed brows (angled inward)
-        ctx.fillStyle = P.darkBrown;
-        ctx.fillRect(13, 9, 3, 1);
-        ctx.fillRect(17, 9, 3, 1);
-        // Mouth - downturned frown
-        ctx.fillStyle = P.darkRed;
-        ctx.fillRect(14, 17, 4, 1);
-        ctx.fillRect(13, 16, 1, 1);
-        ctx.fillRect(18, 16, 1, 1);
-        // Hair
+        ctx.fillRect(10, 24, 12, 8);
+        ctx.fillStyle = P.tan;
+        ctx.fillRect(11, 25, 10, 6);
+        // Apron strings
         ctx.fillStyle = P.brown;
-        ctx.fillRect(10, 5, 12, 4);
-        ctx.fillRect(9, 7, 3, 4);
-        ctx.fillRect(20, 7, 3, 4);
+        ctx.fillRect(10, 24, 1, 5);
+        ctx.fillRect(21, 24, 1, 5);
+        // Collar
+        ctx.fillStyle = '#8a5a2a';
+        ctx.fillRect(12, 21, 2, 3);
+        ctx.fillRect(18, 21, 2, 3);
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(14, 22, 4, 2);
+
+        // Neck — tense
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(12, 19, 8, 5);
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(13, 19, 6, 4);
+
+        // Face — same round shape but tension visible
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(8, 8, 16, 12);
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(9, 8, 14, 11);
+        ctx.fillStyle = P.paleSkin;
+        ctx.fillRect(10, 9, 12, 9);
+        // Less rosy cheeks (blood drained from worry)
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(10, 14, 3, 2);
+        ctx.fillRect(19, 14, 3, 2);
+        // Jaw contour
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(9, 17, 1, 2);
+        ctx.fillRect(22, 17, 1, 2);
+
+        // Eyes — same warm brown but wider, brows pushed up (anxious)
+        // Brows — raised inner corners, furrowed (the key worried expression)
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(11, 9, 4, 1);
+        ctx.fillRect(18, 9, 4, 1);
+        // Inner brow lift (angled upward toward center = worry)
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(14, 9, 1, 1);
+        ctx.fillRect(18, 9, 1, 1);
+        ctx.fillRect(15, 8, 1, 1);  // left inner brow raised
+        ctx.fillRect(17, 8, 1, 1);  // right inner brow raised
+        // Eye whites — slightly more visible (wider open)
+        ctx.fillStyle = '#e8e0d8';
+        ctx.fillRect(11, 11, 4, 3);
+        ctx.fillRect(18, 11, 4, 3);
+        // Brown irises
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(12, 11, 3, 3);
+        ctx.fillRect(19, 11, 3, 3);
+        // Iris highlight
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(13, 12, 1, 1);
+        ctx.fillRect(20, 12, 1, 1);
+        // Pupils — slightly smaller (tension)
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(13, 12, 1, 1);
+        ctx.fillRect(20, 12, 1, 1);
+        // Catch-light (dimmer, less warm)
+        ctx.fillStyle = '#e0d0a0';
+        ctx.fillRect(12, 11, 1, 1);
+        ctx.fillRect(19, 11, 1, 1);
+        // No smile crinkles (they vanished)
+
+        // Nose
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(15, 13, 2, 3);
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(14, 15, 1, 1);
+        ctx.fillRect(17, 15, 1, 1);
+
+        // Mouth — tight, downturned (trying to stay composed)
+        ctx.fillStyle = '#904848';
+        ctx.fillRect(12, 17, 8, 1);
+        ctx.fillStyle = '#a05050';
+        ctx.fillRect(13, 17, 6, 1);
+        // Downturned corners (the smile is gone)
+        ctx.fillStyle = '#904848';
+        ctx.fillRect(12, 18, 1, 1);
+        ctx.fillRect(19, 18, 1, 1);
+        // Lower lip tense
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(14, 18, 4, 1);
+
+        // Hair — same but slightly more disheveled
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(8, 3, 16, 7);
+        ctx.fillRect(7, 5, 2, 8);
+        ctx.fillRect(23, 5, 2, 8);
+        ctx.fillRect(9, 2, 14, 2);
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(10, 3, 3, 4);
+        ctx.fillRect(15, 2, 3, 4);
+        ctx.fillRect(20, 3, 2, 4);
+        // More stray tufts (been running hands through it)
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(8, 2, 3, 1);
+        ctx.fillRect(20, 1, 3, 1);
+        ctx.fillRect(13, 1, 2, 1);
+        // Side hair
+        ctx.fillStyle = P.darkBrown;
+        ctx.fillRect(7, 8, 2, 5);
+        ctx.fillRect(23, 8, 2, 5);
+        ctx.fillStyle = P.brown;
+        ctx.fillRect(7, 9, 1, 3);
+        ctx.fillRect(24, 9, 1, 3);
+
+        // Forehead tension line
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(12, 8, 8, 1);
+
+        // Stubble (same)
+        ctx.fillStyle = 'rgba(74, 42, 10, 0.25)';
+        ctx.fillRect(10, 16, 3, 2);
+        ctx.fillRect(19, 16, 3, 2);
+        ctx.fillRect(12, 18, 8, 1);
       });
 
-      // Helena - hopeful expression: wider eyes, slight smile, brighter face
+      // Helena - hopeful expression: eyes brighter, brows lifted, genuine smile
       mp('helena_hopeful', function (ctx) {
-        ctx.fillStyle = '#0a1a0a';
+        // Slightly warmer background (dawn light, hope)
+        ctx.fillStyle = '#0c160c';
         ctx.fillRect(0, 0, 32, 32);
+        ctx.fillStyle = '#101e10';
+        ctx.fillRect(3, 4, 26, 28);
+
+        // Shoulders — same vestment, posture slightly more open
+        ctx.fillStyle = '#1a4a1a';
+        ctx.fillRect(5, 23, 22, 9);
         ctx.fillStyle = P.darkGreen;
-        ctx.fillRect(6, 22, 20, 10);
+        ctx.fillRect(7, 23, 18, 8);
+        // Collar
+        ctx.fillStyle = '#1a4a1a';
+        ctx.fillRect(10, 20, 3, 4);
+        ctx.fillRect(19, 20, 3, 4);
         ctx.fillStyle = P.gold;
-        ctx.fillRect(14, 21, 4, 2); // chain of office
-        ctx.fillStyle = P.skin;
+        ctx.fillRect(10, 20, 1, 3);
+        ctx.fillRect(21, 20, 1, 3);
+        // Chain of office
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(13, 22, 1, 1);
+        ctx.fillRect(14, 23, 1, 1);
+        ctx.fillRect(15, 22, 2, 1);
+        ctx.fillRect(17, 23, 1, 1);
+        ctx.fillRect(18, 22, 1, 1);
+        // Pendant (catches the light)
+        ctx.fillStyle = P.lightGreen;
+        ctx.fillRect(15, 24, 2, 2);
+        ctx.fillStyle = P.paleGreen;
+        ctx.fillRect(15, 24, 1, 1);
+
+        // Neck
+        ctx.fillStyle = P.darkSkin;
         ctx.fillRect(13, 18, 6, 5);
-        circ(ctx, 16, 13, 7, P.skin);
-        circ(ctx, 16, 13, 6, P.paleSkin);
-        // Eyes - wider, brighter (hopeful gleam)
-        ctx.fillStyle = P.darkGreen;
-        ctx.fillRect(12, 11, 3, 2);
-        ctx.fillRect(18, 11, 3, 2);
-        // Eye highlight (hopeful gleam)
-        ctx.fillStyle = P.white;
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(13, 18, 5, 4);
+
+        // Face — same refined oval, but warmer tones
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(8, 8, 16, 12);
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(9, 8, 14, 11);
+        ctx.fillStyle = P.paleSkin;
+        ctx.fillRect(10, 9, 12, 9);
+        // Warmer cheekbones (color returned to her face)
+        ctx.fillStyle = '#f0d8c0';
+        ctx.fillRect(10, 13, 2, 2);
+        ctx.fillRect(20, 13, 2, 2);
+        // Jaw
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(9, 17, 1, 2);
+        ctx.fillRect(22, 17, 1, 2);
+
+        // Eyes — wider, brighter, glistening (hope, relief)
+        // Brows — raised slightly (open, less guarded)
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(11, 9, 4, 1);
+        ctx.fillRect(18, 9, 4, 1);
+        // Eye whites — more visible (wider eyes)
+        ctx.fillStyle = '#f0e8e0';
+        ctx.fillRect(11, 10, 4, 3);
+        ctx.fillRect(18, 10, 4, 3);
+        // Green irises — brighter than usual
+        ctx.fillStyle = P.green;
+        ctx.fillRect(12, 10, 3, 3);
+        ctx.fillRect(19, 10, 3, 3);
+        // Bright iris center
+        ctx.fillStyle = P.lightGreen;
         ctx.fillRect(13, 11, 1, 1);
-        ctx.fillRect(19, 11, 1, 1);
-        // Mouth - upturned smile
-        ctx.fillStyle = P.darkRed;
-        ctx.fillRect(14, 16, 4, 1);
-        ctx.fillRect(13, 15, 1, 1);
-        ctx.fillRect(18, 15, 1, 1);
-        // Silver-streaked hair
-        ctx.fillStyle = P.lightGray;
-        ctx.fillRect(9, 4, 14, 5);
-        ctx.fillRect(8, 7, 3, 6);
-        ctx.fillRect(21, 7, 3, 6);
+        ctx.fillRect(20, 11, 1, 1);
+        // Pupils
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(13, 11, 1, 1);
+        ctx.fillRect(20, 11, 1, 1);
+        // Bright catch-light (hope shining)
+        ctx.fillStyle = P.white;
+        ctx.fillRect(12, 10, 1, 1);
+        ctx.fillRect(19, 10, 1, 1);
+        // Moisture glistening (holding back tears of relief)
+        ctx.fillStyle = 'rgba(240, 240, 240, 0.3)';
+        ctx.fillRect(11, 13, 4, 1);
+        ctx.fillRect(18, 13, 4, 1);
+        // Lower lash line
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(11, 13, 4, 1);
+        ctx.fillRect(18, 13, 4, 1);
+
+        // Nose
+        ctx.fillStyle = P.skin;
+        ctx.fillRect(15, 12, 2, 3);
+        ctx.fillStyle = P.darkSkin;
+        ctx.fillRect(15, 14, 1, 1);
+
+        // Mouth — genuine smile (rare for her)
+        ctx.fillStyle = '#b05050';
+        ctx.fillRect(12, 16, 8, 1);
+        ctx.fillStyle = '#c86868';
+        ctx.fillRect(13, 16, 6, 1);
+        // Upturned corners (a real smile breaks through)
+        ctx.fillStyle = '#b05050';
+        ctx.fillRect(12, 15, 1, 1);
+        ctx.fillRect(19, 15, 1, 1);
+        // Slight lower lip
+        ctx.fillStyle = P.paleSkin;
+        ctx.fillRect(14, 17, 4, 1);
+
+        // Hair — same silver-streaked, but light catches it more
         ctx.fillStyle = P.gray;
-        ctx.fillRect(11, 5, 2, 3);
-        ctx.fillRect(19, 5, 2, 3);
+        ctx.fillRect(8, 3, 16, 7);
+        ctx.fillRect(7, 5, 2, 10);
+        ctx.fillRect(23, 5, 2, 10);
+        ctx.fillRect(9, 2, 14, 2);
+        // Silver streaks — brighter
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(10, 3, 2, 5);
+        ctx.fillRect(14, 2, 2, 5);
+        ctx.fillRect(20, 3, 2, 5);
+        // Bright highlights (dawn light)
+        ctx.fillStyle = '#dddde8';
+        ctx.fillRect(11, 3, 1, 3);
+        ctx.fillRect(15, 2, 1, 3);
+        ctx.fillRect(21, 3, 1, 3);
+        // Darker undertone
+        ctx.fillStyle = P.darkGray;
+        ctx.fillRect(13, 4, 1, 4);
+        ctx.fillRect(17, 4, 1, 4);
+        // Side hair
+        ctx.fillStyle = P.gray;
+        ctx.fillRect(7, 8, 2, 7);
+        ctx.fillRect(23, 8, 2, 7);
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(7, 9, 1, 4);
+        ctx.fillRect(24, 9, 1, 4);
+
+        // Worry lines still present but softened
+        ctx.fillStyle = P.paleSkin;
+        ctx.fillRect(10, 15, 3, 1);
+        ctx.fillRect(19, 15, 3, 1);
       });
 
       // Nitriti — ethereal spirit between stars: pale luminous face floating

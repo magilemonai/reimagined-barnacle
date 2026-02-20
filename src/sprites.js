@@ -1369,27 +1369,27 @@
 
       // --- Temple tiles ---
       mt('temple_wall', function (ctx) {
-        fill(ctx, P.darkStone);
-        ctx.fillStyle = P.black;
+        fill(ctx, '#4a4a5a');
+        ctx.fillStyle = '#2a2a3a';
         for (var r = 0; r < 4; r++) {
           var y = r * 4;
           ctx.fillRect(0, y, 16, 1);
           for (var c = r % 2 ? 4 : 0; c < 16; c += 8) ctx.fillRect(c, y, 1, 4);
         }
         // Ancient carvings
-        ctx.fillStyle = P.stone;
+        ctx.fillStyle = P.lightStone;
         ctx.fillRect(6, 6, 4, 1);
         ctx.fillRect(7, 10, 2, 1);
       });
 
       mt('temple_floor', function (ctx) {
-        fill(ctx, P.stone);
-        ctx.fillStyle = P.darkStone;
+        fill(ctx, P.lightStone);
+        ctx.fillStyle = P.stone;
         ctx.fillRect(0, 0, 16, 1);
         ctx.fillRect(0, 8, 16, 1);
         ctx.fillRect(0, 0, 1, 16);
         ctx.fillRect(8, 0, 1, 16);
-        dots(ctx, P.lightStone, 4);
+        dots(ctx, '#b8b8c8', 4);
       });
 
       mt('temple_door', function (ctx) {
@@ -1496,6 +1496,41 @@
         ctx.fillRect(8, 2, 2, 3);
         ctx.fillStyle = P.white;
         ctx.fillRect(8, 3, 2, 1);
+      });
+
+      // Nitriti shrine — glowing pale-blue crystalline shrine with star motif
+      mt('nitriti_shrine', function (ctx) {
+        fill(ctx, P.darkStone);
+        // Stone base pedestal
+        ctx.fillStyle = P.stone;
+        ctx.fillRect(2, 12, 12, 4);
+        ctx.fillStyle = P.lightStone;
+        ctx.fillRect(3, 12, 10, 1);
+        // Shrine pillar — pale stone with blue veins
+        ctx.fillStyle = P.lightGray;
+        ctx.fillRect(5, 3, 6, 10);
+        ctx.fillStyle = '#b0b8d0';
+        ctx.fillRect(6, 4, 4, 8);
+        // Blue crystal veins
+        ctx.fillStyle = P.paleBlue;
+        ctx.fillRect(7, 5, 1, 6);
+        ctx.fillRect(8, 4, 1, 4);
+        // Star symbol at top — Nitriti's mark
+        ctx.fillStyle = '#c0d8ff';
+        ctx.fillRect(7, 1, 2, 1);
+        ctx.fillRect(6, 2, 4, 1);
+        ctx.fillRect(7, 3, 2, 1);
+        // Star bright center
+        ctx.fillStyle = P.white;
+        ctx.fillRect(7, 2, 2, 1);
+        // Soft glow halo around the star
+        ctx.fillStyle = P.paleBlue;
+        ctx.fillRect(5, 1, 1, 3);
+        ctx.fillRect(10, 1, 1, 3);
+        ctx.fillRect(7, 0, 2, 1);
+        // Faint blue glow at base
+        ctx.fillStyle = 'rgba(138,184,240,0.3)';
+        ctx.fillRect(3, 11, 10, 2);
       });
 
       mt('chest', function (ctx) {
@@ -4512,264 +4547,294 @@
         ctx.fillRect(108, 82, 2, 2);
       });
 
-      // Que'Rubra - ancient tree spirit, gnarled bark face, glowing green eyes, leaf crown
+      // Que'Rubra - serene feminine tree spirit, flowing vine hair, gentle glowing eyes
       mp('querubra', function (ctx) {
-        // Deep forest darkness background (128x128)
-        ctx.fillStyle = '#050e05';
+        // Soft dappled forest background — warm green light filtering through canopy
+        ctx.fillStyle = '#0a1a0a';
         ctx.fillRect(0, 0, 128, 128);
-        ctx.fillStyle = '#0a200a';
-        ctx.fillRect(8, 8, 112, 112);
-        ctx.fillStyle = '#0c280c';
-        ctx.fillRect(16, 16, 96, 96);
-        // Additional background depth layer
-        ctx.fillStyle = '#0d2c0d';
-        ctx.fillRect(20, 20, 88, 88);
+        ctx.fillStyle = '#102810';
+        ctx.fillRect(6, 6, 116, 116);
+        ctx.fillStyle = '#143214';
+        ctx.fillRect(12, 12, 104, 104);
+        ctx.fillStyle = '#183a18';
+        ctx.fillRect(18, 18, 92, 92);
+        // Dappled light spots — sunlight through leaves
+        ctx.fillStyle = 'rgba(90, 197, 90, 0.08)';
+        ctx.fillRect(20, 10, 14, 10);
+        ctx.fillRect(80, 6, 16, 8);
+        ctx.fillRect(50, 100, 20, 12);
+        ctx.fillRect(100, 70, 12, 14);
 
-        // Bark trunk/body — gnarled, asymmetric
-        ctx.fillStyle = '#2a1808';
-        ctx.fillRect(24, 80, 80, 48);
-        ctx.fillRect(12, 88, 20, 40);
-        ctx.fillRect(96, 88, 20, 40);
-        // Additional bark base shading
-        ctx.fillStyle = '#3a2010';
-        ctx.fillRect(28, 84, 72, 40);
-        // Bark texture lines (vertical grain) - more detailed
-        ctx.fillStyle = '#1a1004';
-        ctx.fillRect(36, 84, 4, 36);
-        ctx.fillRect(52, 82, 4, 38);
-        ctx.fillRect(68, 86, 4, 34);
-        ctx.fillRect(84, 84, 4, 36);
-        // Additional finer grain details
-        ctx.fillStyle = '#2a1808';
-        ctx.fillRect(44, 85, 2, 30);
-        ctx.fillRect(76, 83, 2, 32);
-        ctx.fillRect(60, 86, 3, 28);
-        // Root-like shoulder bulges - enhanced
-        ctx.fillStyle = '#3a2010';
-        ctx.fillRect(16, 88, 12, 8);
-        ctx.fillRect(100, 88, 12, 8);
-        ctx.fillStyle = '#4a3018';
-        ctx.fillRect(18, 90, 8, 4);
-        ctx.fillRect(102, 90, 8, 4);
-
-        // Head — weathered bark face, ancient wood
-        ctx.fillStyle = '#3a2010';
-        ctx.fillRect(16, 28, 96, 56);
-        ctx.fillRect(24, 24, 80, 8);
-        ctx.fillRect(12, 36, 8, 40);
-        ctx.fillRect(108, 36, 8, 40);
-        // Lighter inner face — aged heartwood
-        ctx.fillStyle = P.brown;
-        ctx.fillRect(24, 32, 80, 48);
-        ctx.fillStyle = '#6a4020';
-        ctx.fillRect(28, 36, 72, 40);
-        // Additional face shading layer
-        ctx.fillStyle = '#5a3818';
-        ctx.fillRect(32, 40, 64, 32);
-        // Wood grain texture (flowing lines) - enhanced detail
-        ctx.fillStyle = '#5a3818';
-        ctx.fillRect(32, 36, 4, 36);
-        ctx.fillRect(92, 40, 4, 28);
-        ctx.fillRect(60, 32, 4, 20);
-        // Additional grain lines
-        ctx.fillRect(48, 38, 3, 30);
-        ctx.fillRect(76, 42, 3, 26);
-        ctx.fillStyle = '#7a5028';
-        ctx.fillRect(44, 36, 2, 24);
-        ctx.fillRect(82, 36, 2, 24);
-        ctx.fillRect(64, 34, 2, 28);
-        // Bark knots and texture details
-        ctx.fillStyle = '#4a3018';
-        ctx.fillRect(38, 42, 3, 3);
-        ctx.fillRect(86, 44, 3, 3);
-
-        // Brow ridge — heavy, expressive, gnarled
-        ctx.fillStyle = '#2a1808';
-        ctx.fillRect(28, 36, 28, 8);
-        ctx.fillRect(72, 36, 28, 8);
-        ctx.fillStyle = '#3a2010';
-        ctx.fillRect(32, 36, 20, 4);
-        ctx.fillRect(76, 36, 20, 4);
-        // Brow knots (woodgrain detail) - enhanced
-        ctx.fillStyle = '#4a3018';
-        ctx.fillRect(36, 36, 4, 4);
-        ctx.fillRect(84, 36, 4, 4);
-        // Additional brow texture
-        ctx.fillStyle = '#5a3818';
-        ctx.fillRect(42, 38, 3, 3);
-        ctx.fillRect(80, 38, 3, 3);
-
-        // Eyes — deep glowing sockets, the spiritual core
-        // Dark eye sockets
-        ctx.fillStyle = '#0a0804';
-        ctx.fillRect(32, 44, 24, 16);
-        ctx.fillRect(76, 44, 24, 16);
-        // Additional socket depth
-        ctx.fillStyle = '#050402';
-        ctx.fillRect(34, 46, 20, 12);
-        ctx.fillRect(78, 46, 20, 12);
-        // Green glow fill - layered
-        ctx.fillStyle = '#1a6a1a';
-        ctx.fillRect(34, 46, 20, 12);
-        ctx.fillRect(78, 46, 20, 12);
-        ctx.fillStyle = '#2a7a2a';
-        ctx.fillRect(36, 47, 16, 10);
-        ctx.fillRect(80, 47, 16, 10);
-        // Bright green inner glow
-        ctx.fillStyle = P.green;
-        ctx.fillRect(38, 48, 12, 8);
-        ctx.fillRect(82, 48, 12, 8);
-        // Bright iris centers
-        ctx.fillStyle = P.lightGreen;
-        ctx.fillRect(40, 48, 8, 8);
-        ctx.fillRect(84, 48, 8, 8);
-        // Additional iris detail
-        ctx.fillStyle = P.paleGreen;
-        ctx.fillRect(42, 50, 4, 4);
-        ctx.fillRect(86, 50, 4, 4);
-        // Pupils (dark forest-green centers)
-        ctx.fillStyle = '#0a2a0a';
-        ctx.fillRect(42, 50, 4, 4);
-        ctx.fillRect(86, 50, 4, 4);
-        // Bright highlights (ancient life)
-        ctx.fillStyle = P.paleGreen;
-        ctx.fillRect(40, 48, 4, 4);
-        ctx.fillRect(84, 48, 4, 4);
-        // Under-eye glow (light spilling from sockets) - enhanced
-        ctx.fillStyle = 'rgba(90, 197, 90, 0.25)';
-        ctx.fillRect(32, 60, 24, 4);
-        ctx.fillRect(76, 60, 24, 4);
-        ctx.fillStyle = 'rgba(90, 197, 90, 0.15)';
-        ctx.fillRect(30, 64, 26, 3);
-        ctx.fillRect(74, 64, 26, 3);
-
-        // Nose — subtle bark ridge between the eyes
-        ctx.fillStyle = '#5a3818';
-        ctx.fillRect(60, 52, 8, 12);
-        ctx.fillStyle = P.brown;
-        ctx.fillRect(60, 52, 6, 8);
-        // Nose detail
-        ctx.fillStyle = '#4a3018';
-        ctx.fillRect(62, 54, 4, 6);
-
-        // Mouth — wide, knowing, ancient smile
-        ctx.fillStyle = '#1a1004';
-        ctx.fillRect(36, 72, 56, 8);
-        ctx.fillStyle = '#2a1808';
-        ctx.fillRect(40, 72, 48, 4);
-        // Additional mouth depth
-        ctx.fillStyle = '#0f0804';
-        ctx.fillRect(42, 74, 44, 3);
-        // Wood-grain teeth (ancient, unsettling, wise) - more detailed
-        ctx.fillStyle = '#3a2a10';
-        ctx.fillRect(44, 76, 4, 4);
-        ctx.fillRect(52, 76, 4, 4);
-        ctx.fillRect(60, 76, 4, 4);
-        ctx.fillRect(68, 76, 4, 4);
-        ctx.fillRect(76, 76, 4, 4);
-        // Additional teeth
-        ctx.fillStyle = '#4a3a18';
-        ctx.fillRect(48, 76, 3, 3);
-        ctx.fillRect(64, 76, 3, 3);
-        ctx.fillRect(72, 76, 3, 3);
-        // Mouth corners — knowing upturn
-        ctx.fillStyle = '#1a1004';
-        ctx.fillRect(32, 68, 6, 4);
-        ctx.fillRect(90, 68, 6, 4);
-
-        // Leaf crown — elaborate, wild, asymmetric (the defining feature)
-        // Far left cluster
+        // Shoulders/body — graceful bark-skin, smooth not gnarled
+        ctx.fillStyle = '#5a3a1a';
+        ctx.fillRect(20, 86, 88, 42);
+        ctx.fillStyle = '#6a4a28';
+        ctx.fillRect(24, 88, 80, 38);
+        ctx.fillStyle = '#7a5a34';
+        ctx.fillRect(28, 90, 72, 34);
+        // Smooth bark texture — elegant vertical lines
+        ctx.fillStyle = '#6a4a28';
+        ctx.fillRect(40, 91, 2, 28);
+        ctx.fillRect(56, 90, 2, 30);
+        ctx.fillRect(72, 92, 2, 26);
+        ctx.fillRect(86, 91, 2, 28);
+        // Shoulder curves — soft, rounded, organic
+        ctx.fillStyle = '#5a3a1a';
+        ctx.fillRect(14, 90, 10, 16);
+        ctx.fillRect(104, 90, 10, 16);
+        ctx.fillStyle = '#6a4a28';
+        ctx.fillRect(16, 92, 6, 10);
+        ctx.fillRect(106, 92, 6, 10);
+        // Green moss accents on shoulders — living wood
         ctx.fillStyle = P.darkGreen;
-        ctx.fillRect(8, 8, 28, 28);
-        // Left-center (tall)
-        ctx.fillRect(32, 0, 20, 36);
-        // Center (tallest)
-        ctx.fillRect(52, -4, 24, 36);
-        // Right-center
-        ctx.fillRect(76, 0, 20, 36);
-        // Far right cluster
-        ctx.fillRect(92, 12, 28, 24);
-        // Leaf highlights (mid-green) - enhanced
+        ctx.fillRect(18, 90, 8, 3);
+        ctx.fillRect(102, 90, 8, 3);
         ctx.fillStyle = P.green;
-        ctx.fillRect(12, 10, 16, 20);
-        ctx.fillRect(36, 4, 12, 24);
-        ctx.fillRect(56, 0, 16, 24);
-        ctx.fillRect(80, 4, 12, 24);
-        ctx.fillRect(96, 16, 16, 16);
-        // Additional leaf layer detail
+        ctx.fillRect(20, 90, 4, 2);
+        ctx.fillRect(104, 90, 4, 2);
+
+        // Neck — elegant, slender bark-skin
+        ctx.fillStyle = '#6a4a28';
+        ctx.fillRect(46, 74, 36, 16);
+        ctx.fillStyle = '#7a5a34';
+        ctx.fillRect(48, 74, 32, 14);
+        ctx.fillStyle = '#8a6a40';
+        ctx.fillRect(50, 76, 28, 10);
+
+        // Face — serene, elegant, feminine bark-skin with warmth
+        // Oval face shape — smooth, not angular
+        ctx.fillStyle = '#7a5a34';
+        ctx.fillRect(26, 26, 76, 52);
+        ctx.fillStyle = '#8a6a40';
+        ctx.fillRect(28, 24, 72, 52);
+        ctx.fillStyle = '#9a7a4a';
+        ctx.fillRect(32, 26, 64, 48);
+        // Warm inner face glow — honeyed heartwood
+        ctx.fillStyle = '#aa8a58';
+        ctx.fillRect(36, 30, 56, 42);
+        ctx.fillStyle = '#b09060';
+        ctx.fillRect(40, 34, 48, 36);
+        // Soft cheekbones — gentle, not harsh
+        ctx.fillStyle = '#b89868';
+        ctx.fillRect(34, 50, 12, 8);
+        ctx.fillRect(82, 50, 12, 8);
+        // Subtle bark grain — beautiful flowing lines, not rough
+        ctx.fillStyle = '#8a6a40';
+        ctx.fillRect(36, 32, 1, 20);
+        ctx.fillRect(91, 34, 1, 18);
+        ctx.fillStyle = '#9a7a4a';
+        ctx.fillRect(44, 30, 1, 16);
+        ctx.fillRect(83, 30, 1, 16);
+        // Jaw — soft, rounded, feminine
+        ctx.fillStyle = '#8a6a40';
+        ctx.fillRect(30, 68, 4, 6);
+        ctx.fillRect(94, 68, 4, 6);
+        ctx.fillRect(34, 72, 60, 4);
+
+        // Brow — gentle arch, not heavy
+        ctx.fillStyle = '#7a5a34';
+        ctx.fillRect(34, 36, 22, 4);
+        ctx.fillRect(72, 36, 22, 4);
+        ctx.fillStyle = '#8a6a40';
+        ctx.fillRect(36, 36, 18, 2);
+        ctx.fillRect(74, 36, 18, 2);
+
+        // Eyes — large, luminous, gentle green glow (serene not fierce)
+        // Soft eye sockets — warm shadow
+        ctx.fillStyle = '#6a5030';
+        ctx.fillRect(34, 42, 22, 14);
+        ctx.fillRect(72, 42, 22, 14);
+        // Outer iris — deep forest green
+        ctx.fillStyle = '#1a6a2a';
+        ctx.fillRect(36, 43, 18, 12);
+        ctx.fillRect(74, 43, 18, 12);
+        // Mid iris ring — bright emerald
+        ctx.fillStyle = P.green;
+        ctx.fillRect(38, 44, 14, 10);
+        ctx.fillRect(76, 44, 14, 10);
+        // Inner iris — vivid bright green
+        ctx.fillStyle = P.lightGreen;
+        ctx.fillRect(40, 45, 10, 8);
+        ctx.fillRect(78, 45, 10, 8);
+        // Iris center — pale glowing core
+        ctx.fillStyle = P.paleGreen;
+        ctx.fillRect(42, 46, 6, 6);
+        ctx.fillRect(80, 46, 6, 6);
+        // Pupils — small, soft, dark green (not harsh black)
+        ctx.fillStyle = '#0a3a0a';
+        ctx.fillRect(44, 47, 4, 4);
+        ctx.fillRect(82, 47, 4, 4);
+        // Large warm catch-lights (life and warmth)
+        ctx.fillStyle = '#c0f0c0';
+        ctx.fillRect(40, 44, 3, 3);
+        ctx.fillRect(78, 44, 3, 3);
+        ctx.fillStyle = P.white;
+        ctx.fillRect(40, 44, 2, 2);
+        ctx.fillRect(78, 44, 2, 2);
+        // Second catch-light (lower)
+        ctx.fillStyle = '#c0f0c0';
+        ctx.fillRect(48, 50, 2, 2);
+        ctx.fillRect(86, 50, 2, 2);
+        // Soft green glow radiating from eyes
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = P.lightGreen;
+        ctx.fillRect(30, 40, 30, 18);
+        ctx.fillRect(68, 40, 30, 18);
+        ctx.globalAlpha = 1;
+        // Gentle lower lid line
+        ctx.fillStyle = '#7a5a34';
+        ctx.fillRect(36, 56, 18, 1);
+        ctx.fillRect(74, 56, 18, 1);
+        // Subtle eyelash suggestion (upper)
+        ctx.fillStyle = '#6a4a28';
+        ctx.fillRect(34, 42, 22, 1);
+        ctx.fillRect(72, 42, 22, 1);
+
+        // Nose — delicate, small, elegant
+        ctx.fillStyle = '#8a6a40';
+        ctx.fillRect(58, 54, 12, 10);
+        ctx.fillStyle = '#9a7a4a';
+        ctx.fillRect(60, 54, 8, 8);
+        ctx.fillStyle = '#aa8a58';
+        ctx.fillRect(62, 55, 4, 5);
+        // Small nostrils
+        ctx.fillStyle = '#7a5a34';
+        ctx.fillRect(58, 62, 3, 2);
+        ctx.fillRect(67, 62, 3, 2);
+
+        // Mouth — serene, gentle smile, closed and content
+        ctx.fillStyle = '#7a4a30';
+        ctx.fillRect(44, 66, 40, 3);
+        ctx.fillStyle = '#8a5a3a';
+        ctx.fillRect(46, 66, 36, 2);
+        // Gentle upturned corners — a warm knowing smile, not menacing
+        ctx.fillStyle = '#7a4a30';
+        ctx.fillRect(42, 65, 3, 2);
+        ctx.fillRect(83, 65, 3, 2);
+        // Lower lip highlight — soft
+        ctx.fillStyle = '#9a6a48';
+        ctx.fillRect(50, 68, 28, 2);
+        ctx.fillStyle = '#aa7a55';
+        ctx.fillRect(54, 69, 20, 1);
+
+        // Hair — flowing vines and leaves cascading down, elegant not wild
+        // Main vine-hair mass — rich greens flowing from crown
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(16, 6, 96, 24);
+        ctx.fillRect(14, 14, 10, 36);
+        ctx.fillRect(104, 14, 10, 36);
+        // Hair flows past shoulders
+        ctx.fillRect(8, 30, 12, 50);
+        ctx.fillRect(108, 30, 12, 50);
+        // Mid-green layer
+        ctx.fillStyle = P.green;
+        ctx.fillRect(20, 8, 88, 18);
+        ctx.fillRect(16, 16, 8, 28);
+        ctx.fillRect(106, 16, 8, 28);
+        ctx.fillRect(10, 34, 8, 40);
+        ctx.fillRect(110, 34, 8, 40);
+        // Flowing vine strands — individual curves
         ctx.fillStyle = '#3a9a3a';
-        ctx.fillRect(14, 12, 10, 14);
-        ctx.fillRect(38, 6, 8, 18);
-        ctx.fillRect(58, 2, 12, 18);
-        ctx.fillRect(82, 6, 8, 18);
-        ctx.fillRect(98, 18, 12, 12);
-        // Bright leaf tips (new growth)
+        ctx.fillRect(24, 10, 4, 14);
+        ctx.fillRect(38, 8, 4, 16);
+        ctx.fillRect(54, 6, 4, 18);
+        ctx.fillRect(70, 6, 4, 18);
+        ctx.fillRect(86, 8, 4, 16);
+        ctx.fillRect(100, 10, 4, 14);
+        // Bright strand highlights — light catching the vines
         ctx.fillStyle = P.lightGreen;
-        ctx.fillRect(16, 10, 6, 8);
-        ctx.fillRect(38, 4, 6, 8);
-        ctx.fillRect(60, 0, 8, 8);
-        ctx.fillRect(82, 4, 6, 8);
-        ctx.fillRect(100, 16, 6, 8);
-        // Very bright leaf tips
-        ctx.fillStyle = P.paleGreen;
-        ctx.fillRect(18, 11, 3, 4);
-        ctx.fillRect(40, 5, 3, 4);
-        ctx.fillRect(62, 1, 4, 4);
-        ctx.fillRect(84, 5, 3, 4);
-        ctx.fillRect(102, 17, 3, 4);
-        // Individual leaf shapes at edges - more detail
-        ctx.fillStyle = P.green;
-        ctx.fillRect(8, 8, 4, 12);
-        ctx.fillRect(28, 0, 4, 12);
-        ctx.fillRect(74, 0, 4, 12);
-        ctx.fillRect(116, 12, 4, 12);
-        // Additional leaf detail
+        ctx.fillRect(26, 10, 2, 8);
+        ctx.fillRect(40, 8, 2, 10);
+        ctx.fillRect(56, 6, 2, 12);
+        ctx.fillRect(72, 6, 2, 12);
+        ctx.fillRect(88, 8, 2, 10);
+        ctx.fillRect(102, 10, 2, 8);
+        // Long side tendrils — flowing down past face
+        // Left side vines
         ctx.fillStyle = P.darkGreen;
-        ctx.fillRect(10, 10, 2, 8);
-        ctx.fillRect(30, 2, 2, 8);
-        ctx.fillRect(76, 2, 2, 8);
-        ctx.fillRect(118, 14, 2, 8);
-        // Golden berries/flowers scattered in crown - enhanced
+        ctx.fillRect(6, 44, 8, 38);
+        ctx.fillRect(4, 54, 6, 32);
+        ctx.fillStyle = P.green;
+        ctx.fillRect(8, 46, 4, 30);
+        ctx.fillRect(6, 56, 3, 24);
+        ctx.fillStyle = P.lightGreen;
+        ctx.fillRect(9, 50, 2, 16);
+        ctx.fillRect(7, 60, 1, 14);
+        // Right side vines
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(114, 44, 8, 38);
+        ctx.fillRect(118, 54, 6, 32);
+        ctx.fillStyle = P.green;
+        ctx.fillRect(116, 46, 4, 30);
+        ctx.fillRect(119, 56, 3, 24);
+        ctx.fillStyle = P.lightGreen;
+        ctx.fillRect(117, 50, 2, 16);
+        ctx.fillRect(120, 60, 1, 14);
+        // Vine tips curling gently
+        ctx.fillStyle = P.green;
+        ctx.fillRect(4, 82, 3, 3);
+        ctx.fillRect(121, 82, 3, 3);
+        ctx.fillRect(3, 84, 2, 2);
+        ctx.fillRect(123, 84, 2, 2);
+
+        // Leaf crown — graceful, arranged, beautiful (like a living tiara)
+        // Central leaf cluster — tallest, symmetrical
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(42, -2, 44, 14);
+        ctx.fillRect(34, 0, 60, 10);
+        // Side leaf clusters — sweeping outward elegantly
+        ctx.fillRect(18, 4, 20, 10);
+        ctx.fillRect(90, 4, 20, 10);
+        // Mid-green leaf layer
+        ctx.fillStyle = P.green;
+        ctx.fillRect(44, 0, 40, 10);
+        ctx.fillRect(36, 2, 56, 6);
+        ctx.fillRect(20, 5, 16, 6);
+        ctx.fillRect(92, 5, 16, 6);
+        // Bright leaf highlights
+        ctx.fillStyle = P.lightGreen;
+        ctx.fillRect(48, 0, 8, 6);
+        ctx.fillRect(62, -1, 8, 6);
+        ctx.fillRect(76, 0, 8, 6);
+        ctx.fillRect(22, 5, 6, 4);
+        ctx.fillRect(100, 5, 6, 4);
+        // Individual leaf tips — pointed, graceful
+        ctx.fillStyle = P.lightGreen;
+        ctx.fillRect(50, -3, 4, 4);
+        ctx.fillRect(64, -4, 4, 4);
+        ctx.fillRect(78, -3, 4, 4);
+        ctx.fillRect(36, 0, 4, 4);
+        ctx.fillRect(88, 0, 4, 4);
+        // Pale green leaf veins
+        ctx.fillStyle = P.paleGreen;
+        ctx.fillRect(52, -2, 2, 3);
+        ctx.fillRect(66, -3, 2, 3);
+        ctx.fillRect(80, -2, 2, 3);
+
+        // Small flowers and buds in the crown
+        ctx.fillStyle = '#f0c8e0';
+        ctx.fillRect(44, 2, 3, 3);
+        ctx.fillRect(72, 1, 3, 3);
+        ctx.fillRect(96, 6, 3, 3);
+        ctx.fillRect(28, 6, 3, 3);
+        ctx.fillStyle = '#f8d8e8';
+        ctx.fillRect(45, 2, 1, 1);
+        ctx.fillRect(73, 1, 1, 1);
+        ctx.fillRect(97, 6, 1, 1);
+        ctx.fillRect(29, 6, 1, 1);
+        // Golden berries
         ctx.fillStyle = P.gold;
-        ctx.fillRect(20, 16, 4, 4);
-        ctx.fillRect(44, 8, 4, 4);
-        ctx.fillRect(68, 4, 4, 4);
-        ctx.fillRect(92, 12, 4, 4);
-        // Additional berries
-        ctx.fillRect(26, 14, 3, 3);
-        ctx.fillRect(60, 6, 3, 3);
-        ctx.fillRect(88, 10, 3, 3);
+        ctx.fillRect(56, 2, 3, 3);
+        ctx.fillRect(84, 3, 3, 3);
         ctx.fillStyle = P.yellow;
-        ctx.fillRect(20, 16, 2, 2);
-        ctx.fillRect(44, 8, 2, 2);
-        ctx.fillRect(68, 4, 2, 2);
-        ctx.fillRect(92, 12, 2, 2);
-        ctx.fillRect(26, 14, 1, 1);
-        ctx.fillRect(60, 6, 1, 1);
-        ctx.fillRect(88, 10, 1, 1);
+        ctx.fillRect(57, 2, 1, 1);
+        ctx.fillRect(85, 3, 1, 1);
 
-        // Hanging moss/vine wisps — sides of face
-        ctx.fillStyle = P.darkGreen;
-        ctx.fillRect(8, 36, 8, 28);
-        ctx.fillRect(112, 40, 8, 24);
-        ctx.fillStyle = P.green;
-        ctx.fillRect(10, 40, 4, 16);
-        ctx.fillRect(114, 44, 4, 12);
-        // Additional moss detail
-        ctx.fillStyle = '#3a9a3a';
-        ctx.fillRect(11, 42, 2, 10);
-        ctx.fillRect(115, 46, 2, 8);
-        // Moss drips - enhanced
-        ctx.fillStyle = P.darkGreen;
-        ctx.fillRect(10, 60, 4, 8);
-        ctx.fillRect(114, 60, 4, 8);
-        ctx.fillStyle = P.green;
-        ctx.fillRect(10, 64, 2, 4);
-        ctx.fillRect(116, 64, 2, 4);
-        // Additional drip detail
-        ctx.fillStyle = P.darkGreen;
-        ctx.fillRect(11, 66, 1, 3);
-        ctx.fillRect(115, 66, 1, 3);
+        // Overall soft green ambient glow (gentle spirit energy)
+        ctx.globalAlpha = 0.06;
+        ctx.fillStyle = P.lightGreen;
+        ctx.fillRect(20, 20, 88, 80);
+        ctx.globalAlpha = 1;
       });
 
       // Bargnot - goblin queen, fierce, crowned, red robes over green skin

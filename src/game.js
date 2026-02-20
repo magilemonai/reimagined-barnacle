@@ -2641,8 +2641,8 @@
         for (var i = 0; i < torches.length; i++) {
             var tx = torches[i].x;
             var ty = torches[i].y;
-            // Pulsing radius 24-32px using sin wave (matches darkness cutout)
-            var flickerR = 28 + Math.sin(flickerSeed + i * 2.5) * 4;
+            // Pulsing radius 36-48px using sin wave (matches darkness cutout)
+            var flickerR = 42 + Math.sin(flickerSeed + i * 2.5) * 6;
             // Random jitter ±2px for flicker
             flickerR += (Math.random() - 0.5) * 4;
             var flickerA = 0.14 + Math.sin(flickerSeed * 1.3 + i) * 0.05;
@@ -2691,21 +2691,21 @@
         var dc = getDarknessCanvas();
         var dCtx = dc.ctx;
 
-        // Clear and fill with 80% opacity darkness
+        // Clear and fill with darkness (atmospheric but still readable)
         dCtx.globalCompositeOperation = 'source-over';
         dCtx.clearRect(0, 0, W, H);
-        dCtx.fillStyle = 'rgba(0,0,10,0.80)';
+        dCtx.fillStyle = 'rgba(0,0,10,0.55)';
         dCtx.fillRect(0, 0, W, H);
 
         // Cut out light circles using destination-out compositing
         dCtx.globalCompositeOperation = 'destination-out';
 
-        // Light around each torch: pulsing radius 24-32px via sin wave, ±2px random jitter
+        // Light around each torch: pulsing radius 36-48px via sin wave, ±2px random jitter
         for (var i = 0; i < torches.length; i++) {
             var tx = torches[i].x;
             var ty = torches[i].y;
-            // Base pulsing radius: oscillates between 24 and 32 using sin wave
-            var pulseR = 28 + Math.sin(flickerSeed + i * 2.5) * 4;
+            // Base pulsing radius: oscillates between 36 and 48 using sin wave
+            var pulseR = 42 + Math.sin(flickerSeed + i * 2.5) * 6;
             // Random jitter ±2px each frame for flicker effect
             var jitter = (Math.random() - 0.5) * 4; // -2 to +2
             var lr = pulseR + jitter;
@@ -2721,14 +2721,14 @@
             dCtx.fill();
         }
 
-        // Light around the player: 40px radius, shrinks to 28px at low HP
+        // Light around the player: 52px radius, shrinks to 36px at low HP
         if (Game.player) {
             var px = Game.player.x + Game.player.w / 2;
             var py = Game.player.y + Game.player.h / 2;
-            // Player light shrinks as HP drops: 40px at full, 28px at 0 HP
+            // Player light shrinks as HP drops: 52px at full, 36px at 0 HP
             var hpRatio = Game.player.maxHp > 0 ? (Game.player.hp / Game.player.maxHp) : 0;
             hpRatio = Math.max(0, Math.min(1, hpRatio));
-            var pr = 28 + hpRatio * 12; // 28 at 0hp, 40 at full hp
+            var pr = 36 + hpRatio * 16; // 36 at 0hp, 52 at full hp
 
             var pGrad = dCtx.createRadialGradient(px, py, 0, px, py, pr);
             pGrad.addColorStop(0, 'rgba(0,0,0,1)');

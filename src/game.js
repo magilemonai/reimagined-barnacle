@@ -830,7 +830,7 @@
                         if (npc.interacted) {
                             // Return visits give blessing directly
                             sorenBlessing();
-                            Dialogue.start(null, null, 'May the light guide you, child. I have restored your strength.');
+                            Dialogue.start('soren_return');
                         } else {
                             // First visit: show greeting, then bless
                             npc.interacted = true;

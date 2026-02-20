@@ -235,7 +235,7 @@
     ],
 
     soren_return: [
-      { speaker: 'Soren', text: 'You\'ve returned. The spirits told me you would. ...Actually I just heard the door. Sit. Rest. Let me tend your wounds.' }
+      { speaker: 'Soren', text: 'You\'ve returned. The spirits told me you would. ...Actually I just heard the door. Sit. Rest. May the winds be at your back.' }
     ],
 
     svana_return: [

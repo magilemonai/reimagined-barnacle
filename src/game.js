@@ -6952,6 +6952,7 @@
     // =====================================================================
 
     function gameLoop() {
+      try {
         Game.frame++;
 
         // Update based on current state
@@ -7000,6 +7001,9 @@
 
         // Clear pressed keys for next frame
         Input.update();
+      } catch (e) {
+        console.error('Game loop error:', e);
+      }
 
         requestAnimationFrame(gameLoop);
     }

@@ -47,9 +47,9 @@
         charNames: ['Daxon Lamn', 'Luigi Bonemoon', 'Lirielle'],
         charClasses: ['Eldritch Knight', 'Warlock', 'Circle of Stars Druid'],
         charDescs: [
-            'A warrior of Ebon Vale. Strong melee attacks and a defensive shield.',
-            'A warlock bound by the Bonemoon prophecy. Ranged blasts and familiar Brog.',
-            'An elven druid seeking her lost parents. Quick strikes and healing magic.'
+            'Ebon Vale warrior. Wide cleaving sword. Shield Slam: invincibility + damaging shockwave.',
+            'Bonemoon warlock. Extended range blasts. Brog: summon a homing bolt familiar.',
+            'Elven druid. Long reach vine whip. Nature Burst: heal HP + thorn ring damages foes.'
         ],
 
         // Game objects
@@ -3621,9 +3621,9 @@
 
     // Character stats for select screen display
     var CHAR_STATS = {
-        daxon:    { hp: 4, atk: 4, spd: 3, spc: 'Shield', spcDesc: 'Invincibility' },
-        luigi:    { hp: 3, atk: 3, spd: 3, spc: 'Brog',   spcDesc: 'Homing bolt' },
-        lirielle: { hp: 3, atk: 2, spd: 3, spc: 'Heal',   spcDesc: 'Restore HP' }
+        daxon:    { hp: 4, atk: 4, spd: 3, spc: 'Shield Slam', spcDesc: 'Invincible + shockwave' },
+        luigi:    { hp: 3, atk: 3, spd: 3, spc: 'Brog',        spcDesc: 'Summon homing bolt' },
+        lirielle: { hp: 3, atk: 2, spd: 3, spc: 'Nature Burst', spcDesc: 'Heal + thorn ring' }
     };
 
     // Helper: word-wrap text to fit maxW pixels at given charWidth

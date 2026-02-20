@@ -161,8 +161,8 @@
     ],
 
     boss_phase3: [
-      { speaker: 'Bargnot', text: 'I can feel it... oh gods, I can feel it... this is too much... NO. I WILL NOT STOP.', speed: 1 },
-      { speaker: 'Bargnot', text: 'THE SHADOW IS MINE TO COMMAND! MINE!' }
+      { speaker: 'Bargnot', text: 'I can feel it... oh gods, I can feel it... this is too much... NO. I WILL NOT STOP.', speed: 1, emotion: 'rage' },
+      { speaker: 'Bargnot', text: 'THE SHADOW IS MINE TO COMMAND! MINE!', emotion: 'rage' }
     ],
 
     boss_defeat: [

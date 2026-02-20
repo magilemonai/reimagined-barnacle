@@ -5066,6 +5066,265 @@
         ctx.fillRect(59, 21, 8, 2);
       });
 
+      // Bargnot rage — phase 3 transition, upset, purple beginning to seep in
+      mp('bargnot_rage', function (ctx) {
+        // Dark ritual chamber — purple creeping into the background
+        ctx.fillStyle = '#1a0a1a';
+        ctx.fillRect(0, 0, 128, 128);
+        ctx.fillStyle = '#201020';
+        ctx.fillRect(8, 12, 112, 116);
+        ctx.fillStyle = '#281428';
+        ctx.fillRect(16, 20, 96, 100);
+        ctx.fillStyle = '#301830';
+        ctx.fillRect(20, 24, 88, 92);
+        // Purple energy wisps bleeding into background
+        ctx.fillStyle = 'rgba(122, 58, 170, 0.15)';
+        ctx.fillRect(4, 16, 16, 48);
+        ctx.fillRect(108, 20, 16, 44);
+        ctx.fillRect(8, 80, 12, 32);
+        ctx.fillRect(108, 76, 12, 36);
+
+        // Robes — still red but purple corruption at edges
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(12, 88, 104, 40);
+        ctx.fillStyle = '#8a1818';
+        ctx.fillRect(20, 88, 88, 36);
+        ctx.fillStyle = P.red;
+        ctx.fillRect(28, 90, 72, 32);
+        ctx.fillStyle = '#a02020';
+        ctx.fillRect(32, 92, 64, 26);
+        ctx.fillStyle = '#8a1818';
+        ctx.fillRect(40, 94, 48, 20);
+        // High collar — slightly disheveled
+        ctx.fillStyle = '#8a1818';
+        ctx.fillRect(36, 76, 56, 16);
+        ctx.fillStyle = P.red;
+        ctx.fillRect(40, 76, 48, 12);
+        ctx.fillStyle = '#b03030';
+        ctx.fillRect(44, 78, 40, 8);
+        // Gold robe trim — still present but dulling
+        ctx.fillStyle = '#c09020';
+        ctx.fillRect(28, 88, 72, 4);
+        ctx.fillRect(60, 92, 8, 20);
+        ctx.fillStyle = '#b08018';
+        ctx.fillRect(30, 89, 68, 2);
+        // Purple corruption seeping into robe edges
+        ctx.fillStyle = 'rgba(58, 26, 92, 0.35)';
+        ctx.fillRect(12, 92, 16, 32);
+        ctx.fillRect(100, 92, 16, 32);
+        ctx.fillStyle = 'rgba(58, 26, 92, 0.2)';
+        ctx.fillRect(20, 96, 8, 24);
+        ctx.fillRect(100, 96, 8, 24);
+
+        // Neck — green, purple veins starting
+        ctx.fillStyle = '#1a5a1a';
+        ctx.fillRect(48, 68, 32, 16);
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(50, 68, 28, 12);
+        ctx.fillStyle = P.green;
+        ctx.fillRect(52, 70, 24, 8);
+        ctx.fillStyle = '#3a8a3a';
+        ctx.fillRect(54, 71, 20, 6);
+        // Purple veins on neck
+        ctx.fillStyle = 'rgba(122, 58, 170, 0.25)';
+        ctx.fillRect(50, 72, 4, 6);
+        ctx.fillRect(74, 72, 4, 6);
+
+        // Face — strained, brow furrowed, jaw clenched
+        ctx.fillStyle = '#1a5a1a';
+        ctx.fillRect(24, 24, 80, 48);
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(28, 24, 72, 44);
+        ctx.fillStyle = P.green;
+        ctx.fillRect(32, 28, 64, 38);
+        ctx.fillStyle = '#3a8a3a';
+        ctx.fillRect(36, 32, 56, 30);
+        // Strained cheekbones — tighter, more gaunt
+        ctx.fillStyle = '#4a9a4a';
+        ctx.fillRect(32, 48, 10, 4);
+        ctx.fillRect(86, 48, 10, 4);
+        ctx.fillStyle = '#5aaa5a';
+        ctx.fillRect(34, 49, 6, 2);
+        ctx.fillRect(88, 49, 6, 2);
+        // Angular jaw clenched
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(28, 60, 4, 8);
+        ctx.fillRect(96, 60, 4, 8);
+        ctx.fillStyle = '#1a5a1a';
+        ctx.fillRect(30, 62, 2, 6);
+        ctx.fillRect(96, 62, 2, 6);
+        // Purple veins creeping up face
+        ctx.fillStyle = 'rgba(122, 58, 170, 0.2)';
+        ctx.fillRect(28, 56, 6, 12);
+        ctx.fillRect(94, 56, 6, 12);
+        ctx.fillStyle = 'rgba(122, 58, 170, 0.12)';
+        ctx.fillRect(32, 52, 4, 8);
+        ctx.fillRect(92, 52, 4, 8);
+
+        // Goblin ears — swept back, tense
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(8, 32, 20, 16);
+        ctx.fillRect(100, 32, 20, 16);
+        ctx.fillStyle = P.green;
+        ctx.fillRect(10, 34, 16, 10);
+        ctx.fillRect(102, 34, 16, 10);
+        ctx.fillStyle = '#3a8a3a';
+        ctx.fillRect(12, 36, 12, 6);
+        ctx.fillRect(104, 36, 12, 6);
+        // Ear tips
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(4, 28, 8, 8);
+        ctx.fillRect(116, 28, 8, 8);
+        ctx.fillStyle = '#1a5a1a';
+        ctx.fillRect(6, 30, 4, 4);
+        ctx.fillRect(118, 30, 4, 4);
+        // Purple tinge at ear tips
+        ctx.fillStyle = 'rgba(122, 58, 170, 0.25)';
+        ctx.fillRect(4, 28, 6, 6);
+        ctx.fillRect(118, 28, 6, 6);
+
+        // Eyes — transitioning red-to-purple, wider, furious
+        // Heavy brow — furrowed deeply
+        ctx.fillStyle = '#0a3a0a';
+        ctx.fillRect(34, 30, 26, 6);
+        ctx.fillRect(68, 30, 26, 6);
+        ctx.fillStyle = '#051a05';
+        ctx.fillRect(36, 31, 22, 4);
+        ctx.fillRect(70, 31, 22, 4);
+        // Furrowed brow creases
+        ctx.fillStyle = '#0a2a0a';
+        ctx.fillRect(42, 28, 4, 3);
+        ctx.fillRect(82, 28, 4, 3);
+        // Eye sockets — purple glow bleeding in
+        ctx.fillStyle = '#400420';
+        ctx.fillRect(36, 38, 24, 14);
+        ctx.fillRect(72, 38, 24, 14);
+        ctx.fillStyle = '#300418';
+        ctx.fillRect(38, 39, 20, 12);
+        ctx.fillRect(74, 39, 20, 12);
+        // Irises — red-purple mix, power surging
+        ctx.fillStyle = '#a03060';
+        ctx.fillRect(40, 40, 16, 12);
+        ctx.fillRect(76, 40, 16, 12);
+        ctx.fillStyle = '#c04080';
+        ctx.fillRect(44, 42, 8, 8);
+        ctx.fillRect(80, 42, 8, 8);
+        // Hot purple center
+        ctx.fillStyle = P.lightPurple;
+        ctx.fillRect(46, 44, 4, 4);
+        ctx.fillRect(82, 44, 4, 4);
+        // Purple-pink mid-tone
+        ctx.fillStyle = '#d060a0';
+        ctx.fillRect(45, 43, 6, 6);
+        ctx.fillRect(81, 43, 6, 6);
+        // Slitted pupils — dilated
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(48, 42, 2, 8);
+        ctx.fillRect(84, 42, 2, 8);
+        // Catch-light with purple tint
+        ctx.fillStyle = '#e0a0d0';
+        ctx.fillRect(42, 40, 4, 4);
+        ctx.fillRect(78, 40, 4, 4);
+        ctx.fillStyle = '#f0d0f0';
+        ctx.fillRect(43, 41, 2, 2);
+        ctx.fillRect(79, 41, 2, 2);
+        // Faint purple glow around eyes
+        ctx.fillStyle = 'rgba(122, 58, 170, 0.18)';
+        ctx.fillRect(32, 36, 32, 20);
+        ctx.fillRect(68, 36, 32, 20);
+
+        // Nose — flared, breathing hard
+        ctx.fillStyle = P.darkGreen;
+        ctx.fillRect(60, 52, 8, 6);
+        ctx.fillStyle = '#1a5a1a';
+        ctx.fillRect(61, 54, 6, 4);
+        // Nostrils flared wide
+        ctx.fillStyle = '#0a3a0a';
+        ctx.fillRect(59, 56, 5, 3);
+        ctx.fillRect(64, 56, 5, 3);
+        ctx.fillStyle = '#051a05';
+        ctx.fillRect(60, 56, 3, 2);
+        ctx.fillRect(65, 56, 3, 2);
+
+        // Mouth — snarling, teeth bared, furious
+        ctx.fillStyle = '#804040';
+        ctx.fillRect(44, 64, 40, 8);
+        ctx.fillStyle = '#a05050';
+        ctx.fillRect(48, 64, 32, 6);
+        ctx.fillStyle = '#c06060';
+        ctx.fillRect(50, 64, 28, 1);
+        // Teeth bared in fury
+        ctx.fillStyle = '#d0d0a0';
+        ctx.fillRect(48, 66, 4, 4);
+        ctx.fillRect(56, 66, 4, 4);
+        ctx.fillRect(64, 66, 4, 4);
+        ctx.fillRect(72, 66, 4, 4);
+        ctx.fillRect(80, 66, 4, 4);
+        ctx.fillStyle = '#e0e0b0';
+        ctx.fillRect(48, 66, 2, 2);
+        ctx.fillRect(56, 66, 2, 2);
+        ctx.fillRect(64, 66, 2, 2);
+        ctx.fillRect(72, 66, 2, 2);
+        ctx.fillRect(80, 66, 2, 2);
+        // Tooth gaps
+        ctx.fillStyle = '#603030';
+        ctx.fillRect(52, 66, 4, 4);
+        ctx.fillRect(60, 66, 4, 4);
+        ctx.fillRect(68, 66, 4, 4);
+        ctx.fillRect(76, 66, 4, 4);
+
+        // Crown — still on but askew, gem pulsing brighter
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(30, 14, 66, 12);
+        ctx.fillStyle = P.yellow;
+        ctx.fillRect(34, 16, 58, 8);
+        ctx.fillStyle = '#f0d040';
+        ctx.fillRect(36, 17, 54, 6);
+        // Crown band detail
+        ctx.fillStyle = '#c0a020';
+        ctx.fillRect(32, 15, 2, 10);
+        ctx.fillRect(92, 15, 2, 10);
+        // Crown points — slightly tilted (2px offset)
+        ctx.fillStyle = P.gold;
+        ctx.fillRect(34, 2, 10, 16);
+        ctx.fillRect(58, -2, 8, 20);
+        ctx.fillRect(82, 4, 10, 14);
+        ctx.fillStyle = P.yellow;
+        ctx.fillRect(36, 4, 6, 8);
+        ctx.fillRect(60, 0, 4, 12);
+        ctx.fillRect(84, 6, 6, 6);
+        ctx.fillStyle = '#f0e050';
+        ctx.fillRect(38, 5, 4, 4);
+        ctx.fillRect(61, 2, 2, 6);
+        ctx.fillRect(86, 7, 4, 3);
+        // Crown gem — pulsing with purple energy, brighter than normal
+        ctx.fillStyle = P.purple;
+        ctx.fillRect(56, 18, 14, 8);
+        ctx.fillStyle = P.lightPurple;
+        ctx.fillRect(58, 20, 10, 4);
+        ctx.fillStyle = '#d0a0e0';
+        ctx.fillRect(60, 21, 6, 2);
+        // Gem glow radiating outward
+        ctx.fillStyle = 'rgba(170, 106, 218, 0.3)';
+        ctx.fillRect(52, 16, 22, 12);
+        ctx.fillStyle = 'rgba(122, 58, 170, 0.15)';
+        ctx.fillRect(48, 14, 30, 16);
+
+        // Faint purple energy wisps at edges — shadow beginning to manifest
+        ctx.fillStyle = P.darkPurple;
+        ctx.globalAlpha = 0.25;
+        ctx.fillRect(4, 36, 8, 32);
+        ctx.fillRect(116, 32, 8, 36);
+        ctx.fillRect(8, 84, 8, 24);
+        ctx.fillRect(112, 80, 8, 28);
+        ctx.globalAlpha = 0.12;
+        ctx.fillRect(12, 24, 6, 16);
+        ctx.fillRect(110, 20, 6, 20);
+        ctx.fillRect(4, 68, 6, 16);
+        ctx.fillRect(118, 64, 6, 20);
+        ctx.globalAlpha = 1;
+      });
+
       // Bargnot desperate — shadow consuming her, crown falling
       mp('bargnot_desperate', function (ctx) {
         // Dark void — shadow encroaching (128x128)

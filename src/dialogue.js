@@ -593,6 +593,8 @@
       // Still typing on current page -> reveal the rest of this page
       if (this.displayedChars < charsToEndOfPage) {
         this.displayedChars = charsToEndOfPage;
+        this.charTimer = 0;
+        this._punctPause = 0;
         return;
       }
 
@@ -601,6 +603,8 @@
         this._rowPage++;
         this._currentStep++;
         // Don't reset displayedChars - it tracks cumulative progress
+        this.charTimer = 0;
+        this._punctPause = 0;
         this._blinkTimer = 0;
         if (window.GameAudio) window.GameAudio.play('select');
         return;
@@ -650,8 +654,18 @@
         speed = 1;
       }
 
-      // Typewriter reveal with punctuation pauses
-      if (this.displayedChars < line.text.length) {
+      // Compute character limit for current page (don't reveal past visible area)
+      var _pageStart = this._rowPage * MAX_VISIBLE_ROWS;
+      var _pageEnd = Math.min(_pageStart + MAX_VISIBLE_ROWS, this._fullRows.length);
+      var _charsToEndOfPage = 0;
+      for (var _r = 0; _r < _pageEnd; _r++) {
+        _charsToEndOfPage += this._fullRows[_r].length;
+        if (_r < _pageEnd - 1) _charsToEndOfPage++;
+      }
+      var charLimit = Math.min(line.text.length, _charsToEndOfPage);
+
+      // Typewriter reveal with punctuation pauses (stops at current page boundary)
+      if (this.displayedChars < charLimit) {
         // If we're in a punctuation pause, count it down first
         if (this._punctPause > 0) {
           this._punctPause--;

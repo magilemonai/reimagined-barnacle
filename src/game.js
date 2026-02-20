@@ -179,6 +179,7 @@
 
         // Examine object interaction
         nearExamine: null,
+        examinedObjects: {},
 
         // Area name banner slide animation
         roomBannerSlide: 0,

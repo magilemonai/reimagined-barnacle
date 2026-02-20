@@ -1673,45 +1673,58 @@
         ctx.fillStyle = '#2a1c14';
         ctx.fillRect(8, 10, 48, 50);
 
-        // Shoulders — fitted, stylish deep purple tunic with embroidered trim
-        ctx.fillStyle = '#2a1040';
+        // Shoulders — white button-down shirt with dark vest
+        // Shirt base — crisp white, visible at shoulders and collar
+        ctx.fillStyle = '#c8c8c8';
         ctx.fillRect(6, 46, 52, 18);
-        ctx.fillStyle = P.darkPurple;
-        ctx.fillRect(10, 46, 44, 16);
-        ctx.fillStyle = P.purple;
-        ctx.fillRect(14, 47, 36, 14);
-        // Embroidered shoulder trim — gold thread filigree
-        ctx.fillStyle = P.gold;
-        ctx.fillRect(14, 46, 36, 2);
-        ctx.fillRect(14, 48, 2, 3);
-        ctx.fillRect(48, 48, 2, 3);
-        // Filigree detail — tiny gold scrollwork
-        ctx.fillStyle = '#c09020';
-        ctx.fillRect(18, 46, 1, 1); ctx.fillRect(22, 46, 1, 1);
-        ctx.fillRect(26, 46, 1, 1); ctx.fillRect(38, 46, 1, 1);
-        ctx.fillRect(42, 46, 1, 1); ctx.fillRect(46, 46, 1, 1);
-        // V-neckline — tailored, elegant
-        ctx.fillStyle = P.purple;
-        ctx.fillRect(24, 40, 16, 7);
-        ctx.fillStyle = '#2a1040';
-        ctx.fillRect(26, 40, 12, 6);
-        // Gold piping on V-cut
-        ctx.fillStyle = P.gold;
-        ctx.fillRect(24, 40, 2, 7);
-        ctx.fillRect(38, 40, 2, 7);
-        ctx.fillRect(30, 45, 4, 2);
-        // Brooch — amethyst set in gold filigree
-        ctx.fillStyle = P.gold;
-        ctx.fillRect(29, 42, 6, 4);
-        ctx.fillStyle = P.lightPurple;
-        ctx.fillRect(30, 43, 4, 2);
-        ctx.fillStyle = '#d0a0e0';
-        ctx.fillRect(31, 43, 2, 1);
-        // Visible skin at neckline
+        ctx.fillStyle = '#e0e0e0';
+        ctx.fillRect(8, 46, 48, 16);
+        ctx.fillStyle = '#f0f0f0';
+        ctx.fillRect(10, 47, 44, 14);
+        // Vest over shirt — fitted, charcoal with subtle sheen
+        ctx.fillStyle = '#1a1a22';
+        ctx.fillRect(12, 46, 40, 18);
+        ctx.fillStyle = '#2a2a34';
+        ctx.fillRect(14, 47, 36, 16);
+        ctx.fillStyle = '#323240';
+        ctx.fillRect(16, 48, 32, 14);
+        // Vest lapels — angled, tailored
+        ctx.fillStyle = '#1a1a22';
+        ctx.fillRect(14, 46, 4, 10);
+        ctx.fillRect(46, 46, 4, 10);
+        ctx.fillStyle = '#3a3a48';
+        ctx.fillRect(15, 47, 2, 8);
+        ctx.fillRect(47, 47, 2, 8);
+        // Vest buttons — three small brass buttons down center
+        ctx.fillStyle = '#a08830';
+        ctx.fillRect(31, 48, 2, 2);
+        ctx.fillRect(31, 52, 2, 2);
+        ctx.fillRect(31, 56, 2, 2);
+        ctx.fillStyle = '#c0a840';
+        ctx.fillRect(31, 48, 1, 1);
+        ctx.fillRect(31, 52, 1, 1);
+        ctx.fillRect(31, 56, 1, 1);
+        // Shirt collar — white, popped slightly above vest
+        ctx.fillStyle = '#f0f0f0';
+        ctx.fillRect(22, 40, 20, 7);
+        ctx.fillStyle = '#f8f8f8';
+        ctx.fillRect(24, 40, 16, 6);
+        // Collar points
+        ctx.fillStyle = '#e8e8e8';
+        ctx.fillRect(22, 40, 3, 4);
+        ctx.fillRect(39, 40, 3, 4);
+        // Collar shadow
+        ctx.fillStyle = '#d0d0d0';
+        ctx.fillRect(24, 45, 16, 1);
+        // Top button undone — hint of skin
         ctx.fillStyle = P.skin;
-        ctx.fillRect(28, 41, 8, 3);
+        ctx.fillRect(29, 41, 6, 3);
         ctx.fillStyle = P.paleSkin;
-        ctx.fillRect(29, 41, 6, 2);
+        ctx.fillRect(30, 41, 4, 2);
+        // Shirt sleeve edges peeking past vest at shoulders
+        ctx.fillStyle = '#f0f0f0';
+        ctx.fillRect(8, 47, 4, 6);
+        ctx.fillRect(52, 47, 4, 6);
 
         // Neck — graceful, slender
         ctx.fillStyle = P.darkSkin;
@@ -1728,30 +1741,28 @@
         ctx.fillRect(16, 14, 32, 23);
         ctx.fillStyle = P.paleSkin;
         ctx.fillRect(18, 16, 28, 20);
-        // Warm cheeks — soft kitchen glow
+        // Warm cheeks — soft firelight glow
         ctx.fillStyle = '#e8b898';
         ctx.fillRect(18, 28, 5, 4);
         ctx.fillRect(41, 28, 5, 4);
         ctx.fillStyle = '#f0c0a0';
         ctx.fillRect(19, 29, 3, 2);
         ctx.fillRect(42, 29, 3, 2);
-        // Soft jawline — neither sharp nor round, androgynous
+        // Soft jawline — androgynous
         ctx.fillStyle = P.skin;
         ctx.fillRect(16, 34, 2, 3);
         ctx.fillRect(46, 34, 2, 3);
         ctx.fillRect(18, 36, 2, 1);
         ctx.fillRect(44, 36, 2, 1);
 
-        // Eyes — warm amber, large, expressive (the inviting core)
-        // Well-kept brows — arched, intentional
+        // Eyes — warm amber, large, expressive
+        // Groomed brows — arched, intentional
         ctx.fillStyle = '#3a1a0a';
         ctx.fillRect(20, 18, 10, 2);
         ctx.fillRect(36, 18, 10, 2);
-        // Arch shape — groomed, graceful curve
-        ctx.fillStyle = '#3a1a0a';
         ctx.fillRect(19, 19, 2, 1);
         ctx.fillRect(45, 19, 2, 1);
-        // Eye whites — large, expressive
+        // Eye whites
         ctx.fillStyle = '#f0e8e0';
         ctx.fillRect(20, 22, 10, 6);
         ctx.fillRect(36, 22, 10, 6);
@@ -1759,15 +1770,13 @@
         ctx.fillStyle = '#5a3820';
         ctx.fillRect(20, 21, 10, 1);
         ctx.fillRect(36, 21, 10, 1);
-        // Amber irises — warm, rich
+        // Amber irises
         ctx.fillStyle = '#7a4a10';
         ctx.fillRect(22, 22, 7, 6);
         ctx.fillRect(38, 22, 7, 6);
-        // Iris ring detail
         ctx.fillStyle = '#9a6020';
         ctx.fillRect(23, 23, 5, 4);
         ctx.fillRect(39, 23, 5, 4);
-        // Inner amber glow
         ctx.fillStyle = '#b07820';
         ctx.fillRect(24, 24, 3, 2);
         ctx.fillRect(40, 24, 3, 2);
@@ -1775,18 +1784,18 @@
         ctx.fillStyle = '#0a0a0a';
         ctx.fillRect(25, 24, 2, 2);
         ctx.fillRect(41, 24, 2, 2);
-        // Warm catch-light (firelight dancing)
+        // Warm catch-light
         ctx.fillStyle = '#f0d8a0';
         ctx.fillRect(23, 22, 2, 2);
         ctx.fillRect(39, 22, 2, 2);
         ctx.fillStyle = '#f8e8c0';
         ctx.fillRect(23, 22, 1, 1);
         ctx.fillRect(39, 22, 1, 1);
-        // Lower lash line — soft
+        // Lower lash line
         ctx.fillStyle = '#b09878';
         ctx.fillRect(20, 28, 10, 1);
         ctx.fillRect(36, 28, 10, 1);
-        // Smile crinkles at outer corners (warmth)
+        // Smile crinkles
         ctx.fillStyle = P.skin;
         ctx.fillRect(18, 26, 2, 2);
         ctx.fillRect(46, 26, 2, 2);
@@ -1797,78 +1806,90 @@
         ctx.fillStyle = P.darkSkin;
         ctx.fillRect(29, 30, 2, 1);
         ctx.fillRect(33, 30, 2, 1);
-        // Bridge highlight
         ctx.fillStyle = P.paleSkin;
         ctx.fillRect(31, 26, 2, 3);
 
-        // Mouth — warm, easy, genuine smile
+        // Mouth — warm, genuine smile
         ctx.fillStyle = '#a04848';
         ctx.fillRect(24, 34, 16, 2);
         ctx.fillStyle = '#c06868';
         ctx.fillRect(26, 34, 12, 2);
-        // Upper lip contour
         ctx.fillStyle = '#904040';
         ctx.fillRect(28, 33, 8, 1);
-        // Upturned corners (real smile)
+        // Upturned corners
         ctx.fillStyle = '#a04848';
         ctx.fillRect(23, 33, 2, 1);
         ctx.fillRect(39, 33, 2, 1);
         // Lower lip highlight
         ctx.fillStyle = '#d08080';
         ctx.fillRect(28, 35, 8, 1);
-        // Lip shadow below
         ctx.fillStyle = P.skin;
         ctx.fillRect(26, 36, 12, 1);
 
-        // Hair — styled with intention, swept asymmetrically, rich auburn
-        // Base mass — rich dark auburn
+        // Hair — auburn, styled with a dramatic flop over the right eye
+        // Base mass — rich dark auburn, swept from left to right
         ctx.fillStyle = '#3a1a0a';
         ctx.fillRect(10, 4, 44, 14);
         ctx.fillRect(8, 8, 6, 18);
-        ctx.fillRect(50, 8, 6, 12);
-        // Volume — swept left (longer side), shorter right
-        ctx.fillRect(6, 4, 10, 10);
-        ctx.fillRect(14, 2, 30, 4);
+        ctx.fillRect(50, 8, 6, 10);
+        ctx.fillRect(14, 2, 34, 4);
+        ctx.fillRect(8, 4, 8, 8);
         // Auburn mid-tones
         ctx.fillStyle = '#6a3018';
         ctx.fillRect(14, 4, 8, 8);
         ctx.fillRect(26, 3, 8, 8);
-        ctx.fillRect(38, 4, 8, 8);
-        // Warm highlights — well-maintained, glossy
+        ctx.fillRect(38, 4, 10, 8);
+        // Warm highlights — glossy, well-kept
         ctx.fillStyle = '#904820';
         ctx.fillRect(16, 4, 3, 6);
         ctx.fillRect(30, 3, 3, 6);
-        ctx.fillRect(40, 4, 3, 6);
-        // Bright styled streak (fashion accent)
+        ctx.fillRect(42, 4, 3, 6);
         ctx.fillStyle = '#b06028';
         ctx.fillRect(18, 5, 2, 4);
         ctx.fillRect(32, 4, 2, 4);
-        ctx.fillRect(42, 5, 2, 4);
-        // Swept left side — longer, layered, flowing past ear
+        ctx.fillRect(44, 5, 2, 4);
+        // THE FLOP — dramatic swoop of hair falling over right eye
+        // Sweeps from top-left across forehead, droops over right eye
         ctx.fillStyle = '#3a1a0a';
-        ctx.fillRect(6, 14, 6, 16);
-        ctx.fillRect(4, 8, 4, 14);
+        ctx.fillRect(34, 12, 16, 6);
+        ctx.fillRect(38, 10, 14, 4);
+        ctx.fillRect(40, 14, 12, 6);
+        ctx.fillRect(44, 18, 10, 6);
+        ctx.fillRect(48, 22, 6, 4);
+        // Flop mid-tones — shows the curve and body
         ctx.fillStyle = '#6a3018';
-        ctx.fillRect(7, 16, 4, 10);
-        ctx.fillRect(5, 10, 3, 8);
+        ctx.fillRect(36, 12, 12, 4);
+        ctx.fillRect(40, 14, 10, 4);
+        ctx.fillRect(44, 18, 8, 4);
+        ctx.fillRect(48, 22, 4, 3);
+        // Flop highlights — the glossy arc
         ctx.fillStyle = '#904820';
-        ctx.fillRect(8, 18, 2, 6);
-        // Right side — shorter, neat
+        ctx.fillRect(38, 12, 4, 3);
+        ctx.fillRect(42, 14, 4, 3);
+        ctx.fillRect(46, 18, 3, 3);
+        ctx.fillStyle = '#b06028';
+        ctx.fillRect(40, 12, 2, 2);
+        ctx.fillRect(44, 15, 2, 2);
+        ctx.fillRect(47, 19, 2, 2);
+        // Left side — swept back behind ear, shorter
         ctx.fillStyle = '#3a1a0a';
-        ctx.fillRect(50, 12, 4, 8);
+        ctx.fillRect(6, 12, 6, 14);
+        ctx.fillRect(4, 8, 4, 10);
         ctx.fillStyle = '#6a3018';
-        ctx.fillRect(50, 14, 3, 4);
+        ctx.fillRect(7, 14, 4, 8);
+        ctx.fillStyle = '#904820';
+        ctx.fillRect(8, 16, 2, 4);
 
-        // Gold earring — left ear, visible on longer-hair side
+        // Left ear visible (hair swept back on this side)
         ctx.fillStyle = P.darkSkin;
         ctx.fillRect(10, 24, 4, 6);
         ctx.fillStyle = P.skin;
         ctx.fillRect(11, 25, 2, 4);
+        // Gold earring
         ctx.fillStyle = P.gold;
         ctx.fillRect(9, 26, 2, 4);
         ctx.fillStyle = P.yellow;
         ctx.fillRect(9, 26, 1, 2);
-        // Earring gem
         ctx.fillStyle = P.lightPurple;
         ctx.fillRect(9, 29, 2, 1);
       });
@@ -3278,35 +3299,50 @@
         ctx.fillStyle = '#241810';
         ctx.fillRect(8, 10, 48, 50);
 
-        // Same stylish tunic, slightly hunched
-        ctx.fillStyle = '#2a1040';
+        // Same white shirt + vest, slightly hunched
+        // Shirt base
+        ctx.fillStyle = '#b8b8b8';
         ctx.fillRect(6, 48, 52, 16);
-        ctx.fillStyle = P.darkPurple;
-        ctx.fillRect(10, 48, 44, 14);
-        ctx.fillStyle = P.purple;
-        ctx.fillRect(14, 49, 36, 12);
-        // Gold trim (same)
-        ctx.fillStyle = P.gold;
-        ctx.fillRect(14, 48, 36, 2);
-        ctx.fillRect(14, 50, 2, 2);
-        ctx.fillRect(48, 50, 2, 2);
-        // V-neckline
-        ctx.fillStyle = P.purple;
-        ctx.fillRect(24, 42, 16, 7);
-        ctx.fillStyle = '#2a1040';
-        ctx.fillRect(26, 42, 12, 6);
-        ctx.fillStyle = P.gold;
-        ctx.fillRect(24, 42, 2, 7);
-        ctx.fillRect(38, 42, 2, 7);
-        ctx.fillRect(30, 47, 4, 2);
-        // Brooch
-        ctx.fillStyle = P.gold;
-        ctx.fillRect(29, 44, 6, 4);
-        ctx.fillStyle = P.lightPurple;
-        ctx.fillRect(30, 45, 4, 2);
-        // Skin at neckline
+        ctx.fillStyle = '#d0d0d0';
+        ctx.fillRect(8, 48, 48, 14);
+        ctx.fillStyle = '#e0e0e0';
+        ctx.fillRect(10, 49, 44, 12);
+        // Vest — same charcoal
+        ctx.fillStyle = '#1a1a22';
+        ctx.fillRect(12, 48, 40, 16);
+        ctx.fillStyle = '#2a2a34';
+        ctx.fillRect(14, 49, 36, 14);
+        ctx.fillStyle = '#323240';
+        ctx.fillRect(16, 50, 32, 12);
+        // Vest lapels
+        ctx.fillStyle = '#1a1a22';
+        ctx.fillRect(14, 48, 4, 10);
+        ctx.fillRect(46, 48, 4, 10);
+        ctx.fillStyle = '#3a3a48';
+        ctx.fillRect(15, 49, 2, 8);
+        ctx.fillRect(47, 49, 2, 8);
+        // Buttons
+        ctx.fillStyle = '#a08830';
+        ctx.fillRect(31, 50, 2, 2);
+        ctx.fillRect(31, 54, 2, 2);
+        ctx.fillRect(31, 58, 2, 2);
+        // Shirt collar — slightly rumpled
+        ctx.fillStyle = '#e0e0e0';
+        ctx.fillRect(22, 42, 20, 7);
+        ctx.fillStyle = '#e8e8e8';
+        ctx.fillRect(24, 42, 16, 6);
+        ctx.fillStyle = '#d0d0d0';
+        ctx.fillRect(22, 42, 3, 4);
+        ctx.fillRect(39, 42, 3, 4);
+        ctx.fillStyle = '#c0c0c0';
+        ctx.fillRect(24, 47, 16, 1);
+        // Skin at collar
         ctx.fillStyle = P.skin;
-        ctx.fillRect(28, 43, 8, 3);
+        ctx.fillRect(29, 43, 6, 3);
+        // Shirt sleeves peeking
+        ctx.fillStyle = '#e0e0e0';
+        ctx.fillRect(8, 49, 4, 6);
+        ctx.fillRect(52, 49, 4, 6);
 
         // Neck — tense
         ctx.fillStyle = P.darkSkin;
@@ -3331,11 +3367,10 @@
         ctx.fillRect(46, 34, 2, 3);
 
         // Eyes — amber, wider, brows in worried lift
-        // Brows — raised inner corners (the telltale worry)
         ctx.fillStyle = '#3a1a0a';
         ctx.fillRect(20, 18, 10, 2);
         ctx.fillRect(36, 18, 10, 2);
-        // Inner brow lift
+        // Inner brow lift (telltale worry)
         ctx.fillStyle = '#3a1a0a';
         ctx.fillRect(30, 16, 2, 2);
         ctx.fillRect(34, 16, 2, 2);
@@ -3386,42 +3421,59 @@
         ctx.fillStyle = '#904848';
         ctx.fillRect(23, 35, 2, 2);
         ctx.fillRect(39, 35, 2, 2);
-        // Upper lip tension
         ctx.fillStyle = '#804040';
         ctx.fillRect(28, 33, 8, 1);
 
-        // Hair — styled but mussed (ran hands through it, anxious)
+        // Hair — same flop but mussed (ran hands through it, anxious)
         ctx.fillStyle = '#3a1a0a';
         ctx.fillRect(10, 4, 44, 14);
         ctx.fillRect(8, 8, 6, 18);
-        ctx.fillRect(50, 8, 6, 12);
-        ctx.fillRect(6, 4, 10, 10);
-        ctx.fillRect(14, 2, 30, 4);
-        // Auburn highlights
+        ctx.fillRect(50, 8, 6, 10);
+        ctx.fillRect(14, 2, 34, 4);
+        ctx.fillRect(8, 4, 8, 8);
+        // Auburn mid-tones
         ctx.fillStyle = '#6a3018';
         ctx.fillRect(14, 4, 8, 8);
         ctx.fillRect(26, 3, 8, 8);
-        ctx.fillRect(38, 4, 8, 8);
+        ctx.fillRect(38, 4, 10, 8);
+        // Highlights
         ctx.fillStyle = '#904820';
         ctx.fillRect(16, 4, 3, 6);
         ctx.fillRect(30, 3, 3, 6);
-        ctx.fillRect(40, 4, 3, 6);
-        // More stray pieces (anxious fidgeting with hair)
+        ctx.fillRect(42, 4, 3, 6);
+        // Stray pieces (anxious fidgeting)
         ctx.fillStyle = '#3a1a0a';
         ctx.fillRect(4, 2, 6, 3);
-        ctx.fillRect(44, 0, 4, 3);
         ctx.fillRect(22, 0, 4, 2);
-        // Swept left side (messier)
+        // THE FLOP — same dramatic swoop but slightly messier
         ctx.fillStyle = '#3a1a0a';
-        ctx.fillRect(6, 14, 6, 16);
-        ctx.fillRect(4, 8, 4, 16);
+        ctx.fillRect(34, 12, 16, 6);
+        ctx.fillRect(38, 10, 14, 4);
+        ctx.fillRect(40, 14, 12, 6);
+        ctx.fillRect(44, 18, 10, 6);
+        ctx.fillRect(48, 22, 6, 4);
+        // Extra stray strand falling lower (the worry-fidget)
+        ctx.fillRect(50, 24, 4, 4);
+        ctx.fillRect(52, 26, 2, 3);
+        // Flop mid-tones
         ctx.fillStyle = '#6a3018';
-        ctx.fillRect(7, 16, 4, 10);
-        // Right side
+        ctx.fillRect(36, 12, 12, 4);
+        ctx.fillRect(40, 14, 10, 4);
+        ctx.fillRect(44, 18, 8, 4);
+        ctx.fillRect(48, 22, 4, 3);
+        // Flop highlights — dimmer
+        ctx.fillStyle = '#904820';
+        ctx.fillRect(38, 12, 4, 3);
+        ctx.fillRect(42, 14, 4, 3);
+        ctx.fillRect(46, 18, 3, 3);
+        // Left side — swept back, messier
         ctx.fillStyle = '#3a1a0a';
-        ctx.fillRect(50, 12, 4, 8);
+        ctx.fillRect(6, 12, 6, 16);
+        ctx.fillRect(4, 8, 4, 12);
+        ctx.fillStyle = '#6a3018';
+        ctx.fillRect(7, 14, 4, 10);
 
-        // Earring (same)
+        // Left ear + earring
         ctx.fillStyle = P.darkSkin;
         ctx.fillRect(10, 24, 4, 6);
         ctx.fillStyle = P.skin;
@@ -3435,7 +3487,7 @@
 
         // Forehead tension lines
         ctx.fillStyle = P.skin;
-        ctx.fillRect(22, 16, 20, 1);
+        ctx.fillRect(22, 16, 12, 1);
       });
 
       // Helena hopeful — same halfline, strawberry curls, dawn light, relief (64x64)

@@ -161,8 +161,8 @@
     ],
 
     boss_phase3: [
-      { speaker: 'Bargnot', text: 'I can feel it... oh gods, I can feel it... this is too much... NO. I WILL NOT STOP.', speed: 1 },
-      { speaker: 'Bargnot', text: 'THE SHADOW IS MINE TO COMMAND! MINE!' }
+      { speaker: 'Bargnot', text: 'I can feel it... oh gods, I can feel it... this is too much... NO. I WILL NOT STOP.', speed: 1, emotion: 'rage' },
+      { speaker: 'Bargnot', text: 'THE SHADOW IS MINE TO COMMAND! MINE!', emotion: 'rage' }
     ],
 
     boss_defeat: [
@@ -324,6 +324,15 @@
       { speaker: '', text: 'The town well. The water is dark and smells of iron. Nobody drinks from it anymore.' }
     ],
 
+    shrine_rest: [
+      { speaker: '', text: 'A shrine to Nitriti glows with faint warmth. You rest a moment and feel your wounds mend.' },
+      { speaker: '', text: 'This place will remember you. Should you fall, you will return here.' }
+    ],
+
+    shrine_rest_return: [
+      { speaker: '', text: 'The shrine\'s warmth washes over you once more.' }
+    ],
+
     examine_tapestry: [
       { speaker: '', text: 'A faded tapestry depicting Nitriti ascending beyond the veil. Moths have eaten through their face.' },
       { speaker: '', text: 'At the bottom, barely legible: "When shadow returns, seek the Eldspyre. The mountain that burns with starlight holds the last light."' }
@@ -343,7 +352,7 @@
     ],
 
     examine_puzzle_statue: [
-      { speaker: '', text: 'An ancient altar bearing the mark of Izuriel Sakazarac. Three gem-shaped slots are carved into the stone -- one for a crown, one for a cape, one for a scepter.' }
+      { speaker: 'Statue', text: 'An ancient altar bearing the mark of Izuriel Sakazarac. Three gem-shaped slots are carved into the stone -- one for a crown, one for a cape, one for a scepter.' }
     ],
 
     examine_bones: [
@@ -584,6 +593,8 @@
       // Still typing on current page -> reveal the rest of this page
       if (this.displayedChars < charsToEndOfPage) {
         this.displayedChars = charsToEndOfPage;
+        this.charTimer = 0;
+        this._punctPause = 0;
         return;
       }
 
@@ -592,6 +603,8 @@
         this._rowPage++;
         this._currentStep++;
         // Don't reset displayedChars - it tracks cumulative progress
+        this.charTimer = 0;
+        this._punctPause = 0;
         this._blinkTimer = 0;
         if (window.GameAudio) window.GameAudio.play('select');
         return;
@@ -641,8 +654,18 @@
         speed = 1;
       }
 
-      // Typewriter reveal with punctuation pauses
-      if (this.displayedChars < line.text.length) {
+      // Compute character limit for current page (don't reveal past visible area)
+      var _pageStart = this._rowPage * MAX_VISIBLE_ROWS;
+      var _pageEnd = Math.min(_pageStart + MAX_VISIBLE_ROWS, this._fullRows.length);
+      var _charsToEndOfPage = 0;
+      for (var _r = 0; _r < _pageEnd; _r++) {
+        _charsToEndOfPage += this._fullRows[_r].length;
+        if (_r < _pageEnd - 1) _charsToEndOfPage++;
+      }
+      var charLimit = Math.min(line.text.length, _charsToEndOfPage);
+
+      // Typewriter reveal with punctuation pauses (stops at current page boundary)
+      if (this.displayedChars < charLimit) {
         // If we're in a punctuation pause, count it down first
         if (this._punctPause > 0) {
           this._punctPause--;
@@ -781,7 +804,7 @@
         // Speaker name text in the tab
         window.Utils.drawText(ctx, line.speaker, tabX + 4, tabY - tabH + 4, '#f0f0f0', 1);
 
-        // --- Pass 5B: Speaker portrait (32x32 scaled to fit) ---
+        // --- Pass 5B: Speaker portrait (128x128 scaled to fit) ---
         var portraitX = BOX_X + 5;
         var portraitY = by + 5;
         var portraitSize = bh - 10;

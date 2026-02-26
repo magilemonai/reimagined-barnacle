@@ -299,6 +299,7 @@
             { type: 'goblin_lackey', x: 9,  y: 7  },
             { type: 'goblin_lackey', x: 10, y: 10 },
             { type: 'goblin_archer', x: 3,  y: 5  },
+            { type: 'dire_boar',     x: 10, y: 7  },
         ],
         items: [
             { type: 'item_potion', x: 4, y: 9, id: 'forest_entry_potion' },
@@ -348,6 +349,7 @@
             { type: 'goblin_lackey',   x: 10, y: 10 },
             { type: 'spinecleaver',    x: 14, y: 5 },
             { type: 'goblin_archer',   x: 6,  y: 9 },
+            { type: 'goblin_shaman',   x: 11, y: 4 },
         ],
         items: [
             { type: 'item_potion', x: 4, y: 5, id: 'deep_forest_potion' },
@@ -388,8 +390,9 @@
         },
         npcs: [],
         enemies: [
-            { type: 'spinecleaver', x: 4,  y: 4 },
-            { type: 'spinecleaver', x: 11, y: 8 },
+            { type: 'spinecleaver',  x: 4,  y: 4 },
+            { type: 'spinecleaver',  x: 11, y: 8 },
+            { type: 'goblin_shaman', x: 7,  y: 6 },
         ],
         items: [],
         onEnter: 'temple_entrance_ambience',
@@ -428,7 +431,9 @@
             north: { room: 'temple_boss',       spawnX: 7, spawnY: 12 },
             south: { room: 'temple_entrance',   spawnX: 7, spawnY: 1  },
         },
-        npcs: [],
+        npcs: [
+            { id: 'shrine_checkpoint', sprite: 'tile_nitriti_shrine', x: 4, y: 10, dialogue: 'shrine_rest' },
+        ],
         enemies: [
             // Left alcove guards
             { type: 'goblin_lackey', x: 1,  y: 2 },

@@ -7,11 +7,13 @@
  *
  * Globals expected:
  *   window.C, window.Input, window.Sprites, window.Maps, window.Particles,
- *   window.Audio, window.Utils, window.Dialogue, window.buf,
+ *   window.GameAudio, window.Utils, window.Dialogue, window.buf,
  *   window.TILE (16), window.W (256), window.H (224)
  */
 (function () {
     "use strict";
+
+    var Audio = window.GameAudio;
 
     /* ===================================================================
      *  Player
@@ -24,7 +26,9 @@
             this.h = 12;
             this.spriteW = 16;
             this.spriteH = 24;
-            this.speed = 1.5;
+            // Character-specific base speeds: Daxon=slow tank, Luigi=fast glass cannon, Lirielle=balanced
+            this.speed = (characterId === 'daxon') ? 1.3 :
+                         (characterId === 'luigi') ? 1.8 : 1.6;
             this.dir = 'down';     // down, up, left, right
             this.frame = 0;        // animation frame (0 or 1)
             this.frameTimer = 0;
@@ -46,7 +50,9 @@
             this.attackPhase = 0;       // 0=wind-up, 1=swing, 2=recovery
 
             this.specialCooldown = 0;
-            this.specialMaxCooldown = 120; // 2 seconds at 60 fps
+            // Daxon: long cooldown (defensive), Luigi: short (burst damage), Lirielle: moderate
+            this.specialMaxCooldown = (characterId === 'daxon') ? 150 :
+                                      (characterId === 'luigi') ? 90 : 100;
 
             this.invincible = 0;    // invincibility frames after taking damage
             this.knockback = null;  // {vx, vy, timer}
@@ -153,11 +159,11 @@
                 }
 
                 // Walk animation: 4-phase cycle (0->1->2->3) with 8-tick hold per phase
-                // Sprite mapping: phase 0,2 = frame 0 (stride), phase 1,3 = frame 1 (upright)
+                // Sprite mapping: phase 0,2 = frame 0 (standing), phase 1 = frame 1 (left stride), phase 3 = frame 2 (right stride)
                 this.frameTimer++;
                 if (this.frameTimer >= 8) {
                     this.walkPhase = (this.walkPhase + 1) % 4;
-                    this.frame = (this.walkPhase % 2 === 0) ? 0 : 1;
+                    this.frame = [0, 1, 0, 2][this.walkPhase];
                     this.frameTimer = 0;
                     // Play footstep sound at the start of each stride (phases 0 and 2)
                     if (this.walkPhase === 0 || this.walkPhase === 2) {
@@ -809,7 +815,7 @@
      * =================================================================*/
     class Enemy {
         constructor(type, x, y) {
-            this.type = type;        // 'goblin' or 'spinecleaver'
+            this.type = type;        // 'goblin', 'spinecleaver', 'goblin_shaman', 'dire_boar'
             this.x = x * TILE;      // convert tile coords to pixels
             this.y = y * TILE;
             this.w = 12;
@@ -821,11 +827,19 @@
             this.frameTimer = 0;
             this.walkPhase = 0;    // 4-phase walk cycle: 0,1,2,3
 
-            this.speed       = (type === 'goblin') ? 0.6 : 0.5;
-            this.maxHp       = (type === 'goblin') ? 3   : 6;
+            // Per-type stats
+            var stats = {
+                goblin:        { speed: 0.6, hp: 3, damage: 1, atkRange: 20 },
+                spinecleaver:  { speed: 0.5, hp: 6, damage: 2, atkRange: 24 },
+                goblin_shaman: { speed: 0.4, hp: 4, damage: 1, atkRange: 70 },
+                dire_boar:     { speed: 0.7, hp: 5, damage: 2, atkRange: 60 }
+            };
+            var s = stats[type] || stats.goblin;
+            this.speed       = s.speed;
+            this.maxHp       = s.hp;
             this.hp          = this.maxHp;
-            this.damage      = (type === 'goblin') ? 1   : 2;   // half-hearts
-            this.attackRange = (type === 'goblin') ? 20  : 24;
+            this.damage      = s.damage;
+            this.attackRange = s.atkRange;
             this.aggroRange  = 80; // pixels -- start chasing player
 
             this.state       = 'idle';   // idle, patrol, chase, attack, hurt, dead
@@ -880,6 +894,22 @@
             if (this.hitstop > 0) {
                 this.hitstop--;
                 return false;
+            }
+
+            // Poison tick (Lirielle's attacks)
+            if (this._poisonTimer > 0) {
+                this._poisonTimer--;
+                // Green particle drip while poisoned
+                if (this._poisonTimer % 10 === 0) {
+                    Particles.add(this.x + this.w / 2, this.y + this.h / 2, {
+                        vx: (Math.random() - 0.5) * 0.3, vy: 0.3,
+                        life: 12, color: C.green, size: 1, gravity: 0.02
+                    });
+                }
+                if (this._poisonTimer === 0 && !this.dead) {
+                    var src = this._poisonSource || { x: this.x, y: this.y };
+                    this.takeDamage(1, src.x, src.y);
+                }
             }
 
             // Stagger: stunned from consecutive hits
@@ -994,53 +1024,154 @@
             }
 
             if (this.state === 'chase') {
-                // Move toward player (goblins apply flank offset when allies are nearby)
                 var angle = Math.atan2(player.y - this.y, player.x - this.x);
-                if (this.type === 'goblin' && allies && distToPlayer > this.attackRange) {
-                    // Check if another goblin is chasing the same player within 30px on the same side
-                    var shouldFlank = false;
-                    for (var fi = 0; fi < allies.length; fi++) {
-                        var other = allies[fi];
-                        if (other === this || other.dead || other.state !== 'chase') continue;
-                        if (other.type !== 'goblin') continue;
-                        var otherDist = Utils.dist(other, player);
-                        if (otherDist < this.aggroRange) {
-                            // Another goblin is also chasing — apply flanking
-                            shouldFlank = true;
-                            break;
+
+                // --- Goblin Shaman AI: stay at range, fire projectiles ---
+                if (this.type === 'goblin_shaman') {
+                    this.dir = this.angleToDir(angle);
+                    // Maintain distance: back away if too close, approach if too far
+                    if (distToPlayer < 40) {
+                        var fleeDx = -Math.cos(angle) * this.speed;
+                        var fleeDy = -Math.sin(angle) * this.speed;
+                        if (!this.collidesWithMap(room, this.x + fleeDx, this.y)) this.x += fleeDx;
+                        if (!this.collidesWithMap(room, this.x, this.y + fleeDy)) this.y += fleeDy;
+                    } else if (distToPlayer > 60) {
+                        var appDx = Math.cos(angle) * this.speed * 0.6;
+                        var appDy = Math.sin(angle) * this.speed * 0.6;
+                        if (!this.collidesWithMap(room, this.x + appDx, this.y)) this.x += appDx;
+                        if (!this.collidesWithMap(room, this.x, this.y + appDy)) this.y += appDy;
+                    }
+                    // Cast spell: fire a slow projectile at player
+                    if (this.attackCooldown <= 0 && distToPlayer < this.attackRange) {
+                        if (!this._telegraphing) {
+                            this._telegraphing = true;
+                            this._telegraphTimer = 15; // longer wind-up for readability
+                            this.flash = 15;
+                        } else {
+                            this._telegraphTimer--;
+                            if (this._telegraphTimer <= 0) {
+                                this.attacking = true;
+                                this.attackTimer = 12;
+                                this._telegraphing = false;
+                                // Fire hex bolt projectile
+                                this._pendingShamanBolt = {
+                                    x: this.x + this.w / 2,
+                                    y: this.y + this.h / 2,
+                                    angle: angle
+                                };
+                                Audio.play('sword');
+                            }
                         }
-                    }
-                    if (shouldFlank) {
-                        angle += this._flankOffset;
-                    }
-                }
-                var dx = Math.cos(angle) * this.speed;
-                var dy = Math.sin(angle) * this.speed;
-
-                this.dir = this.angleToDir(angle);
-
-                var newX = this.x + dx;
-                var newY = this.y + dy;
-                if (!this.collidesWithMap(room, newX, this.y)) this.x = newX;
-                if (!this.collidesWithMap(room, this.x, newY)) this.y = newY;
-
-                // Attack if in range - with telegraph warning
-                if (distToPlayer < this.attackRange && this.attackCooldown <= 0) {
-                    if (!this._telegraphing) {
-                        // Start telegraph: flash for 8 frames before attacking
-                        this._telegraphing = true;
-                        this._telegraphTimer = 8;
-                        this.flash = 8;
                     } else {
-                        this._telegraphTimer--;
-                        if (this._telegraphTimer <= 0) {
-                            this.attacking = true;
-                            this.attackTimer = 20;
+                        this._telegraphing = false;
+                    }
+
+                // --- Dire Boar AI: charge in a straight line ---
+                } else if (this.type === 'dire_boar') {
+                    this.dir = this.angleToDir(angle);
+                    // Charge mechanic
+                    if (this._charging) {
+                        // Move fast in charge direction
+                        var chargeDx = Math.cos(this._chargeAngle) * this.speed * 3;
+                        var chargeDy = Math.sin(this._chargeAngle) * this.speed * 3;
+                        var cNewX = this.x + chargeDx;
+                        var cNewY = this.y + chargeDy;
+                        var hitWall = false;
+                        if (!this.collidesWithMap(room, cNewX, this.y)) { this.x = cNewX; } else { hitWall = true; }
+                        if (!this.collidesWithMap(room, this.x, cNewY)) { this.y = cNewY; } else { hitWall = true; }
+                        this._chargeTimer--;
+                        // Trail particles
+                        Particles.add(this.x + this.w / 2, this.y + this.h, {
+                            vx: (Math.random() - 0.5) * 0.5, vy: 0.3,
+                            life: 8, color: C.brown, size: 1, gravity: 0
+                        });
+                        if (this._chargeTimer <= 0 || hitWall) {
+                            this._charging = false;
+                            this._exhaustTimer = 40; // stunned after charge
+                            if (hitWall) {
+                                Particles.burst(this.x + this.w / 2, this.y + this.h / 2, 6, C.brown);
+                                Audio.play('hit');
+                            }
+                        }
+                    } else if (this._exhaustTimer > 0) {
+                        // Stunned after charge — vulnerable window
+                        this._exhaustTimer--;
+                        this.flash = this._exhaustTimer % 4 < 2 ? 1 : 0;
+                    } else {
+                        // Normal movement: approach player
+                        var bDx = Math.cos(angle) * this.speed * 0.5;
+                        var bDy = Math.sin(angle) * this.speed * 0.5;
+                        if (!this.collidesWithMap(room, this.x + bDx, this.y)) this.x += bDx;
+                        if (!this.collidesWithMap(room, this.x, this.y + bDy)) this.y += bDy;
+                        // Begin charge when in range and cooldown ready
+                        if (distToPlayer < this.attackRange && this.attackCooldown <= 0) {
+                            if (!this._telegraphing) {
+                                this._telegraphing = true;
+                                this._telegraphTimer = 20; // long wind-up — scrapes hoof
+                                this.flash = 20;
+                                Particles.burst(this.x + this.w / 2, this.y + this.h, 4, C.brown);
+                            } else {
+                                this._telegraphTimer--;
+                                if (this._telegraphTimer <= 0) {
+                                    this._charging = true;
+                                    this._chargeAngle = angle;
+                                    this._chargeTimer = 20;
+                                    this.attackCooldown = 60;
+                                    this._telegraphing = false;
+                                    Audio.play('stagger');
+                                }
+                            }
+                        } else {
                             this._telegraphing = false;
                         }
                     }
+
+                // --- Standard goblin/spinecleaver melee AI ---
                 } else {
-                    this._telegraphing = false;
+                    // Move toward player (goblins apply flank offset when allies are nearby)
+                    if (this.type === 'goblin' && allies && distToPlayer > this.attackRange) {
+                        var shouldFlank = false;
+                        for (var fi = 0; fi < allies.length; fi++) {
+                            var other = allies[fi];
+                            if (other === this || other.dead || other.state !== 'chase') continue;
+                            if (other.type !== 'goblin') continue;
+                            var otherDist = Utils.dist(other, player);
+                            if (otherDist < this.aggroRange) {
+                                shouldFlank = true;
+                                break;
+                            }
+                        }
+                        if (shouldFlank) {
+                            angle += this._flankOffset;
+                        }
+                    }
+                    var dx = Math.cos(angle) * this.speed;
+                    var dy = Math.sin(angle) * this.speed;
+
+                    this.dir = this.angleToDir(angle);
+
+                    var newX = this.x + dx;
+                    var newY = this.y + dy;
+                    if (!this.collidesWithMap(room, newX, this.y)) this.x = newX;
+                    if (!this.collidesWithMap(room, this.x, newY)) this.y = newY;
+
+                    // Attack if in range - with telegraph warning
+                    if (distToPlayer < this.attackRange && this.attackCooldown <= 0) {
+                        if (!this._telegraphing) {
+                            this._telegraphing = true;
+                            this._telegraphTimer = 8;
+                            this.flash = 8;
+                        } else {
+                            this._telegraphTimer--;
+                            if (this._telegraphTimer <= 0) {
+                                this.attacking = true;
+                                this.attackTimer = 20;
+                                this._telegraphing = false;
+                            }
+                        }
+                    } else {
+                        this._telegraphing = false;
+                    }
                 }
             } else {
                 // Patrol: walk in current direction, change periodically
@@ -1162,6 +1293,12 @@
 
         /** Return the melee attack hitbox while attacking, or null */
         getAttackHitbox() {
+            // Dire boar uses its body as the hitbox during charge
+            if (this.type === 'dire_boar' && this._charging) {
+                return { x: this.x - 2, y: this.y - 2, w: this.w + 4, h: this.h + 4 };
+            }
+            // Shaman doesn't melee
+            if (this.type === 'goblin_shaman') return null;
             if (!this.attacking) return null;
             var hx = this.x, hy = this.y;
             switch (this.dir) {
@@ -1493,6 +1630,21 @@
                 return;
             }
 
+            // Poison tick (Lirielle's attacks)
+            if (this._poisonTimer > 0) {
+                this._poisonTimer--;
+                if (this._poisonTimer % 10 === 0) {
+                    Particles.add(this.x + this.w / 2, this.y + this.h / 2, {
+                        vx: (Math.random() - 0.5) * 0.3, vy: 0.3,
+                        life: 12, color: C.green, size: 1, gravity: 0.02
+                    });
+                }
+                if (this._poisonTimer === 0 && !this.dead) {
+                    var src = this._poisonSource || { x: this.x, y: this.y };
+                    this.takeDamage(1, src.x, src.y);
+                }
+            }
+
             // Phase transition animation
             if (this.phaseTransition) {
                 this.phaseTransitionTimer--;
@@ -1695,6 +1847,11 @@
                 this._chargeExhaust = 12; // exhaustion when timer <= 12 (recovery window)
             }
 
+            // Barrage: store initial stateTimer for telegraph timing
+            if (this.state === 'barrage') {
+                this._barrageStart = this.stateTimer;
+            }
+
             // Teleport: move to a pillar position instantly
             if (this.state === 'teleport') {
                 this.stateTimer = 30;
@@ -1718,13 +1875,15 @@
             if (this.state === 'voidzone') {
                 this.stateTimer = 65;
                 this._voidZones = [];
-                // Mark 2 zones near the player
+                // Mark 2 zones near the player — minimum 24px from player center
                 for (var vz = 0; vz < 2; vz++) {
+                    var vzAngle = Math.random() * Math.PI * 2;
+                    var vzDist = 24 + Math.random() * 24; // 24-48px from player
                     this._voidZones.push({
-                        x: player.x + (Math.random() - 0.5) * 40,
-                        y: player.y + (Math.random() - 0.5) * 40,
+                        x: player.x + Math.cos(vzAngle) * vzDist - 16,
+                        y: player.y + Math.sin(vzAngle) * vzDist - 16,
                         w: 32, h: 32,
-                        timer: 40, // frames until eruption
+                        timer: 50, // slightly more reaction time (was 40)
                         erupted: false
                     });
                 }
@@ -1829,13 +1988,28 @@
                     break;
 
                 case 'barrage':
-                    // Phase 3: 3-orb fan spread, slower but larger
-                    if (this.stateTimer % 15 === 0) {
+                    // Phase 3: 3-orb fan spread with telegraph wind-up
+                    this.dir = this.angleToDir(angle);
+                    // First 18 frames: telegraph — gather energy particles
+                    if (this.stateTimer > this._barrageStart - 18 && this.stateTimer > this._barrageStart - 18) {
+                        if (this.stateTimer % 3 === 0) {
+                            var gAngle = Math.random() * Math.PI * 2;
+                            Particles.add(
+                                this.x + this.w / 2 + Math.cos(gAngle) * 20,
+                                this.y + this.h / 2 + Math.sin(gAngle) * 20, {
+                                vx: -Math.cos(gAngle) * 1.5,
+                                vy: -Math.sin(gAngle) * 1.5,
+                                life: 12, color: C.purple, size: 2, gravity: 0
+                            });
+                        }
+                        this.flash = 2;
+                    }
+                    // Fire after telegraph period — every 15 frames
+                    if (this.stateTimer <= (this._barrageStart - 18) && this.stateTimer % 15 === 0) {
                         for (var i = 0; i < 3; i++) {
                             this.fireProjectile(angle + (i * Math.PI / 5) - Math.PI / 5);
                         }
                     }
-                    this.dir = this.angleToDir(angle);
                     break;
 
                 case 'teleport':
@@ -1965,21 +2139,31 @@
             // Invincibility flash (skip frame)
             if (this.invincible > 0 && Math.floor(this.invincible / 2) % 2 === 0 && !this.phaseTransition) return;
 
-            // Render void zones (Phase 3) — pulsing dark circles
+            // Render void zones (Phase 3) — pulsing dark circles that intensify as eruption nears
             if (this._voidZones) {
                 for (var vi = 0; vi < this._voidZones.length; vi++) {
                     var vz = this._voidZones[vi];
                     if (!vz.erupted) {
-                        var vzAlpha = 0.15 + Math.sin(vz.timer * 0.3) * 0.1;
+                        // Urgency ramps up: pulse faster and brighter as timer approaches 0
+                        var urgency = 1 - (vz.timer / 50); // 0 at start, 1 at eruption
+                        var pulseSpeed = 0.3 + urgency * 0.6;
+                        var vzAlpha = 0.15 + urgency * 0.25 + Math.sin(vz.timer * pulseSpeed) * 0.1;
                         // Pulsing warning zone
                         ctx.globalAlpha = vzAlpha;
-                        ctx.fillStyle = C.darkPurple;
+                        ctx.fillStyle = urgency > 0.7 ? C.purple : C.darkPurple;
                         ctx.fillRect(Math.floor(vz.x), Math.floor(vz.y), vz.w, vz.h);
                         // Brighter border
                         ctx.globalAlpha = vzAlpha + 0.2;
                         ctx.strokeStyle = C.purple;
-                        ctx.lineWidth = 1;
+                        ctx.lineWidth = urgency > 0.5 ? 2 : 1;
                         ctx.strokeRect(Math.floor(vz.x), Math.floor(vz.y), vz.w, vz.h);
+                        // Inner warning cross when about to erupt
+                        if (urgency > 0.6) {
+                            ctx.globalAlpha = urgency * 0.4;
+                            ctx.fillStyle = C.red;
+                            ctx.fillRect(Math.floor(vz.x + vz.w / 2 - 1), Math.floor(vz.y + 2), 2, vz.h - 4);
+                            ctx.fillRect(Math.floor(vz.x + 2), Math.floor(vz.y + vz.h / 2 - 1), vz.w - 4, 2);
+                        }
                         ctx.globalAlpha = 1;
                     }
                 }
@@ -2857,6 +3041,11 @@
                 if (Utils.aabb(player.attackHitbox, enemyBox)) {
                     enemy.takeDamage(atkDmg, player.x + player.w / 2, player.y + player.h / 2);
                     hitAny = true;
+                    // Lirielle's attacks apply poison: 1 extra damage after 45 frames
+                    if (player.characterId === 'lirielle' && !enemy.dead) {
+                        enemy._poisonTimer = 45;
+                        enemy._poisonSource = { x: player.x + player.w / 2, y: player.y + player.h / 2 };
+                    }
                     // Attacker hitstop matches target: heavier hits freeze longer
                     player.hitstop = atkDmg >= 3 ? 5 : 3;
                     // Screen shake scales with damage
@@ -2872,6 +3061,11 @@
                 if (Utils.aabb(player.attackHitbox, bossBox)) {
                     boss.takeDamage(atkDmg, player.x + player.w / 2, player.y + player.h / 2);
                     hitAny = true;
+                    // Lirielle's attacks apply poison to the boss too
+                    if (player.characterId === 'lirielle' && !boss.dead) {
+                        boss._poisonTimer = 45;
+                        boss._poisonSource = { x: player.x + player.w / 2, y: player.y + player.h / 2 };
+                    }
                     player.hitstop = 5; // Boss hits always feel weighty
                     player._hitShake = 3;
                 }

@@ -18,7 +18,7 @@
 
     var C         = window.C;
     var Input     = window.Input;
-    var Audio     = window.Audio;
+    var Audio     = window.GameAudio;
     var Particles = window.Particles;
     var Utils     = window.Utils;
     var Sprites   = window.Sprites;
@@ -57,6 +57,7 @@
         enemies: [],
         npcs: [],
         heartDrops: [],
+        enemyProjectiles: [],
         boss: null,
         currentRoom: null,
 
@@ -68,6 +69,10 @@
             puzzleSolved: false,
             bossDefeated: false
         },
+
+        // Temple checkpoint
+        checkpoint: null, // { room: roomId, x: tileX, y: tileY } — respawn location
+        checkpointUsed: false, // track if shrine has been used for dialogue
 
         // Room clearing
         clearedRooms: {},
@@ -97,6 +102,8 @@
 
         // Room name display
         roomNameTimer: 0,
+        mercyActive: false,
+        mercyMessageTimer: 0,
         roomNameText: '',
 
         // Boss fight sub-state for dialogue progression
@@ -172,6 +179,7 @@
 
         // Examine object interaction
         nearExamine: null,
+        examinedObjects: {},
 
         // Area name banner slide animation
         roomBannerSlide: 0,
@@ -501,6 +509,7 @@
         Game.currentRoom = room;
         Game.roomNameText = room.name || roomId;
         Game.roomNameTimer = 90;
+        Game.mercyActive = false;
 
         // Create NPCs
         Game.npcs = [];
@@ -543,6 +552,7 @@
                     if (roomDeaths >= 3) {
                         enemy.damage = Math.max(1, enemy.damage - 1);
                         enemy.speed *= 0.85;
+                        Game.mercyActive = true;
                     }
                     // Reward no-death players after temple entrance
                     if (!Game.playerHasDied && Game.visitedRooms['temple_entrance']) {
@@ -554,8 +564,14 @@
             }
         }
 
-        // Clear heart drops
+        // Show mercy message if adaptive difficulty activated
+        if (Game.mercyActive) {
+            Game.mercyMessageTimer = 150;
+        }
+
+        // Clear heart drops and enemy projectiles
         Game.heartDrops = [];
+        Game.enemyProjectiles = [];
 
         // Clear boss reference (unless boss room)
         if (roomId !== 'temple_boss') {
@@ -835,6 +851,23 @@
                             });
                             Audio.play('select');
                         }
+                    } else if (npc.id === 'shrine_checkpoint') {
+                        // Temple checkpoint shrine: heal and set respawn
+                        npc.interacted = true;
+                        var shrineKey = Game.checkpointUsed ? 'shrine_rest_return' : 'shrine_rest';
+                        Game.checkpointUsed = true;
+                        Game.checkpoint = {
+                            room: Game.currentRoom.id,
+                            x: 7, y: 11 // spawn near shrine
+                        };
+                        // Heal player fully
+                        if (Game.player) {
+                            Game.player.hp = Game.player.maxHp;
+                        }
+                        Dialogue.start(shrineKey);
+                        Audio.play('heal');
+                        Particles.ring(npc.x + 8, npc.y + 8, 16, 12, C.paleBlue);
+                        Particles.sparkle(npc.x + 8, npc.y, C.white);
                     } else if (npc.id === 'npc_brother_soren') {
                         if (npc.interacted) {
                             // Return visits give blessing directly
@@ -899,7 +932,7 @@
                 // Check if the zone is clear of enemies
                 var zoneClear = isZoneClear(item);
 
-                if (zoneClear && Input.pressed['z']) {
+                if (Input.pressed['z']) {
                     // Pick up the item
                     Game.collectedItems[item.id] = true;
 
@@ -1055,6 +1088,36 @@
         var promptX = Math.floor(obj.tx * TILE + 4);
         var promptY = Math.floor(obj.ty * TILE - 10 + bobY);
         Utils.drawText(ctx, 'Z', promptX, promptY, C.yellow, 1);
+    }
+
+    // Examine objects that show a "!" indicator until first examined
+    var INDICATOR_EXAMINE_KEYS = {
+        'examine_puzzle_statue': true
+    };
+
+    function renderExamineIndicators(ctx) {
+        if (!Game.currentRoom) return;
+        var roomId = Game.currentRoom.id;
+        var examineList = EXAMINE_OBJECTS[roomId];
+        if (!examineList) return;
+
+        // Deduplicate: only render one "!" per key (statue spans two tiles)
+        var rendered = {};
+        for (var i = 0; i < examineList.length; i++) {
+            var obj = examineList[i];
+            if (!INDICATOR_EXAMINE_KEYS[obj.key]) continue;
+            if (Game.examinedObjects[obj.key]) continue;
+            if (rendered[obj.key]) continue;
+            rendered[obj.key] = true;
+
+            var indicatorBob = Math.sin(Game.frame * 0.12) * 2;
+            var ix = Math.floor(obj.tx * TILE + 4);
+            var iy = Math.floor(obj.ty * TILE - 18 + indicatorBob);
+            // Yellow "!" — vertical bar + dot (matches NPC style)
+            ctx.fillStyle = C.yellow;
+            ctx.fillRect(ix, iy, 2, 4);
+            ctx.fillRect(ix, iy + 5, 2, 1);
+        }
     }
 
     // Render examine object overlay sprites on top of base tiles
@@ -1444,6 +1507,7 @@
         if (enemyNear) return;
 
         var examKey = Game.nearExamine.key;
+        Game.examinedObjects[examKey] = true;
         Dialogue.start(examKey);
         Audio.play('select');
         // Lore tracking for bestiary
@@ -1882,7 +1946,7 @@
     }
 
     function spawnHeartDrop(x, y) {
-        // Pass 7E: Legend difficulty — no heart drops from enemies
+        // Pass 7E: Legend difficulty — no heart drops from any source
         if (Game.difficulty === 2) return;
         Game.heartDrops.push({
             x: x,
@@ -1911,8 +1975,12 @@
                 // Drop goblin teeth (currency) from goblin-type enemies
                 if (enemy.type === 'goblin' || enemy.type === 'goblin_archer') {
                     Game.goblinTeeth += 1;
+                } else if (enemy.type === 'goblin_shaman') {
+                    Game.goblinTeeth += 2;
                 } else if (enemy.type === 'spinecleaver') {
                     Game.goblinTeeth += 2;
+                } else if (enemy.type === 'dire_boar') {
+                    Game.goblinTeeth += 1;
                 }
                 Game.enemies.splice(i, 1);
             }
@@ -2043,6 +2111,59 @@
     }
 
     // =====================================================================
+    // ENEMY PROJECTILES (shaman hex bolts)
+    // =====================================================================
+
+    function updateEnemyProjectiles() {
+        if (!Game.player) return;
+        for (var i = Game.enemyProjectiles.length - 1; i >= 0; i--) {
+            var ep = Game.enemyProjectiles[i];
+            ep.x += ep.vx;
+            ep.y += ep.vy;
+            ep.life--;
+
+            // Trail particle
+            if (Game.frame % 3 === 0) {
+                Particles.add(ep.x, ep.y, {
+                    vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+                    life: 8, color: ep.color || C.green, size: 1, gravity: 0
+                });
+            }
+
+            // Remove if expired or out of bounds
+            if (ep.life <= 0 || ep.x < -8 || ep.x > W + 8 || ep.y < -8 || ep.y > H + 8) {
+                Game.enemyProjectiles.splice(i, 1);
+                continue;
+            }
+
+            // Hit player
+            if (Game.player.invincible <= 0) {
+                var pBox = { x: Game.player.x, y: Game.player.y, w: Game.player.w, h: Game.player.h };
+                var epBox = { x: ep.x - ep.w / 2, y: ep.y - ep.h / 2, w: ep.w, h: ep.h };
+                if (Utils.aabb(pBox, epBox)) {
+                    Game.player.takeDamage(ep.damage, ep.x, ep.y);
+                    Particles.burst(ep.x, ep.y, 6, ep.color || C.green);
+                    Game.enemyProjectiles.splice(i, 1);
+                }
+            }
+        }
+    }
+
+    function renderEnemyProjectiles(ctx) {
+        for (var i = 0; i < Game.enemyProjectiles.length; i++) {
+            var ep = Game.enemyProjectiles[i];
+            // Green hex bolt — small glowing orb
+            ctx.fillStyle = ep.color || '#44ff88';
+            ctx.globalAlpha = 0.9;
+            ctx.fillRect(Math.floor(ep.x - 2), Math.floor(ep.y - 2), 5, 5);
+            ctx.fillStyle = '#ffffff';
+            ctx.globalAlpha = 0.6;
+            ctx.fillRect(Math.floor(ep.x - 1), Math.floor(ep.y - 1), 3, 3);
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    // =====================================================================
     // DAXON'S SHIELD SLAM SHOCKWAVE
     // =====================================================================
 
@@ -2053,7 +2174,7 @@
         var px = Game.player.x + Game.player.w / 2;
         var py = Game.player.y + Game.player.h / 2;
         var shockRadius = 40; // pixels
-        var shockDmg = 2;
+        var shockDmg = 1; // primarily defensive — creates space, not a damage tool
 
         // Damage all enemies in radius
         var allTargets = Game.enemies.slice();
@@ -2089,7 +2210,7 @@
 
         var px = Game.player.x + Game.player.w / 2;
         var py = Game.player.y + Game.player.h / 2;
-        var burstRadius = 36; // pixels
+        var burstRadius = 44; // pixels (wider than Daxon's shockwave — Lirielle's offensive AoE)
         var burstDmg = 3;
 
         // Damage all enemies in radius
@@ -2128,6 +2249,12 @@
         // Temple boss room - spawn boss on first entry
         if (Game.currentRoom.id === 'temple_boss' && !Game.flags.bossDefeated && !Game.boss) {
             if (Game.state === 'game') {
+                // Create boss immediately so she's visible during intro dialogue
+                try {
+                    Game.boss = new Entities.Boss(7 * TILE, 6 * TILE);
+                } catch (e) {
+                    console.warn('Error creating boss:', e);
+                }
                 Game.state = 'boss_intro';
                 Game.bossDialogueStage = 0;
                 Game.encounteredEnemies['boss'] = true; // Bestiary
@@ -2135,12 +2262,6 @@
                 Dialogue.start('boss_intro', function () {
                     // Lore tracking: Bargnot mentions Smaldge
                     Game.loreEntries['lore_smaldge'] = true;
-                    // Spawn boss at center of room
-                    try {
-                        Game.boss = new Entities.Boss(7 * TILE, 6 * TILE);
-                    } catch (e) {
-                        console.warn('Error creating boss:', e);
-                    }
                     Game.state = 'boss';
                     if (Music) Music.play('boss');
                 });
@@ -2553,8 +2674,8 @@
         for (var i = 0; i < torches.length; i++) {
             var tx = torches[i].x;
             var ty = torches[i].y;
-            // Pulsing radius 24-32px using sin wave (matches darkness cutout)
-            var flickerR = 28 + Math.sin(flickerSeed + i * 2.5) * 4;
+            // Pulsing radius 35-45px using sin wave (matches darkness cutout)
+            var flickerR = 40 + Math.sin(flickerSeed + i * 2.5) * 5;
             // Random jitter ±2px for flicker
             flickerR += (Math.random() - 0.5) * 4;
             var flickerA = 0.14 + Math.sin(flickerSeed * 1.3 + i) * 0.05;
@@ -2603,21 +2724,21 @@
         var dc = getDarknessCanvas();
         var dCtx = dc.ctx;
 
-        // Clear and fill with 80% opacity darkness
+        // Clear and fill with darkness (atmospheric but still readable)
         dCtx.globalCompositeOperation = 'source-over';
         dCtx.clearRect(0, 0, W, H);
-        dCtx.fillStyle = 'rgba(0,0,10,0.80)';
+        dCtx.fillStyle = 'rgba(0,0,10,0.60)';
         dCtx.fillRect(0, 0, W, H);
 
         // Cut out light circles using destination-out compositing
         dCtx.globalCompositeOperation = 'destination-out';
 
-        // Light around each torch: pulsing radius 24-32px via sin wave, ±2px random jitter
+        // Light around each torch: pulsing radius 35-45px via sin wave, ±2px random jitter
         for (var i = 0; i < torches.length; i++) {
             var tx = torches[i].x;
             var ty = torches[i].y;
-            // Base pulsing radius: oscillates between 24 and 32 using sin wave
-            var pulseR = 28 + Math.sin(flickerSeed + i * 2.5) * 4;
+            // Base pulsing radius: oscillates between 35 and 45 using sin wave
+            var pulseR = 40 + Math.sin(flickerSeed + i * 2.5) * 5;
             // Random jitter ±2px each frame for flicker effect
             var jitter = (Math.random() - 0.5) * 4; // -2 to +2
             var lr = pulseR + jitter;
@@ -2633,14 +2754,14 @@
             dCtx.fill();
         }
 
-        // Light around the player: 40px radius, shrinks to 28px at low HP
+        // Light around the player: 48px radius, shrinks to 34px at low HP
         if (Game.player) {
             var px = Game.player.x + Game.player.w / 2;
             var py = Game.player.y + Game.player.h / 2;
-            // Player light shrinks as HP drops: 40px at full, 28px at 0 HP
+            // Player light shrinks as HP drops: 48px at full, 34px at 0 HP
             var hpRatio = Game.player.maxHp > 0 ? (Game.player.hp / Game.player.maxHp) : 0;
             hpRatio = Math.max(0, Math.min(1, hpRatio));
-            var pr = 28 + hpRatio * 12; // 28 at 0hp, 40 at full hp
+            var pr = 34 + hpRatio * 14; // 34 at 0hp, 48 at full hp
 
             var pGrad = dCtx.createRadialGradient(px, py, 0, px, py, pr);
             pGrad.addColorStop(0, 'rgba(0,0,0,1)');
@@ -3000,6 +3121,30 @@
     }
 
     // =====================================================================
+    // MERCY MESSAGE (adaptive difficulty feedback)
+    // =====================================================================
+
+    function renderMercyMessage(ctx) {
+        if (Game.mercyMessageTimer <= 0) return;
+        Game.mercyMessageTimer--;
+
+        var alpha = 1;
+        if (Game.mercyMessageTimer > 120) {
+            alpha = (150 - Game.mercyMessageTimer) / 30; // fade in
+        } else if (Game.mercyMessageTimer < 30) {
+            alpha = Game.mercyMessageTimer / 30; // fade out
+        }
+
+        ctx.globalAlpha = alpha * 0.8;
+        var msg = 'The shadows recede...';
+        var textLen = msg.length * 6;
+        var mx = Math.floor((W - textLen) / 2);
+        var my = 38;
+        Utils.drawText(ctx, msg, mx, my, C.paleBlue, 1);
+        ctx.globalAlpha = 1;
+    }
+
+    // =====================================================================
     // SPEED RUN TIMER
     // =====================================================================
 
@@ -3136,7 +3281,8 @@
         // Temporary speed boost
         Game.sorenBlessing = true;
         Game.sorenBlessingTimer = 600; // 10 seconds
-        Game.player.speed = 2.0;
+        Game.player._baseSpeed = Game.player._baseSpeed || Game.player.speed;
+        Game.player.speed = Game.player._baseSpeed * 1.3;
         Audio.play('heal');
         Particles.ring(Game.player.x + 5, Game.player.y + 6, 15, 12, C.paleBlue);
         Particles.sparkle(Game.player.x + 5, Game.player.y, C.white);
@@ -3737,9 +3883,9 @@
 
     // Character stats for select screen display
     var CHAR_STATS = {
-        daxon:    { hp: 4, atk: 4, spd: 3, spc: 'Shield Slam', spcDesc: 'Invincible + shockwave' },
-        luigi:    { hp: 3, atk: 3, spd: 3, spc: 'Brog',        spcDesc: 'Summon homing bolt' },
-        lirielle: { hp: 3, atk: 2, spd: 3, spc: 'Nature Burst', spcDesc: 'Heal + thorn ring' }
+        daxon:    { hp: 4, atk: 4, spd: 2, spc: 'Shield Slam', spcDesc: 'Invincible + shockwave' },
+        luigi:    { hp: 3, atk: 3, spd: 5, spc: 'Brog',        spcDesc: 'Summon homing bolt' },
+        lirielle: { hp: 3, atk: 3, spd: 4, spc: 'Nature Burst', spcDesc: 'Heal + thorn ring' }
     };
 
     // Helper: word-wrap text to fit maxW pixels at given charWidth
@@ -4264,7 +4410,7 @@
             if (Game.difficulty === 0) { // Easy
                 Game.player.maxHp += 4;
                 Game.player.hp = Game.player.maxHp;
-                Game.player.speed = 1.7;
+                Game.player.speed *= 1.1;
             } else if (Game.difficulty === 2) { // Hard
                 Game.player.maxHp = Math.max(4, Game.player.maxHp - 2);
                 Game.player.hp = Game.player.maxHp;
@@ -4295,7 +4441,7 @@
             Game.sorenBlessingTimer--;
             if (Game.sorenBlessingTimer <= 0) {
                 Game.sorenBlessing = false;
-                if (Game.player) Game.player.speed = 1.5; // Reset speed
+                if (Game.player) Game.player.speed = Game.player._baseSpeed || Game.player.speed;
             }
         }
 
@@ -4378,7 +4524,24 @@
             if (enemy.update) {
                 enemy.update(Game.currentRoom, Game.player, Game.enemies);
             }
+            // Spawn shaman hex bolt projectiles
+            if (enemy._pendingShamanBolt) {
+                var bolt = enemy._pendingShamanBolt;
+                Game.enemyProjectiles.push({
+                    x: bolt.x, y: bolt.y,
+                    vx: Math.cos(bolt.angle) * 1.2,
+                    vy: Math.sin(bolt.angle) * 1.2,
+                    w: 5, h: 5,
+                    damage: 1,
+                    life: 90,
+                    color: '#44ff88'
+                });
+                enemy._pendingShamanBolt = null;
+            }
         }
+
+        // Update enemy projectiles (shaman bolts)
+        updateEnemyProjectiles();
 
         // Update heart drops
         updateHeartDrops();
@@ -4620,6 +4783,11 @@
             }
         }
 
+        // Render boss (visible during boss_intro before fight starts)
+        if (Game.boss && Game.boss.render) {
+            Game.boss.render(ctx);
+        }
+
         // Render player
         if (Game.player && Game.player.render) {
             Game.player.render(ctx);
@@ -4627,6 +4795,7 @@
 
         // Render friendly projectiles (Luigi's Brog, etc.)
         renderProjectiles(ctx);
+        renderEnemyProjectiles(ctx);
 
         // Render environment particles (leaves, dust, embers, fireflies, wisps)
         renderEnvironmentParticles(ctx);
@@ -4667,7 +4836,8 @@
         // Render sign interaction prompt
         renderSignPrompt(ctx);
 
-        // Render examine object interaction prompt
+        // Render examine object interaction prompt and indicators
+        renderExamineIndicators(ctx);
         renderExaminePrompt(ctx);
 
         // Render speed run timer
@@ -4685,8 +4855,9 @@
         // Render transition overlay
         renderTransition(ctx);
 
-        // Render room name
+        // Render room name and mercy message
         renderRoomName(ctx);
+        renderMercyMessage(ctx);
 
         // Render Soren blessing indicator
         if (Game.sorenBlessing) {
@@ -5099,6 +5270,9 @@
         // Pass 8B: Door open animation
         renderDoorAnimation(ctx);
 
+        // Examine object overlay sprites (banners, etc. — visible throughout boss fight)
+        renderExamineObjects(ctx);
+
         // Render NPCs
         for (var n = 0; n < Game.npcs.length; n++) {
             var npc = Game.npcs[n];
@@ -5190,6 +5364,7 @@
 
         // Render friendly projectiles (Luigi's Brog, etc.)
         renderProjectiles(ctx);
+        renderEnemyProjectiles(ctx);
 
         // Environment particles (embers, boss wisps)
         renderEnvironmentParticles(ctx);
@@ -5230,8 +5405,9 @@
         // Dialogue
         Dialogue.render(ctx);
 
-        // Room name
+        // Room name and mercy message
         renderRoomName(ctx);
+        renderMercyMessage(ctx);
     }
 
     // =====================================================================
@@ -5259,7 +5435,7 @@
             if (Input.pressed['z'] || Input.pressed['Enter']) {
                 Audio.play('select');
                 if (Game.gameOverMenuIndex === 0) {
-                    // Continue: respawn at last safe room
+                    // Continue: respawn at checkpoint if available, else last safe room
                     if (Game.player) {
                         Game.player.hp = Game.player.maxHp;
                         Game.player.dead = false;
@@ -5268,10 +5444,18 @@
                     Game.bossDeathTimer = 0;
                     Game.bossDialogueStage = 0;
                     Game.state = 'game';
-                    loadRoom(Game.lastSafeRoom);
-                    if (Game.player) {
-                        Game.player.x = Game.lastSafeX * TILE;
-                        Game.player.y = Game.lastSafeY * TILE;
+                    if (Game.checkpoint) {
+                        loadRoom(Game.checkpoint.room);
+                        if (Game.player) {
+                            Game.player.x = Game.checkpoint.x * TILE;
+                            Game.player.y = Game.checkpoint.y * TILE;
+                        }
+                    } else {
+                        loadRoom(Game.lastSafeRoom);
+                        if (Game.player) {
+                            Game.player.x = Game.lastSafeX * TILE;
+                            Game.player.y = Game.lastSafeY * TILE;
+                        }
                     }
                 } else {
                     // Quit to title
@@ -6109,10 +6293,12 @@
                 encounteredEnemies: Game.encounteredEnemies,
                 metNPCs: Game.metNPCs,
                 loreEntries: Game.loreEntries,
+                examinedObjects: Game.examinedObjects,
                 deathCounts: Game.deathCounts,
                 playerHasDied: Game.playerHasDied,
                 difficulty: Game.difficulty,
-                npcTalkedFirst: Game.npcTalkedFirst
+                npcTalkedFirst: Game.npcTalkedFirst,
+                checkpoint: Game.checkpoint
             };
             localStorage.setItem(SAVE_KEY, JSON.stringify(data));
         } catch (e) {
@@ -6152,10 +6338,12 @@
             Game.encounteredEnemies = data.encounteredEnemies || {};
             Game.metNPCs = data.metNPCs || {};
             Game.loreEntries = data.loreEntries || {};
+            Game.examinedObjects = data.examinedObjects || {};
             Game.deathCounts = data.deathCounts || {};
             Game.playerHasDied = data.playerHasDied || false;
             Game.difficulty = data.difficulty != null ? data.difficulty : 1;
             Game.npcTalkedFirst = data.npcTalkedFirst || null;
+            Game.checkpoint = data.checkpoint || null;
 
             // Load the room
             loadRoom(data.roomId);
@@ -6194,7 +6382,9 @@
     var BESTIARY_ENEMIES = [
         { id: 'goblin', name: 'Goblin Lackey', desc: 'Desperate foot soldiers of Bargnot\'s horde.' },
         { id: 'goblin_archer', name: 'Goblin Archer', desc: 'Cowardly snipers who flee when cornered.' },
+        { id: 'goblin_shaman', name: 'Goblin Shaman', desc: 'Hex-slingers who rain curses from afar.' },
         { id: 'spinecleaver', name: 'Spinecleaver', desc: 'Armored brutes with unbreakable shields.' },
+        { id: 'dire_boar', name: 'Dire Boar', desc: 'Frenzied beasts that charge without warning.' },
         { id: 'boss', name: 'Queen Bargnot', desc: 'A desperate queen who bargained with shadow.' }
     ];
 
@@ -6658,6 +6848,7 @@
         Game.projectiles = [];
         Game.npcs = [];
         Game.heartDrops = [];
+        Game.enemyProjectiles = [];
         Game.boss = null;
         Game.currentRoom = null;
         Game.flags = {
@@ -6712,6 +6903,7 @@
         Game.encounteredEnemies = {};
         Game.metNPCs = {};
         Game.loreEntries = {};
+        Game.examinedObjects = {};
         Game.gameOverMenuIndex = 0;
         Game.deathCounts = {};
         Game.playerHasDied = false;
@@ -6761,6 +6953,7 @@
     // =====================================================================
 
     function gameLoop() {
+      try {
         Game.frame++;
 
         // Update based on current state
@@ -6809,6 +7002,9 @@
 
         // Clear pressed keys for next frame
         Input.update();
+      } catch (e) {
+        console.error('Game loop error:', e);
+      }
 
         requestAnimationFrame(gameLoop);
     }
@@ -6817,29 +7013,45 @@
     // INITIALIZATION
     // =====================================================================
 
+    function showLoadingScreen(callback) {
+        var ctx = window.buf;
+        var dctx = window.display;
+        // Draw loading message on buffer
+        ctx.fillStyle = '#0a0a12';
+        ctx.fillRect(0, 0, W, H);
+        Utils.drawText(ctx, 'LOADING...', Math.floor(W / 2 - 30), Math.floor(H / 2 - 4), C.gold, 1);
+        // Flush to display canvas
+        dctx.imageSmoothingEnabled = false;
+        dctx.drawImage(ctx.canvas, 0, 0, W, H, 0, 0, W * 3, H * 3);
+        // Yield to browser so loading screen paints before heavy sprite work
+        requestAnimationFrame(callback);
+    }
+
     function init() {
-        // Initialize sprites
-        if (Sprites && Sprites.init) {
-            Sprites.init();
-        }
-
-        // Audio init on first user interaction
-        var audioStarted = false;
-        document.addEventListener('keydown', function () {
-            if (!audioStarted) {
-                if (Audio && Audio.init) {
-                    Audio.init();
-                }
-                if (Music && Music.init) {
-                    Music.init();
-                    Music.play('title');
-                }
-                audioStarted = true;
+        showLoadingScreen(function () {
+            // Initialize sprites (heavy synchronous work)
+            if (Sprites && Sprites.init) {
+                Sprites.init();
             }
-        });
 
-        // Start game loop
-        gameLoop();
+            // Audio init on first user interaction
+            var audioStarted = false;
+            document.addEventListener('keydown', function () {
+                if (!audioStarted) {
+                    if (Audio && Audio.init) {
+                        Audio.init();
+                    }
+                    if (Music && Music.init) {
+                        Music.init();
+                        Music.play('title');
+                    }
+                    audioStarted = true;
+                }
+            });
+
+            // Start game loop
+            gameLoop();
+        });
     }
 
     // Start when DOM is ready

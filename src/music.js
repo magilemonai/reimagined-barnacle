@@ -2,9 +2,10 @@
  * Valisar: Shadows of the Eldspyre
  * Procedural Music System
  *
- * Generates SNES-style chiptune music using Web Audio API.
- * Each area has a distinct looping theme built from note patterns
- * scheduled in real-time via oscillators and gain envelopes.
+ * Generates retro-styled music using Web Audio API with modern technique:
+ * smooth waveforms (sine, triangle) are composed musically, then routed
+ * through a bitcrusher (bit-depth + sample-rate reduction) to achieve
+ * retro character without the harshness of raw square/sawtooth oscillators.
  *
  * Themes: title, town, forest, temple, boss, victory
  * Assigned to window.Music
@@ -70,7 +71,7 @@
       // MELODY — the main theme of the game, plaintive and memorable
       // Opens with the ascending "hero's call" motif (E-G-C), develops,
       // then resolves with a gentle descent
-      { wave: 'square', volume: 0.06, notes: [
+      { wave: 'sine', volume: 0.08, notes: [
         // A section: the call
         ['E5', 1.5], [null, 0.5], ['G4', 1], ['C5', 1],       // bar 1: rising call
         ['B4', 1], ['A4', 0.5], ['G4', 0.5], ['E4', 2],       // bar 2: answering descent
@@ -115,7 +116,7 @@
         ['G2', 1], [null, 0.5], ['G2', 0.5], [null, 1]         // V
       ]},
       // MELODY — bright, memorable, with a proper question-and-answer shape
-      { wave: 'square', volume: 0.07, notes: [
+      { wave: 'sine', volume: 0.09, notes: [
         ['E4', 0.5], ['G4', 0.5], ['C5', 1], ['B4', 1],        // bar 1: leaping up
         ['A4', 1], ['G4', 0.5], ['E4', 0.5], ['D4', 1],        // bar 2: stepping down
         ['C4', 0.5], ['E4', 0.5], ['G4', 1], ['A4', 1],        // bar 3: climbing again
@@ -168,7 +169,7 @@
       ]},
       // MELODY — eerie wandering line with wide leaps
       // The melody uses the "dark motif" (C-Eb-D-C) as a recurring cell
-      { wave: 'square', volume: 0.06, notes: [
+      { wave: 'sine', volume: 0.08, notes: [
         ['A4', 1.5], ['B4', 0.5], ['C5', 1], ['E5', 1],        // bar 1: rising unease
         ['D5', 1.5], ['C5', 0.5], ['A4', 1], [null, 1],        // bar 2: falling back
         ['F4', 1], ['A4', 1], ['G4', 0.5], ['F4', 0.5], ['E4', 1],  // bar 3: searching
@@ -184,7 +185,7 @@
         ['A4', 4], ['B4', 4], ['C5', 4], ['D5', 4]
       ]},
       // SPARSE ACCENTS — sudden plucked notes like twigs snapping
-      { wave: 'square', volume: 0.03, notes: [
+      { wave: 'sine', volume: 0.04, notes: [
         [null, 6], ['E5', 0.25], [null, 1.75],
         [null, 4], ['A5', 0.25], [null, 3.75],
         [null, 7], ['B4', 0.25], [null, 0.75],
@@ -265,7 +266,7 @@
     bpm: 152,
     tracks: [
       // POUNDING BASS — driving 8th-note pattern with chromatic movement
-      { wave: 'sawtooth', volume: 0.09, notes: [
+      { wave: 'triangle', volume: 0.11, notes: [
         // Am: root-root-fifth-root
         ['A2', 0.5], ['A2', 0.5], ['E3', 0.5], ['A2', 0.5],
         ['A2', 0.5], ['E3', 0.5], ['A2', 0.5], ['G2', 0.5],
@@ -282,7 +283,7 @@
         ['E2', 0.5], ['F2', 0.5], ['F#2', 0.5], ['G2', 0.5]
       ]},
       // FIERCE MELODY — angular, wide-interval, rhythmically driving
-      { wave: 'square', volume: 0.07, notes: [
+      { wave: 'sine', volume: 0.09, notes: [
         // A section: aggressive statement
         ['A4', 0.5], ['C5', 0.5], ['E5', 0.5], ['C5', 0.5],    // punching upward
         ['A4', 0.5], ['G4', 0.5], ['A4', 1],                    // snapping back
@@ -385,7 +386,7 @@
         ['G2', 2], ['C3', 2]                                     // V → I (final resolution)
       ]},
       // MELODY — triumphant, building to a climax
-      { wave: 'square', volume: 0.07, notes: [
+      { wave: 'sine', volume: 0.09, notes: [
         // A section: fanfare opening
         ['C5', 0.5], ['E5', 0.5], ['G5', 1], ['E5', 1],         // rising fanfare
         ['D5', 0.5], ['E5', 0.5], ['D5', 1], ['B4', 1],         // answering phrase
@@ -444,6 +445,13 @@
     /** Master gain node for music */
     _masterGain: null,
 
+    /** Bitcrusher node for retro character */
+    _crusherNode: null,
+
+    /** Bitcrusher settings: bit depth (lower = crunchier) and rate reduction (0-1, lower = more aliasing) */
+    _bitDepth: 10,
+    _rateReduction: 0.4,
+
     /** Target volume for fade-in/out */
     _fadeTarget: 0.15,
     _fadeSpeed: 0.005,
@@ -460,8 +468,44 @@
         this._ctx = window.GameAudio.ctx;
         this._masterGain = this._ctx.createGain();
         this._masterGain.gain.value = this.masterVolume;
-        this._masterGain.connect(this._ctx.destination);
+
+        // Create bitcrusher for retro character:
+        // Smooth waveforms go in, crunchy retro sound comes out
+        this._crusherNode = this._createBitcrusher();
+        this._masterGain.connect(this._crusherNode);
+        this._crusherNode.connect(this._ctx.destination);
       }
+    },
+
+    /**
+     * Create a bitcrusher ScriptProcessorNode.
+     * Reduces bit depth (quantization) and effective sample rate (sample-and-hold)
+     * to add retro character without using harsh raw oscillator waveforms.
+     */
+    _createBitcrusher: function () {
+      var bufferSize = 2048;
+      var crusher = this._ctx.createScriptProcessor(bufferSize, 1, 1);
+      var bits = this._bitDepth;
+      var normFreq = this._rateReduction;
+      var phaser = 0;
+      var last = 0;
+
+      crusher.onaudioprocess = function (e) {
+        var input = e.inputBuffer.getChannelData(0);
+        var output = e.outputBuffer.getChannelData(0);
+        var step = Math.pow(0.5, bits);
+        var gate = step * 1.5; // noise gate: silence signal below ~1.5 quantization steps
+        for (var i = 0; i < input.length; i++) {
+          phaser += normFreq;
+          if (phaser >= 1.0) {
+            phaser -= 1.0;
+            last = step * Math.floor(input[i] / step + 0.5);
+          }
+          output[i] = (Math.abs(last) < gate) ? 0 : last;
+        }
+      };
+
+      return crusher;
     },
 
     /**
@@ -602,9 +646,9 @@
       if (!this._ctx || !this._masterGain) return;
 
       try {
-        // Very short attack/release for clean chiptune sound
-        var attack = 0.01;
-        var release = Math.min(0.08, duration * 0.3);
+        // Smooth envelope — musical sound before bitcrushing adds retro grit
+        var attack = Math.min(0.025, duration * 0.15);
+        var release = Math.min(0.12, duration * 0.35);
         var sustain = duration - attack - release;
         if (sustain < 0.01) sustain = 0.01;
 

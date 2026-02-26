@@ -494,13 +494,14 @@
         var input = e.inputBuffer.getChannelData(0);
         var output = e.outputBuffer.getChannelData(0);
         var step = Math.pow(0.5, bits);
+        var gate = step * 1.5; // noise gate: silence signal below ~1.5 quantization steps
         for (var i = 0; i < input.length; i++) {
           phaser += normFreq;
           if (phaser >= 1.0) {
             phaser -= 1.0;
             last = step * Math.floor(input[i] / step + 0.5);
           }
-          output[i] = last;
+          output[i] = (Math.abs(last) < gate) ? 0 : last;
         }
       };
 
